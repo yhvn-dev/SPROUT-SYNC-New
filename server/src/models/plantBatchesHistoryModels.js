@@ -1,0 +1,197 @@
+// plantBatchHistory.model.js
+import { query } from "../config/db.js";
+
+
+// ===== READ all history WITH DISPLAY ID =====
+export const readPlantBatchHistory = async () => {
+  try {
+    const sql = `
+      SELECT 
+        *,
+        CASE 
+          WHEN batch_id IS NOT NULL THEN 
+            CONCAT(plant_name, ' #', batch_number, '.H', history_number)
+          ELSE 
+            CONCAT(plant_name, ' #', batch_number, '.H', history_number)
+        END AS display_id
+      FROM plant_batch_history 
+      ORDER BY date_recorded DESC
+    `;
+    const result = await query(sql);
+    return result.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+// ===== READ history by history_id =====
+export const readHistoryById = async (history_id) => {
+  try {
+    const sql = `SELECT * FROM plant_batch_history WHERE history_id = $1`;
+    const result = await query(sql, [history_id]);
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
+
+// ===== READ history by batch_id =====
+export const readHistoryByBatchId = async (batch_id) => {
+  try {
+    const sql = `SELECT * FROM plant_batch_history WHERE batch_id = $1 ORDER BY date_recorded DESC`;
+    const result = await query(sql, [batch_id]);
+    return result.rows;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+// ===== GET TOTALS OF SEEDLINGS =====
+export const readPlantBatchHistoryTotals = async () => {
+  try {
+    const sql = `
+      SELECT 
+        SUM(total_seedlings) AS total_seedlings,
+        SUM(dead_seedlings) AS total_dead,
+        SUM(replanted_seedlings) AS total_replanted,
+        SUM(fully_grown_seedlings) AS total_grown,
+        CASE 
+          WHEN SUM(total_seedlings) = 0 THEN 0
+          ELSE ROUND(SUM(fully_grown_seedlings)::DECIMAL / SUM(total_seedlings) * 100, 2)
+        END AS growth_rate_percentage,
+        CASE
+          WHEN SUM(total_seedlings) = 0 THEN 0
+          ELSE ROUND(SUM(dead_seedlings)::DECIMAL / SUM(total_seedlings) * 100, 2)
+        END AS death_rate_percentage
+      FROM plant_batch_history
+    `;
+    const result = await query(sql);
+    return result.rows[0]; 
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+// ===== GET TOTALS OF SEEDLINGS =====
+export const getPlantBatchTotals = async () => {
+  try {
+    const sql = `
+      SELECT 
+        SUM(total_seedlings) AS total_seedlings,
+        SUM(dead_seedlings) AS total_dead,
+        SUM(replanted_seedlings) AS total_replanted,
+        SUM(fully_grown_seedlings) AS total_grown,
+        CASE 
+          WHEN SUM(total_seedlings) = 0 THEN 0
+          ELSE ROUND(SUM(fully_grown_seedlings)::DECIMAL / SUM(total_seedlings) * 100, 2)
+        END AS growth_rate_percentage,
+        CASE
+          WHEN SUM(total_seedlings) = 0 THEN 0
+          ELSE ROUND(SUM(dead_seedlings)::DECIMAL / SUM(total_seedlings) * 100, 2)
+        END AS death_rate_percentage
+      FROM plant_batch_history
+    `;
+    const result = await query(sql);
+    return result.rows[0]; 
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+// ===== GET SEEDLING GROWTH PER WEEK FOR ALL BATCHES =====
+export const readSeedlingGrowthByWeekAll = async () => {
+  try {
+    const sql = `
+     SELECT
+          DATE_TRUNC('week', date_recorded) AS week_start,
+          SUM(COALESCE(fully_grown_seedlings, 0)) AS total_grown,
+          SUM(COALESCE(dead_seedlings, 0)) AS total_dead,
+          SUM(COALESCE(replanted_seedlings, 0)) AS total_replanted
+      FROM plant_batch_history
+      GROUP BY week_start
+      ORDER BY week_start;
+    `;
+    const result = await query(sql);
+    return result.rows; 
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+export const createHistoryRecord = async (batchData) => {
+  const {
+    batch_number,  
+    tray_id = null,
+    plant_name,
+    date_recorded = new Date(),
+    total_seedlings = 0,
+    dead_seedlings = 0,
+    replanted_seedlings = 0,
+    fully_grown_seedlings = 0,
+    growth_stage = "Seedling",
+    harvest_status = "Ready To Harvest",
+    expected_harvest_days = null,
+    notes = null
+  } = batchData;
+
+  
+  try {
+    const result = await query(
+      `SELECT COALESCE(MAX(history_number), 0) + 1 AS next_number
+       FROM plant_batch_history
+       WHERE plant_name ILIKE $1`,
+      [plant_name.trim()]
+    );
+
+    const history_number = result.rows[0].next_number;
+
+    // 2️⃣ Insert new history record with the incremented history_number
+    const sql = `
+      INSERT INTO plant_batch_history (
+        batch_number, history_number,
+        tray_id, plant_name, date_recorded,
+        total_seedlings, dead_seedlings, replanted_seedlings, fully_grown_seedlings,
+        growth_stage,harvest_status,expected_harvest_days, notes
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+      RETURNING *
+    `;
+
+    const values = [
+      batch_number, history_number,
+      tray_id, plant_name, date_recorded,
+      total_seedlings, dead_seedlings, replanted_seedlings, fully_grown_seedlings,
+      growth_stage,harvest_status,expected_harvest_days, notes
+    ];
+    const insert = await query(sql, values);
+    return insert.rows[0];
+
+
+
+  } catch (error) {
+    throw error;
+  }
+};
+
+
+
+
+
+// ===== DELETE a history record (optional) =====
+export const deleteHistoryRecord = async (history_id) => {
+  try {
+    const sql = `DELETE FROM plant_batch_history WHERE history_id = $1 RETURNING *`;
+    const result = await query(sql, [history_id]);
+    return result.rows[0];
+  } catch (error) {
+    throw error;
+  }
+};
