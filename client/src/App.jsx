@@ -65,11 +65,11 @@ function App() {
   
   return (
     <BrowserRouter>
-      <div 
+    <div 
         id="notification-container"
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] hidden space-y-2 max-w-sm w-80 pointer-events-none"
-      />
-      
+        className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] hidden space-y-2 max-w-sm w-80"
+      ></div>
+            
       <Suspense fallback={
         <div className="flex justify-center items-center h-screen">
           <Dashboard_Skeleton />
