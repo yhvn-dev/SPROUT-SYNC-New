@@ -18,6 +18,8 @@ app.use(cors({
   credentials: true
 }));
 
+
+
 // Serve HLS files
 app.use("/streams", express.static(path.resolve("streams"), {
   setHeaders: (res, filePath) => {

@@ -10,8 +10,8 @@ const pool = new Pool({
     password: process.env.PG_PASSWORD,
     database: process.env.PG_DATABASE,
     port: parseInt(process.env.PG_PORT || '5432', 10),
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,  // Railway SSL
-    max: 20,  // Max connections
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,  
+    max: 20,  
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 2000,
 })

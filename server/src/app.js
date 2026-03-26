@@ -53,6 +53,9 @@ app.use("/streams", express.static(path.resolve(__dirname, "../streams"), {
   }
 }));
 
+
+
+
 // ===== ROUTES =====
 app.use('', userRoutes);
 app.use('/trays', traysRoutes);
