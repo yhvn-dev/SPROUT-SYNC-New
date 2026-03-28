@@ -3,8 +3,11 @@ import { useUser } from "../../hooks/userContext";
 import { Link, useNavigate } from "react-router-dom";
 import  { Form } from "./form.jsx";
 import { Header } from "../../components/header.jsx";
-import * as validate from "../../utils/userValidations";
 import { fetchLoggedUser, loginUser } from "../../data/userService.jsx";
+
+import ForgotPasswordModal from "./modals/forgotPasswordModal.jsx";
+import * as validate from "../../utils/userValidations";
+
 
 function Login() {
   const loginInputRef = useRef(null);
@@ -14,6 +17,13 @@ function Login() {
   const [status, setStatus] = useState("notLoggedIn");
   const { user, setUser } = useUser();
   const navigate = useNavigate();
+  const [forgotPasswordModalOpen,setForgotPasswordModalOpen] = useState(false);
+
+   
+  const handleOpenForgotPasswordModal = () =>{
+      setForgotPasswordModalOpen(true);
+  }
+
 
 
   const handleSubmit = async (e) => {
@@ -22,7 +32,7 @@ function Login() {
     const loginInput = loginInputRef.current.value.trim();
     const password = passwordRef.current.value.trim();
 
-        // Reset messages first
+        
         setErrorMsg({});
         setSuccessMsg("");
         const errors = validate.loginValidation({ loginInput, password }) || {};
@@ -34,10 +44,7 @@ function Login() {
         try {
           setStatus("loggingIn");
 
-          // 🔥 Call backend service
           const data = await loginUser({ loginInput, password });
-
-          // Save token
           localStorage.setItem("accessToken", data.accessToken);
 
           // Fetch logged user
@@ -90,8 +97,19 @@ function Login() {
           loginInputRef={loginInputRef}
           passwordRef={passwordRef}
           status={status}
+          handleOpenForgotPasswordModal={handleOpenForgotPasswordModal}
         />
       </section>
+
+
+      {forgotPasswordModalOpen && (
+        <ForgotPasswordModal
+           isOpen={forgotPasswordModalOpen} 
+          onClose={() => setForgotPasswordModalOpen(false)} 
+        />
+      )}
+
+
     </section>
   );
 }

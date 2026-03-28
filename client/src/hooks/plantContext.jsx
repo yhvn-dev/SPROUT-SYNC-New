@@ -7,7 +7,6 @@ import * as plantBatchHistory from "../data/plantBatchesHistory";
 import * as sensorService from "../data/sensorServices";
 import * as readingsService from "../data/readingsServices";
 import * as notifService from "../data/notifsServices";
-import * as plantGroupService from "../data/plantGroupServices";
 import * as plantService from "../data/plantServices";
 import { playNotifSound } from "../utils/notificationSounds";
 
@@ -36,7 +35,6 @@ export const PlantDataProvider = ({ children }) => {
   const [readNotifs, setReadNotifs] = useState([]);
 
   // NEW: Plant groups and plants
-  const [plantGroups, setPlantGroups] = useState([]);
   const [plants, setPlants] = useState([]);
 
   // ------------------- LOAD FUNCTIONS -------------------
@@ -181,8 +179,6 @@ export const PlantDataProvider = ({ children }) => {
 
   
 
-
-
   const loadNotifsCount = useCallback(async () => {
     try {
       const data = await notifService.fetchNotifsCount();
@@ -204,17 +200,6 @@ export const PlantDataProvider = ({ children }) => {
   }, []);
 
 
-
-
-  // NEW: Load plant groups
-  const loadPlantGroups = useCallback(async () => {
-    try {
-      const data = await plantGroupService.fetchAllPlantGroups();
-      setPlantGroups(data);
-    } catch (error) {
-      console.error("Error loading plant groups", error);
-    }
-  }, []);
 
 
   
@@ -248,9 +233,9 @@ export const PlantDataProvider = ({ children }) => {
     loadNotifs();
     loadNotifsCount();
     markNotifsAsRead();
-    loadPlantGroups();
     loadPlants();
   }, [
+    
     loadTrayGroups,
     loadTrays,
     loadTrayGroupsWithCount,
@@ -266,7 +251,6 @@ export const PlantDataProvider = ({ children }) => {
     loadNotifs,
     loadNotifsCount,
     markNotifsAsRead,
-    loadPlantGroups,
     loadPlants
   ]);
 
@@ -318,9 +302,10 @@ export const PlantDataProvider = ({ children }) => {
         notifs,
         notifsCount,
         readNotifs,
-        plantGroups, // new
-        plants,      // new
-        // Load functions
+        plants,   
+
+
+        // LOAD FUNCTIONS
         loadTrayGroups,
         loadTrays,
         loadTrayGroupsWithCount,
@@ -336,8 +321,7 @@ export const PlantDataProvider = ({ children }) => {
         loadNotifs,
         loadNotifsCount,
         markNotifsAsRead,
-        loadPlantGroups, // new
-        loadPlants       // new
+        loadPlants   
       }}>
         
       {children}

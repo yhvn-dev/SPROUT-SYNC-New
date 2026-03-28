@@ -10,6 +10,7 @@ export function Form({
   loginInputRef,
   passwordRef,
   status,
+  handleOpenForgotPasswordModal
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -39,8 +40,6 @@ export function Form({
           Water Your Plants Login Here
         </p>
       </div>
-
-
 
       {/* Inputs */}
       <ul className="flex items-center justify-start flex-col w-full flex-1 pb-6">
@@ -121,6 +120,9 @@ export function Form({
           </button>
         </div>
 
+
+
+
         {/* Server errors & success */}
         <div className="successMsgBox mt-4 flex flex-col items-start gap-2 w-[90%] sm:w-1/2">
           {errorMsg.server && (
@@ -135,19 +137,48 @@ export function Form({
             </p>
           )}
 
-          
-        
-
           {successMsg && (
             <p className="message-text bg-green-50 border-1 border-green-200 px-4 py-1 rounded-lg text-sm w-full">
               {successMsg}
             </p>
           )}
         </div>
+
+    
+
+
+    
+        <div className="w-[90%] sm:w-1/2 mt-6 pt-4 border-t border-gray-200">
+          <button
+            type="button"
+            onClick={handleOpenForgotPasswordModal}
+            className="
+              w-full
+              text-sm
+              text-sancgb
+              font-medium
+              hover:text-sage
+              hover:underline
+              hover:decoration-1
+              hover:underline-offset-2
+              transition-all
+              duration-200
+              flex
+              items-center
+              justify-center
+              gap-1
+              py-2
+              bg-transparent
+              border-none
+              cursor-pointer
+              active:scale-95
+            "
+          >
+            <Lock size={14} />
+            Forgot Password?
+          </button>
+        </div>
       </ul>
     </form>
   );
-
-
-  
 }

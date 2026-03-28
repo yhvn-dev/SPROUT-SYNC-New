@@ -1,5 +1,5 @@
 
-import { Clock, AlertCircle, CheckCircle, AlertTriangle, Trash2, BellOff } from "lucide-react";
+import { Clock, AlertCircle, CheckCircle, AlertTriangle } from "lucide-react";
 
 
 export const colors = {
@@ -72,9 +72,8 @@ export const colors = {
 };
 
 export const setRoleColor = {
-  ownerColor: colors.dangerB,
   adminColor: colors.warning,
-  viewerColor: colors.accDarkc,
+  farmerColor: colors.accDarkc,
 };
 
 
@@ -94,6 +93,8 @@ export const getStageColor = (stage, isDark = false) => {
   return colors[stage] || colors['Sprout'];
 };
 
+
+
 export const getHarvestStatusColor = (stage, isDark = false) => {
   const colors = {
     'Not Ready':        {  text: isDark ? '#fff'  : 'hsl(210, 15%, 22%)',dot: isDark ? '#fff'  : 'hsl(210, 20%, 42%)' },
@@ -106,6 +107,8 @@ export const getHarvestStatusColor = (stage, isDark = false) => {
   };
   return colors[stage] || colors['Not Ready'];
 };
+
+
 
 
 export const getTrayStatusColor = (status, isDark = false) => {
@@ -127,9 +130,9 @@ export const getTrayStatusColor = (status, isDark = false) => {
       border: isDark ? 'hsl(35, 30%, 30%)' : 'hsl(35, 70%, 78%)',
     }
   };
-  
   return colors[status] || colors['Available'];
 };
+
 
 
 
@@ -194,7 +197,7 @@ export function getSensorStatus(sensor, rawValue, isActive, group, isDark = fals
   }
 
   return {
-    label: "Active", emoji: "✅",
+    label: "Active",
     bgStyle:   { backgroundColor: palette.active.bg },
     textStyle: { color: palette.active.text },
     iconStyle: { color: palette.active.text },

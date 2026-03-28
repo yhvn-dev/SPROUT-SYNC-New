@@ -10,8 +10,10 @@ import notifificationRoutes from "./routes/ProtectedRoutes/notification.Routes.j
 import esp32Routes from "./routes/ProtectedRoutes/esp32.Routes.js";
 import deviceTokenRoutes from "./routes/ProtectedRoutes/deviceToken.Routes.js"
 import streamRoutes from "./routes/ProtectedRoutes/streams.Routes.js";
-import plantGroupRoutes from "./routes/ProtectedRoutes/plantGroup.Routes.js"
 import plantRoutes from "./routes/ProtectedRoutes/plant.Routes.js"
+import passwordResetPublicRoutes from "./routes/UnprotectedRoutes/passwordReset.public.Routes.js"
+import passwordResetPrivateRoutes from "./routes/ProtectedRoutes/passwordReset.private.Routes.js"
+
 
 // ===== CORE =====
 import express from "express";
@@ -38,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ===== CORS =====
 app.use(cors({
-  origin: process.env.ORIGIN_URL || "http://localhost:3000",
+  origin: process.env.DEV_URL || "http://localhost:3000",
   credentials: true
 }))
 
@@ -53,9 +55,6 @@ app.use("/streams", express.static(path.resolve(__dirname, "../streams"), {
   }
 }));
 
-
-
-
 // ===== ROUTES =====
 app.use('', userRoutes);
 app.use('/trays', traysRoutes);
@@ -69,8 +68,12 @@ app.use('/auth', publicRoutes);
 app.use("/esp32", esp32Routes);
 app.use("/deviceToken", deviceTokenRoutes)
 app.use("/stream", streamRoutes);
-app.use("/plant_groups", plantGroupRoutes);
 app.use("/plants", plantRoutes)
+app.use("/pw",passwordResetPublicRoutes)
+app.use("/pw",passwordResetPrivateRoutes)
+
+
+
 
 // ===== TEST =====
 app.get("/", (req, res) => res.send("Serving is Running"));
@@ -87,9 +90,10 @@ const server = http.createServer(app);
 // =====================================================
 export const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.ORIGIN_URL  || "http://localhost:3000",
+    origin: process.env.DEV_URL  || "http://localhost:3000",
     credentials: true}
 });
+
 
 io.on("connection", (socket) => {
   console.log("🟢 User socket connected:", socket.id);

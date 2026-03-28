@@ -213,7 +213,7 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
                 </h2>
                 <p className="text-xs mt-0.5 text-[#5A8F73]">
                   {batchModalMode === "delete" 
-                    ? `Are you sure you want to delete ${selectedBatch?.plant_name} batch?`
+                    ? `Are you sure you want to delete this batch? This will move "${selectedBatch?.plant_name}" to Batch History. Only delete if the batch is already harvested or no longer active.`
                     : `Manage plant batch for [${selectedBatch.batch_number}] ${selectedBatch?.plant_name}`}
                 </p>
               </div>

@@ -385,14 +385,11 @@ select{
 
 
 /* ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== ===== =====  */
-.viewer_color{
+.farmer_color{
     @apply  bg-gray-200 rounded-[10px] rounded-2xl px-[0.3rem] py-[0.3rem] text-xs;
 }
 .admin_color{
     @apply  bg-[var(--color-warning-c)] rounded-2xl px-[0.3rem] py-[0.3rem] text-xs;
-}
-.owner_color{
-    @apply  bg-[var(--color-danger-c)] rounded-2xl px-[0.3rem] py-[0.3rem] text-xs;
 }
 
 .sprout-sync-text{

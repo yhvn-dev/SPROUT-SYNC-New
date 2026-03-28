@@ -54,7 +54,7 @@ export function UserTable({ users, setOpen, setMode, setSelectedUser }) {
                       UPDATE
                     </button>
 
-                    {u.role.toLowerCase() === "viewer" && (
+                    {u.role.toLowerCase() === "farmer" && (
                       <button
                         onClick={() => {
                           setSelectedUser(u);

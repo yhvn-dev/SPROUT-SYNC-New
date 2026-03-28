@@ -30,7 +30,7 @@ export function RoleChart({ chartData }) {
 
   const COLORS = [
     color.setRoleColor.adminColor,
-    color.setRoleColor.viewerColor,
+    color.setRoleColor.farmerColor,
   ];
 
 

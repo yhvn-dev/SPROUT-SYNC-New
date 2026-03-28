@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Sprout, Trash2, AlertTriangle, Leaf, Droplets } from "lucide-react";
 import * as plantModels from "../../../data/plantServices";
+import { X, Sprout, Trash2, AlertTriangle, Leaf, Droplets } from "lucide-react";
+
 
 export function PlantModal({isOpen, onClose, plantModalMode, selectedPlant, setSuccessMsg, reloadPlants}) {
   const [formData, setFormData] = useState({
@@ -12,6 +13,7 @@ export function PlantModal({isOpen, onClose, plantModalMode, selectedPlant, setS
   const [formErrors, setFormErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  
   useEffect(() => {
     if (!isOpen) return;
     if (plantModalMode === "update" && selectedPlant) {
@@ -95,7 +97,6 @@ export function PlantModal({isOpen, onClose, plantModalMode, selectedPlant, setS
   const maxVal = Number(formData.moisture_max) || 0;
   const barLeft = Math.min(minVal, 100);
   const barWidth = Math.max(0, Math.min(maxVal, 100) - Math.min(minVal, 100));
-
 
   
   return (

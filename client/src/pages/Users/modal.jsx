@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { validateUserEmptyFields } from "../../utils/userValidations"; 
-import { X, UserPen, UserPlus, Trash2,EyeOff,Eye } from "lucide-react";
+import { X, UserPen, UserPlus, Trash2, EyeOff, Eye } from "lucide-react";
 
 export function Modal({
   isOpen,
   onClose,
   mode,
-  handleSubmit,      // expects payload as JSON
+  handleSubmit,
   userData,
   backendError,
   setBackendError
@@ -22,7 +22,6 @@ export function Modal({
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  
 
   useEffect(() => {
     if (userData) {
@@ -45,12 +44,10 @@ export function Modal({
       role: role.trim(),
     };
 
-    // Include password if adding or updating with a new one
     if (mode === "insert" || password.trim() !== "") {
       payload.password = password.trim();
     }
 
-    // Validate fields
     const { errors: validationErrors } = validateUserEmptyFields(payload, password, mode);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -58,13 +55,11 @@ export function Modal({
     }
 
     try {
-      // Send JSON payload directly
       await handleSubmit(payload);
       setErrors({});
       onClose();
     } catch (err) {
       console.error("User Error", err);
-      // Optionally set backend errors
       setBackendError(err.response?.data?.message || "Something went wrong");
     }
   };
@@ -89,13 +84,13 @@ export function Modal({
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        transition={{ duration: 0.2 }}>
-
-
+        transition={{ duration: 0.2 }}
+      >
         {/* Close Button */}
         <button
           className="close_button absolute top-6 right-6 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
-          onClick={handleClose}>           
+          onClick={handleClose}
+        >
           <X size={20} className="text-gray-600" />
         </button>
 
@@ -108,7 +103,8 @@ export function Modal({
               <h2 className="text-2xl font-semibold text-gray-900">Delete User</h2>
             </div>
             <p className="text-gray-600 text-lg mb-8">
-              Are you sure you want to delete user <span className="font-semibold text-gray-900">{fullname}</span>?
+              Are you sure you want to delete user{" "}
+              <span className="font-semibold text-gray-900">{fullname}</span>?
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -129,9 +125,15 @@ export function Modal({
           <div className="p-8">
             <div className="flex items-center gap-4 mb-8">
               <div className="icon_box p-3 bg-blue-50 rounded-xl">
-                {mode === "insert" ? <UserPlus size={24} className="add_icon text-blue-600" /> : <UserPen size={24} className="update_icon text-blue-600" />}
+                {mode === "insert" ? (
+                  <UserPlus size={24} className="add_icon text-blue-600" />
+                ) : (
+                  <UserPen size={24} className="update_icon text-blue-600" />
+                )}
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900">{mode === "insert" ? "Add User" : "Update User"}</h2>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                {mode === "insert" ? "Add User" : "Update User"}
+              </h2>
             </div>
 
             <form onSubmit={onFormSubmit} className="space-y-6">
@@ -139,7 +141,7 @@ export function Modal({
                 {/* Left Column */}
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm text-[var(--sancgb)] font-medium  mb-2">Username</label>
+                    <label className="block text-sm text-[var(--sancgb)] font-medium mb-2">Username</label>
                     <input
                       type="text"
                       value={username}
@@ -148,11 +150,13 @@ export function Modal({
                       placeholder="Enter username"
                     />
                     {errors.username && <h6 className="text-red-600 text-sm mt-1">{errors.username}</h6>}
-                    {backendError && backendError.toLowerCase().includes("username") && <p className="text-red-600 text-sm mt-1">{backendError}</p>}
+                    {backendError && backendError.toLowerCase().includes("username") && (
+                      <p className="text-red-600 text-sm mt-1">{backendError}</p>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm text-[var(--sancgb)]  font-medium mb-2">Full Name</label>
+                    <label className="block text-sm text-[var(--sancgb)] font-medium mb-2">Full Name</label>
                     <input
                       type="text"
                       value={fullname}
@@ -160,11 +164,11 @@ export function Modal({
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200"
                       placeholder="Enter full name"
                     />
-                    {errors.fullname && <h6 className=" text-red-600 text-sm mt-1">{errors.fullname}</h6>}
+                    {errors.fullname && <h6 className="text-red-600 text-sm mt-1">{errors.fullname}</h6>}
                   </div>
 
                   <div>
-                    <label className="block text-sm  text-[var(--sancgb)] font-medium  mb-2">Email</label>
+                    <label className="block text-sm text-[var(--sancgb)] font-medium mb-2">Email</label>
                     <input
                       type="text"
                       value={email}
@@ -173,15 +177,15 @@ export function Modal({
                       placeholder="Enter email address"
                     />
                     {errors.email && <h6 className="text-red-600 text-sm mt-1">{errors.email}</h6>}
-                    {backendError && backendError.toLowerCase().includes("email") && <h6 className="text-red-600 text-sm mt-1">{backendError}</h6>}
+                    {backendError && backendError.toLowerCase().includes("email") && (
+                      <h6 className="text-red-600 text-sm mt-1">{backendError}</h6>
+                    )}
                   </div>
                 </div>
 
-
-
                 {/* Right Column */}
                 <div className="space-y-5">
-                  <div className=""> 
+                  <div>
                     <label className="block text-sm text-[var(--sancgb)] font-medium mb-2">Phone Number</label>
                     <input
                       type="text"
@@ -192,42 +196,35 @@ export function Modal({
                     />
                   </div>
 
-
-                  <div >
-                    <label className="flex text-sm text-[var(--sancgb)] font-medium  mb-2">
-                      Password {mode === "update" && <p className="text-gray-400 text-xs mx-2 mt-[2px]">(leave blank to keep current)</p>}
+                  <div>
+                    <label className="flex text-sm text-[var(--sancgb)] font-medium mb-2">
+                      Password{" "}
+                      {mode === "update" && (
+                        <p className="text-gray-400 text-xs mx-2 mt-[2px]">(leave blank to keep current)</p>
+                      )}
                     </label>
-
                     <div className="relative">
                       <input
-                        
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200"
-                            placeholder="Enter password"
-                            type={showPassword ? "text" : "password"}
-        
-                          />
-                          {errors.password && <h6 className=" text-red-600 text-sm mt-1">{errors.password}</h6>}
-
-                          
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(prev => !prev)}
-                            className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all duration-300 hover:bg-gray-200 active:scale-90">
-                            {showPassword ? (
-                              <EyeOff size={16} className="animate-fadeIn" color="var(--acc-darkc)" />
-                            ) : (
-                              <Eye size={16} className="animate-fadeIn" color="var(--acc-darkc)" />
-                            )}
-                          </button>
-
-                        </div>
-                   
-          
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-colors duration-200"
+                        placeholder="Enter password"
+                        type={showPassword ? "text" : "password"}
+                      />
+                      {errors.password && <h6 className="text-red-600 text-sm mt-1">{errors.password}</h6>}
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="cursor-pointer absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all duration-300 hover:bg-gray-200 active:scale-90"
+                      >
+                        {showPassword ? (
+                          <EyeOff size={16} className="animate-fadeIn" color="var(--acc-darkc)" />
+                        ) : (
+                          <Eye size={16} className="animate-fadeIn" color="var(--acc-darkc)" />
+                        )}
+                      </button>
+                    </div>
                   </div>
-
-
 
                   <div>
                     <label className="block text-sm text-[var(--sancgb)] font-medium mb-2">Role</label>
@@ -238,9 +235,11 @@ export function Modal({
                     >
                       <option value="">Select Role</option>
                       <option value="admin">Admin</option>
-                      <option value="viewer">Viewer</option>
+                      <option value="staff">Staff</option>       {/* ✅ keep if needed */}
+                      <option value="farmer">Farmer</option>     {/* ✅ updated */}
+                      {/* ❌ REMOVED: <option value="viewer">Viewer</option> */}
                     </select>
-                    {errors.role && <h6 className=" text-red-600 text-sm mt-1">{errors.role}</h6>}
+                    {errors.role && <h6 className="text-red-600 text-sm mt-1">{errors.role}</h6>}
                   </div>
                 </div>
               </div>
@@ -249,22 +248,29 @@ export function Modal({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="cursor-pointer cancel_button px-6 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors duration-200 font-medium">
+                  className="cursor-pointer cancel_button px-6 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors duration-200 font-medium"
+                >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   className={`cursor-pointer px-6 py-2.5 text-white rounded-xl transition-colors duration-200 font-medium 
-                    ${mode === "update" ? "bg-[var(--white-blple--)] hover:bg-[var(--bluis--)]" : "bg-[var(--sancgb)] hover:bg-[var(--sancgd)]"}`}>
+                    ${mode === "update"
+                      ? "bg-[var(--white-blple--)] hover:bg-[var(--bluis--)]"
+                      : "bg-[var(--sancgb)] hover:bg-[var(--sancgd)]"
+                    }`}
+                >
                   {mode === "update" ? "Save Changes" : "Add User"}
                 </button>
               </div>
             </form>
           </div>
         )}
-
-
       </motion.div>
     </motion.div>
+
+
+
+
   );
 }

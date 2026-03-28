@@ -5,9 +5,9 @@ import * as plantModel from "../models/plantModels.js"
 ========================= */
 export const createPlant = async (req, res) => {
   try {
-    const { name, moisture_min, moisture_max, group_id } = req.body;
+    const { name, moisture_min, moisture_max } = req.body;
 
-    const plant = await  plantModel.createPlant(name, moisture_min, moisture_max, group_id);
+    const plant = await plantModel.createPlant(name, moisture_min, moisture_max);
     return res.status(201).json({ success: true, data: plant });
   } catch (err) {
     console.error("CONTROLLER: Error creating plant", err);
@@ -20,7 +20,7 @@ export const createPlant = async (req, res) => {
 ========================= */
 export const getAllPlants = async (req, res) => {
   try {
-    const plants = await  plantModel.getAllPlants();
+    const plants = await plantModel.getAllPlants();
     return res.status(200).json({ success: true, data: plants });
   } catch (err) {
     console.error("CONTROLLER: Error fetching plants", err);
@@ -35,7 +35,7 @@ export const getPlantById = async (req, res) => {
   try {
     const { plant_id } = req.params;
 
-    const plant = await  plantModel.getPlantById(plant_id);
+    const plant = await plantModel.getPlantById(plant_id);
     if (!plant) {
       return res.status(404).json({ success: false, message: "Plant not found" });
     }
@@ -53,9 +53,9 @@ export const getPlantById = async (req, res) => {
 export const updatePlant = async (req, res) => {
   try {
     const { plant_id } = req.params;
-    const { name, moisture_min, moisture_max, group_id } = req.body;
+    const { name, moisture_min, moisture_max } = req.body;
 
-    const plant = await  plantModel.updatePlant(plant_id, name, moisture_min, moisture_max, group_id);
+    const plant = await plantModel.updatePlant(plant_id, name, moisture_min, moisture_max);
     if (!plant) {
       return res.status(404).json({ success: false, message: "Plant not found" });
     }
@@ -66,6 +66,8 @@ export const updatePlant = async (req, res) => {
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
+
+
 
 
 /* =========================

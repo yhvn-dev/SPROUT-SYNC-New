@@ -1,5 +1,4 @@
 // plantBatches.controller.js
-
 import * as plantBatchModels from "../models/plantBatchesModels.js"
 import * as trayModels from "../models/trayModels.js"
 import * as plantBatchHistoryModel from "../models/plantBatchesHistoryModels.js"
@@ -19,8 +18,6 @@ export const getPlantBatches = async (req, res) => {
     res.status(500).json({ message: "Error getting plant batches", err });
   }
 };
-
-
 
 
 // ===== GET single plant batch by ID =====
@@ -165,7 +162,7 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
       const harvestStr = harvestDate.toISOString().slice(0, 10);
 
       if (newStatus === "Due Tomorrow") {
-        console.log(`📢 Notifying: Due Tomorrow — ${batch.batch_number}`);
+        console.log(`Notifying: Due Tomorrow — ${batch.batch_number}`);
         await createNotif({
           type: "Warning",
           status: "Medium",
@@ -182,7 +179,7 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
         }
 
       } else if (newStatus === "Due Now") {
-        console.log(`📢 Notifying: Due Now — ${batch.batch_number}`);
+        console.log(`Notifying: Due Now — ${batch.batch_number}`);
         await createNotif({
           type: "Success",
           status: "Low",
@@ -199,7 +196,7 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
         }
 
       } else if (newStatus === "Past Due") {
-        console.log(`📢 Notifying: Past Due — ${batch.batch_number}`);
+        console.log(`Notifying: Past Due — ${batch.batch_number}`);
         await createNotif({
           type: "Critical",
           status: "High",
@@ -216,7 +213,7 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
         }
 
       } else if (newStatus === "Harvested") {
-        console.log(`📢 Notifying: Harvested — ${batch.batch_number}`);
+        console.log(`Notifying: Harvested — ${batch.batch_number}`);
         await createNotif({
           type: "Success",
           status: "Low",
@@ -232,7 +229,7 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
           ); 
         }
       } else {
-        console.log(`⏭️ No notify for ${batch.batch_number} — status: ${newStatus}`);
+        console.log(`No notify for ${batch.batch_number} — status: ${newStatus}`);
       }
     }
 

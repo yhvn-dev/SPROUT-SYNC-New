@@ -1,61 +1,46 @@
 "use client";
-import { useEffect, useState, useContext,useCallback} from "react";
+import { useEffect, useState, useContext, useCallback } from "react";
 import { Menu } from "lucide-react";
 import { Sidebar } from "../../components/sidebar";
 import { Db_Header } from "../../components/db_header";
 import { usePlantData } from "../../hooks/plantContext.jsx";
 import { useUser } from "../../hooks/userContext.jsx";
 import { LogoutModal } from "../../components/logoutModal.jsx";
-import { Notif_Modal } from "../../components/notifModal.jsx"
+import { Notif_Modal } from "../../components/notifModal.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
-import { DeleteNotifModal } from '../../components/deleteNotifModal';
+import { DeleteNotifModal } from "../../components/deleteNotifModal";
 import { MessageContext } from "../../hooks/messageHooks.jsx";
-
 import RegisterDeviceModal from "../Dashboard/modals/registerDeviceModal";
-import InfosModal from "../../components/infosModal.jsx";
 import { PlantModal } from "./modals/plantModal.jsx";
-import { PlantGroupsModal } from "./modals/plantGroupsModal.jsx";
-
-import {PlantGroups} from "./plant_groups.jsx"
-import {Plant_Inventory} from "./plant_inventory.jsx"
-
+import { Plant_Inventory } from "./plant_inventory.jsx";
 
 /* ─── MAIN PAGE ──────────────────────────────────────────── */
 export default function Plants() {
-  const { user, skippedRegister} = useUser()
-  const {plants,loadPlantGroups, loadPlants,loadNotifs} = usePlantData();
-    const {openDeleteNotifModal,setOpenDeleteNotifModal,selectedNotif,
-          deleteMode,
-          messageContext,setMessageContext} = useContext(MessageContext);
+  const { user, skippedRegister } = useUser();
+  const { plants, loadPlants, loadNotifs } = usePlantData();
+  const {
+    openDeleteNotifModal,
+    setOpenDeleteNotifModal,
+    selectedNotif,
+    deleteMode,
+    messageContext,
+    setMessageContext,
+  } = useContext(MessageContext);
 
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [isInfoModalOpen, setInfoModalOpen] = useState(false);
-  const [infoModalPurpose, setInfoModalPurpose] = useState("");
   const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
-  const [activeTab,setActiveTab] = useState("plant_inventory");
   const [plantModal, setPlantModal] = useState({
     isOpen: false,
     mode: "insert",
     plant: null,
   });
-  
- 
-  const [plantGroupModal, setPlantGroupModal] = useState({
-    isOpen: false,
-    mode: "insert",
-    plantGroup:null,
-    plant: null,
-  });
-  
-  
-  const clearMsg = useCallback(() => {
-      setMessageContext("")
-      },
-  []);
 
+  const clearMsg = useCallback(() => {
+    setMessageContext("");
+  }, []);
 
   useEffect(() => {
     if (user?.first_time_login && !skippedRegister) {
@@ -65,24 +50,16 @@ export default function Plants() {
     }
   }, [user?.first_time_login, skippedRegister]);
 
-  
-
   useEffect(() => {
-    loadPlantGroups();
-  }, [loadPlantGroups, loadPlants]);
-  
+    loadPlants();
+  }, [loadPlants]);
+
   useEffect(() => {
     if (!successMsg) return;
     const t = setTimeout(() => setSuccessMsg(""), 3000);
     return () => clearTimeout(t);
   }, [successMsg]);
 
-  
-  const handleOpenInfosPlants = () => {
-    setInfoModalPurpose("plants");
-    setInfoModalOpen(true);
-  };
-  
   return (
     <section className="con_main grid grid-cols-1 sm:grid-cols-[12fr_30fr_58fr]
       grid-rows-[8vh_auto_auto]
@@ -102,9 +79,9 @@ export default function Plants() {
         <div
           className="md:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setSidebarOpen(false)}
-        />)}
-        
-        
+        />
+      )}
+
       {/* SIDEBAR */}
       <aside
         className={`${
@@ -123,127 +100,61 @@ export default function Plants() {
         <Db_Header notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
       </div>
 
-      <nav className="plants_nav flex my-4 gap-2 px-4 md:px-0 md:col-start-2">
-         <button
-          onClick={() => setActiveTab("plant_inventory")}
-          className={`db_nav_button cursor-pointer flex-1 md:flex-none px-4 md:px-6 py-2
-            text-xs md:text-sm rounded-lg transition
-            ${activeTab === "plant_inventory"
-              ? "bg-white text-[#027c68] shadow-md active"
-              : "bg-white/50 hover:bg-white text-[#5A8F73] dark:bg-metal-dark5 dark:hover:bg-[var(--metal-dark4)]"
-            }`}>
-          Inventory
-        </button>
-        
-        <button
-          onClick={() => setActiveTab("categories")}
-          className={`db_nav_button cursor-pointer flex-1 md:flex-none px-4 md:px-6 py-2
-            text-xs md:text-sm rounded-lg transition bg-[var(-)]
-            ${activeTab === "categories"
-              ? "bg-white text-[#027c68] shadow-md active"
-              : "bg-white/50 hover:bg-white text-[#5A8F73] dark:hover:bg-[var(--metal-dark4)]"
-            }`}>
-             Categories
-        </button>            
-      </nav>
-
-
-
-      <main className="col-start-1 md:col-start-2 row-start-3 col-span-full">
-        {activeTab === "plant_inventory" ? (
-          <Plant_Inventory setPlantModal={setPlantModal}/>
-        ) : (
-          <PlantGroups 
-            setPlantGroupModal={setPlantGroupModal} 
-            setInfoModalOpen={setInfoModalOpen} 
-            setInfoModalPurpose={setInfoModalPurpose}
-          />
-        )}    
+      {/* MAIN CONTENT */}
+      <main className="col-start-1 md:col-start-2 row-start-2  md:row-span-2 col-span-full conb bg-white overflow-hidden rounded-2xl">
+        <Plant_Inventory setPlantModal={setPlantModal} />
       </main>
-      
 
-      
-    {/* MODALS */}
-    {logoutOpen && (
-      <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
-    )}
+      {/* MODALS */}
+      {logoutOpen && (
+        <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
+      )}
 
-    {isRegisterModalVisible && (
-      <RegisterDeviceModal
-        userData={user}
-        onClose={() => setRegisterModalVisible(false)}
-      />
-    )}
+      {isRegisterModalVisible && (
+        <RegisterDeviceModal
+          userData={user}
+          onClose={() => setRegisterModalVisible(false)}
+        />
+      )}
 
       <PlantModal
-      isOpen={plantModal.isOpen}
-      onClose={() => {
-        setPlantModal(prev => ({ ...prev, isOpen: false }));
-        setTimeout(() => {
-          setPlantModal({ isOpen: false, mode: "insert", plant: null });
-        }, 300); 
-      }}
-      plantModalMode={plantModal.mode}
-      selectedPlant={plantModal.plant}
-      setSuccessMsg={setSuccessMsg}
-      reloadPlants={loadPlants}/>
-
-
-    <PlantGroupsModal
-      isOpen={plantGroupModal.isOpen}
-      onClose={() => {
-        setPlantGroupModal(prev => ({ ...prev, isOpen: false }));
-        setTimeout(() => {
-          setPlantGroupModal({ isOpen: false, mode: "insert", plantGroup:null,plant: null });
-        }, 300);}}
-      plantModalMode={plantGroupModal.mode}
-      selectedPlant={plantGroupModal.plant}
-      selectedPlantGroup={plantGroupModal.plantGroup}
-      setSuccessMsg={setSuccessMsg}
-      reloadPlants={loadPlants}
-      plants={plants}
-    />
-
-
-    {openDeleteNotifModal && (
-      <DeleteNotifModal 
-        isOpen={openDeleteNotifModal} 
-        selectedNotif={selectedNotif}
-        deleteMode={deleteMode} 
-        onClose={() => setOpenDeleteNotifModal(false)} 
-        loadNotifs={loadNotifs}
-      />  
-    )}
-
-
-    {isInfoModalOpen && (
-      <InfosModal
-        isInfosModalOpen={isInfoModalOpen}
-        onClose={() => setInfoModalOpen(false)}
-        purpose={infoModalPurpose}
+        isOpen={plantModal.isOpen}
+        onClose={() => {
+          setPlantModal((prev) => ({ ...prev, isOpen: false }));
+          setTimeout(() => {
+            setPlantModal({ isOpen: false, mode: "insert", plant: null });
+          }, 300);
+        }}
+        plantModalMode={plantModal.mode}
+        selectedPlant={plantModal.plant}
+        setSuccessMsg={setSuccessMsg}
+        reloadPlants={loadPlants}
       />
-    )}
 
-    {notifOpen && (
-      <Notif_Modal
-        isOpen={notifOpen}
-        onClose={() => setNotifOpen(false)}
-      />
-    )}
-    
-    {successMsg && (
-      <FloatSuccessMsg  txt={successMsg} clearMsg={clearMsg} />
-    )}
+      {openDeleteNotifModal && (
+        <DeleteNotifModal
+          isOpen={openDeleteNotifModal}
+          selectedNotif={selectedNotif}
+          deleteMode={deleteMode}
+          onClose={() => setOpenDeleteNotifModal(false)}
+          loadNotifs={loadNotifs}
+        />
+      )}
 
-    {messageContext && (
-      <FloatSuccessMsg  txt={messageContext} clearMsg={clearMsg} />
-    )}
+      {notifOpen && (
+        <Notif_Modal
+          isOpen={notifOpen}
+          onClose={() => setNotifOpen(false)}
+        />
+      )}
 
+      {successMsg && (
+        <FloatSuccessMsg txt={successMsg} clearMsg={clearMsg} />
+      )}
 
+      {messageContext && (
+        <FloatSuccessMsg txt={messageContext} clearMsg={clearMsg} />
+      )}
     </section>
   );
-
-
-
-  
 }

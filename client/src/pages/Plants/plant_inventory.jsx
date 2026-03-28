@@ -52,7 +52,7 @@ export function Plant_Inventory({setPlantModal}) {
     
   return (
     <>
-      <div className="plant_main_div rounded-2xl shadow-lg  h-full md:h-[95%] overflow-y-auto">
+      <div className="plant_main_div rounded-2xl  h-full md:h-[95%] overflow-y-auto">
 
         <div className="conb hidden md:flex items-center  rounded-2xl justify-center flex-col overflow-x-auto overflow-y-auto">
          <div className="conb plant_invent_header  bg-white w-full p-4 flex items-center justify-start">
@@ -249,7 +249,7 @@ export function Plant_Inventory({setPlantModal}) {
 
         {/* ── EMPTY STATE ────────────────────────────────────── */}
         {filteredPlants.length === 0 && (
-          <div className="conb h-full  flex items-center flex-col justify-center  text-gray-500">
+          <div className="conb h-full w-full  flex items-center flex-col justify-center  text-gray-500">
             <Sprout size={48} className="mx-auto mb-4 opacity-50" />
             <p className="text-lg">No plants found</p>
             <p className="text-sm">Try adjusting your search or filters</p>

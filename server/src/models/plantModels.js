@@ -1,24 +1,18 @@
 import { query } from '../config/db.js'; 
 
-
 /* =========================
    CREATE PLANT
 ========================= */
-export const createPlant = async (
-  name,
-  moisture_min,
-  moisture_max,
-  group_id
-) => {
+export const createPlant = async (name, moisture_min, moisture_max) => {
   try {
     const { rows } = await query(
       `
       INSERT INTO plants 
-        (name, moisture_min, moisture_max, group_id)
-      VALUES ($1, $2, $3, $4)
+        (name, moisture_min, moisture_max)
+      VALUES ($1, $2, $3)
       RETURNING *;
       `,
-      [name, moisture_min, moisture_max, group_id]
+      [name, moisture_min, moisture_max]
     );
     return rows[0];
   } catch (err) {
@@ -40,8 +34,6 @@ export const getAllPlants = async () => {
   }
 };
 
-
-
 /* =========================
    GET PLANT BY ID
 ========================= */
@@ -58,13 +50,7 @@ export const getPlantById = async (plant_id) => {
 /* =========================
    UPDATE PLANT
 ========================= */
-export const updatePlant = async (
-  plant_id,
-  name,
-  moisture_min,
-  moisture_max,
-  group_id
-) => {
+export const updatePlant = async (plant_id, name, moisture_min, moisture_max) => {
   try {
     const { rows } = await query(
       `
@@ -72,12 +58,11 @@ export const updatePlant = async (
       SET 
         name = $1,
         moisture_min = $2,
-        moisture_max = $3,
-        group_id = $4
-      WHERE plant_id = $5
+        moisture_max = $3
+      WHERE plant_id = $4
       RETURNING *;
       `,
-      [name, moisture_min, moisture_max, group_id, plant_id]
+      [name, moisture_min, moisture_max, plant_id]
     );
     return rows[0] || null;
   } catch (err) {
@@ -85,7 +70,6 @@ export const updatePlant = async (
     throw err;
   }
 };
-
 
 
 

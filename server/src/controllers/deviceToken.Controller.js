@@ -24,7 +24,7 @@ import { updateFirstTimeLogin } from "../models/userModels.js";
       await sendPushNotification(
         push_token,
         "Welcome to Sprout Sync!",
-        "Your device is registered successfully 🌱"
+        "Your device is registered successfully"
       );
 
       await updateFirstTimeLogin(user_id, false);
