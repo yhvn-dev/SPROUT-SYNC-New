@@ -64,3 +64,15 @@ export const checkExistingRequest = async (user_id) => {
   );
   return result.rows[0] || null;
 };
+
+
+export const rejectResetRequest = async (request_id) => {
+  const result = await query(
+    `UPDATE password_reset_requests
+     SET status = 'Rejected', completed_at = NOW()
+     WHERE request_id = $1
+     RETURNING *`,
+    [request_id]
+  );
+  return result.rows[0];
+};

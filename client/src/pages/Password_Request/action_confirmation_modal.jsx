@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ShieldCheck, ShieldX } from "lucide-react";
 import { useState } from "react";
+import * as passwordResetService from "../../data/passwordResetsServices";
 import { Eye, EyeOff } from "lucide-react";
 
 /* ── PASSWORD INPUT ─────────────────────────────────────────── */
@@ -33,14 +34,15 @@ function PasswordInput({ value, onChange, placeholder = "Enter new password" }) 
 function Action_Confirmation_Modal({
   isOpen,
   onClose,
-  actionMode,        // "approve" | "reject"
-  request,           // the selected request object
-  onHandleOpenModal, // callback after confirm: (request, newPassword?) => void
+  actionMode,
+  request,
+  onRefresh,
 }) {
-  const [step, setStep] = useState("confirm"); // "confirm" | "password"
+  const [step, setStep] = useState("confirm");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen || !request) return null;
 
@@ -54,18 +56,29 @@ function Action_Confirmation_Modal({
     onClose();
   };
 
-  const handleConfirm = () => {
+
+
+
+  // ── CONFIRM BUTTON (Step 1)
+  const handleConfirm = async () => {
     if (isApprove) {
-      // Go to password step
       setStep("password");
-    } else {
-      // Reject — no password needed, fire directly
-      onHandleOpenModal(request, null);
-      handleClose();
+    } else {   
+      try {
+        setLoading(true);
+        await passwordResetService.rejectPasswordReset(request.request_id);
+        onRefresh?.(); 
+        handleClose();
+      } catch (err) {
+        console.error("Error rejecting request:", err);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  const handlePasswordSubmit = () => {
+  // ── CONFIRM & APPROVE BUTTON (Step 2)
+  const handlePasswordSubmit = async () => {
     if (!newPassword.trim()) {
       setPasswordError("Password is required.");
       return;
@@ -78,8 +91,18 @@ function Action_Confirmation_Modal({
       setPasswordError("Passwords do not match.");
       return;
     }
-    onHandleOpenModal(request, newPassword);
-    handleClose();
+
+    try {
+      setLoading(true);
+      await passwordResetService.approvePasswordReset(request.request_id, newPassword);
+      onRefresh?.(); 
+      handleClose();
+    } catch (err) {
+      console.error("Error approving request:", err);
+      setPasswordError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -111,7 +134,6 @@ function Action_Confirmation_Modal({
             {/* ── STEP 1: CONFIRM ─────────────────────────── */}
             {step === "confirm" && (
               <>
-                {/* Icon + Title */}
                 <div className="flex items-center gap-4 mb-5">
                   <div className={`p-3 rounded-xl ${isApprove ? "bg-[var(--sage-lighter)]" : "bg-red-50"}`}>
                     {isApprove
@@ -124,7 +146,6 @@ function Action_Confirmation_Modal({
                   </h2>
                 </div>
 
-                {/* User Info Card */}
                 <div className="bg-[var(--sage-lighter)] rounded-xl p-4 mb-5 space-y-1 border border-[var(--sage-medium)]">
                   <p className="text-xs text-gray-400 mb-1">Request from</p>
                   <p className="text-base font-semibold text-[var(--sancgb)]">{request.fullname}</p>
@@ -138,7 +159,6 @@ function Action_Confirmation_Modal({
                     : "This will reject the user's password reset request. They will need to submit a new one."}
                 </p>
 
-                {/* Actions */}
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={handleClose}
@@ -148,13 +168,14 @@ function Action_Confirmation_Modal({
                   </button>
                   <button
                     onClick={handleConfirm}
-                    className={`cursor-pointer px-5 py-2.5 rounded-xl text-white font-medium text-sm transition-colors
+                    disabled={loading}
+                    className={`cursor-pointer px-5 py-2.5 rounded-xl text-white font-medium text-sm transition-colors disabled:opacity-50
                       ${isApprove
                         ? "bg-[var(--sancgb)] hover:bg-[var(--sancgd)]"
                         : "bg-red-500 hover:bg-red-600"
                       }`}
                   >
-                    {isApprove ? "Yes, Proceed" : "Yes, Reject"}
+                    {loading ? "Processing..." : isApprove ? "Yes, Proceed" : "Yes, Reject"}
                   </button>
                 </div>
               </>
@@ -163,7 +184,6 @@ function Action_Confirmation_Modal({
             {/* ── STEP 2: SET PASSWORD (approve only) ─────── */}
             {step === "password" && (
               <>
-                {/* Icon + Title */}
                 <div className="flex items-center gap-4 mb-5">
                   <div className="p-3 rounded-xl bg-[var(--sage-lighter)]">
                     <ShieldCheck size={24} color="var(--sancgb)" />
@@ -174,7 +194,6 @@ function Action_Confirmation_Modal({
                   </div>
                 </div>
 
-                {/* Password Fields */}
                 <div className="space-y-3 mb-5">
                   <div>
                     <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">
@@ -209,19 +228,20 @@ function Action_Confirmation_Modal({
                   )}
                 </div>
 
-                {/* Actions */}
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={() => setStep("confirm")}
-                    className="cursor-pointer px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium text-sm"
+                    disabled={loading}
+                    className="cursor-pointer px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium text-sm disabled:opacity-50"
                   >
                     Back
                   </button>
                   <button
                     onClick={handlePasswordSubmit}
-                    className="cursor-pointer px-5 py-2.5 rounded-xl bg-[var(--sancgb)] hover:bg-[var(--sancgd)] text-white font-medium text-sm transition-colors"
+                    disabled={loading}
+                    className="cursor-pointer px-5 py-2.5 rounded-xl bg-[var(--sancgb)] hover:bg-[var(--sancgd)] text-white font-medium text-sm transition-colors disabled:opacity-50"
                   >
-                    Confirm & Approve
+                    {loading ? "Processing..." : "Confirm & Approve"}
                   </button>
                 </div>
               </>

@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback, useContext } from "react";
-import { Menu, KeyRound, Search, Check, X, Clock, ShieldCheck, ShieldX, Eye, EyeOff } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Menu, KeyRound, Search, Check, X, Clock,  } from "lucide-react";
 import { Sidebar } from "../../components/sidebar";
 import { Db_Header } from "../../components/db_header";
 import { useUser } from "../../hooks/userContext.jsx";
@@ -9,235 +8,27 @@ import { LogoutModal } from "../../components/logoutModal.jsx";
 import { Notif_Modal } from "../../components/notifModal.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
 import { MessageContext } from "../../hooks/messageHooks.jsx";
+import Action_Confirmation_Modal from "./action_confirmation_modal.jsx"; // ← i-adjust yung path
+
+
+
 
 /* ── STATUS BADGE ───────────────────────────────────────────── */
 function StatusBadge({ status }) {
   const styles = {
     Pending:  "bg-yellow-100 text-yellow-700",
-    Approved: "bg-green-100 text-green-700",
+    Completed: "bg-green-100 text-green-700",
     Rejected: "bg-red-100 text-red-700",
   };
   const icons = {
     Pending:  <Clock size={11} />,
-    Approved: <Check size={11} />,
+    Completed: <Check size={11} />,
     Rejected: <X size={11} />,
   };
   return (
     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${styles[status] ?? "bg-gray-100 text-gray-600"}`}>
       {icons[status]} {status}
     </span>
-  );
-}
-
-/* ── PASSWORD INPUT ─────────────────────────────────────────── */
-function PasswordInput({ value, onChange, placeholder }) {
-  const [show, setShow] = useState(false);
-  return (
-    <div className="relative">
-      <input
-        type={show ? "text" : "password"}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="w-full px-4 py-3 pr-11 border-2 border-gray-200 rounded-xl text-sm focus:border-[var(--sancgb)] focus:outline-none transition-colors"
-      />
-      <button
-        type="button"
-        onClick={() => setShow((p) => !p)}
-        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 transition cursor-pointer"
-      >
-        {show
-          ? <EyeOff size={16} color="var(--sancgb)" />
-          : <Eye size={16} color="var(--sancgb)" />
-        }
-      </button>
-    </div>
-  );
-}
-
-/* ── ACTION CONFIRMATION MODAL ──────────────────────────────── */
-function Action_Confirmation_Modal({
-  isOpen,
-  onClose,
-  actionMode,
-  request,
-  onHandleOpenModal,
-}) {
-  const [step, setStep] = useState("confirm");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-
-  if (!isOpen || !request) return null;
-
-  const isApprove = actionMode === "approve";
-
-  const handleClose = () => {
-    setStep("confirm");
-    setNewPassword("");
-    setConfirmPassword("");
-    setPasswordError("");
-    onClose();
-  };
-
-  const handleConfirm = () => {
-    if (isApprove) {
-      setStep("password");
-    } else {
-      onHandleOpenModal(request, null);
-      handleClose();
-    }
-  };
-
-  const handlePasswordSubmit = () => {
-    if (!newPassword.trim()) {
-      setPasswordError("Password is required.");
-      return;
-    }
-    if (newPassword.length < 6) {
-      setPasswordError("Password must be at least 6 characters.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match.");
-      return;
-    }
-    onHandleOpenModal(request, newPassword);
-    handleClose();
-  };
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm z-50 px-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-      >
-        <motion.div
-          className="bg-white rounded-2xl shadow-2xl relative w-full max-w-[460px]"
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          transition={{ duration: 0.2 }}
-        >
-          <button
-            onClick={handleClose}
-            className="absolute top-5 right-5 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
-          >
-            <X size={18} className="text-gray-500" />
-          </button>
-
-          <div className="p-8">
-            {/* ── STEP 1: CONFIRM ─────────────────────────── */}
-            {step === "confirm" && (
-              <>
-                <div className="flex items-center gap-4 mb-5">
-                  <div className={`p-3 rounded-xl ${isApprove ? "bg-[var(--sage-lighter)]" : "bg-red-50"}`}>
-                    {isApprove
-                      ? <ShieldCheck size={24} color="var(--sancgb)" />
-                      : <ShieldX size={24} className="text-red-500" />
-                    }
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {isApprove ? "Approve Password Reset" : "Reject Password Reset"}
-                  </h2>
-                </div>
-
-                <div className="bg-[var(--sage-lighter)] rounded-xl p-4 mb-5 space-y-1 border border-[var(--sage-medium)]">
-                  <p className="text-xs text-gray-400 mb-1">Request from</p>
-                  <p className="text-base font-semibold text-[var(--sancgb)]">{request.fullname}</p>
-                  <p className="text-sm text-gray-500">@{request.username}</p>
-                  <p className="text-sm text-gray-500">{request.email}</p>
-                </div>
-
-                <p className="text-sm text-gray-500 mb-6">
-                  {isApprove
-                    ? "Proceeding will allow you to set a new password for this user."
-                    : "This will reject the user's password reset request. They will need to submit a new one."}
-                </p>
-
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={handleClose}
-                    className="cursor-pointer px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium text-sm"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleConfirm}
-                    className={`cursor-pointer px-5 py-2.5 rounded-xl text-white font-medium text-sm transition-colors
-                      ${isApprove
-                        ? "bg-[var(--sancgb)] hover:bg-[var(--sancgd)]"
-                        : "bg-red-500 hover:bg-red-600"
-                      }`}
-                  >
-                    {isApprove ? "Yes, Proceed" : "Yes, Reject"}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* ── STEP 2: SET PASSWORD ─────────────────────── */}
-            {step === "password" && (
-              <>
-                <div className="flex items-center gap-4 mb-5">
-                  <div className="p-3 rounded-xl bg-[var(--sage-lighter)]">
-                    <ShieldCheck size={24} color="var(--sancgb)" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">Set New Password</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">for {request.fullname}</p>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-5">
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">
-                      New Password
-                    </label>
-                    <PasswordInput
-                      value={newPassword}
-                      onChange={(e) => { setNewPassword(e.target.value); setPasswordError(""); }}
-                      placeholder="Enter new password"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">
-                      Confirm Password
-                    </label>
-                    <PasswordInput
-                      value={confirmPassword}
-                      onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(""); }}
-                      placeholder="Re-enter new password"
-                    />
-                  </div>
-                  {passwordError && (
-                    <p className="text-red-500 text-xs mt-1">{passwordError}</p>
-                  )}
-                </div>
-
-                <div className="flex justify-end gap-3">
-                  <button
-                    onClick={() => setStep("confirm")}
-                    className="cursor-pointer px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium text-sm"
-                  >
-                    Back
-                  </button>
-                  <button
-                    onClick={handlePasswordSubmit}
-                    className="cursor-pointer px-5 py-2.5 rounded-xl bg-[var(--sancgb)] hover:bg-[var(--sancgd)] text-white font-medium text-sm transition-colors"
-                  >
-                    Confirm & Approve
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
   );
 }
 
@@ -281,7 +72,7 @@ function PasswordRequestTable({ requests, onApprove, onReject }) {
             >
               <option value="All">All Status</option>
               <option value="Pending">Pending</option>
-              <option value="Approved">Approved</option>
+              <option value="Completed">Completed</option>
               <option value="Rejected">Rejected</option>
             </select>
           </div>
@@ -371,7 +162,7 @@ function PasswordRequestTable({ requests, onApprove, onReject }) {
           >
             <option value="All">All Status</option>
             <option value="Pending">Pending</option>
-            <option value="Approved">Approved</option>
+            <option value="Completed">Completed</option>
             <option value="Rejected">Rejected</option>
           </select>
         </div>
@@ -422,8 +213,8 @@ function PasswordRequestTable({ requests, onApprove, onReject }) {
 }
 
 /* ── MAIN PAGE ──────────────────────────────────────────────── */
-export default function PasswordRequests() {
-  const { user, passwordRequests, loadPasswordRequests } = useUser(); // ✅ from context
+export default function Password_Requests() {
+  const { user, passwordRequests, loadPasswordRequests } = useUser();
   const { messageContext, setMessageContext } = useContext(MessageContext);
 
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -438,10 +229,9 @@ export default function PasswordRequests() {
 
   const clearMsg = useCallback(() => setMessageContext(""), []);
 
-  // ✅ Load real data on mount
   useEffect(() => {
     loadPasswordRequests();
-  }, [loadPasswordRequests]);
+  }, []);
 
   useEffect(() => {
     if (!successMsg) return;
@@ -458,21 +248,15 @@ export default function PasswordRequests() {
   const handleCloseActionModal = () =>
     setActionModal({ isOpen: false, mode: null, request: null });
 
-  const handleFinalAction = async (request, newPassword) => {
-    try {
-      if (newPassword) {
-        // TODO: await yourApi.approvePasswordRequest(request.request_id, newPassword)
-        setSuccessMsg(`Password reset approved for ${request.fullname}`);
-      } else {
-        // TODO: await yourApi.rejectPasswordRequest(request.request_id)
-        setSuccessMsg(`Password reset rejected for ${request.fullname}`);
-      }
-      await loadPasswordRequests(); // ✅ reload from context after action
-    } catch (err) {
-      console.error("Action failed:", err);
-      setSuccessMsg("Something went wrong. Please try again.");
-    }
-  };
+  // ← Refresh + success message after modal action
+  const handleRefresh = useCallback(async (mode) => {
+    await loadPasswordRequests();
+    setSuccessMsg(
+      mode === "approve"
+        ? "Password reset approved successfully!"
+        : "Password reset rejected successfully!"
+    );
+  }, [loadPasswordRequests]);
 
   return (
     <section className="con_main grid grid-cols-1 sm:grid-cols-[12fr_30fr_58fr]
@@ -511,13 +295,11 @@ export default function PasswordRequests() {
         <Db_Header notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
       </div>
 
-
-
       {/* MAIN CONTENT */}
       <main className="col-start-1 md:col-start-2 row-start-2 md:row-span-2 col-span-full conb bg-white overflow-hidden rounded-2xl">
         <div className="h-full overflow-y-auto rounded-2xl">
           <PasswordRequestTable
-            requests={passwordRequests}  
+            requests={passwordRequests}
             onApprove={handleApprove}
             onReject={handleReject}
           />
@@ -532,19 +314,17 @@ export default function PasswordRequests() {
         <Notif_Modal isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
       )}
 
+      {/* ← FIXED: onRefresh na lang, wala nang onHandleOpenModal */}
       <Action_Confirmation_Modal
         isOpen={actionModal.isOpen}
         onClose={handleCloseActionModal}
         actionMode={actionModal.mode}
         request={actionModal.request}
-        onHandleOpenModal={handleFinalAction}
+        onRefresh={() => handleRefresh(actionModal.mode)}
       />
 
       {successMsg && <FloatSuccessMsg txt={successMsg} clearMsg={() => setSuccessMsg("")} />}
       {messageContext && <FloatSuccessMsg txt={messageContext} clearMsg={clearMsg} />}
     </section>
-
-
-
   );
 }

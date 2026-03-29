@@ -197,6 +197,25 @@ export const updateUser = async (user_id, userData) => {
 };
 
 
+
+export const updateUserPassword = async (user_id, hashedPassword) => {
+  try {
+    const { rows } = await query(
+      `UPDATE users 
+       SET password_hash = $1
+       WHERE user_id = $2
+       RETURNING *`,
+      [hashedPassword, user_id] 
+    );
+    return rows[0];
+  } catch (err) {
+    console.log(`MODELS: Error Updating Password ${err}`);
+    throw err;
+  }
+};
+
+
+
 export const updateFirstTimeLogin = async (user_id, first_time_login) => {
   try {
     const { rows } = await query(

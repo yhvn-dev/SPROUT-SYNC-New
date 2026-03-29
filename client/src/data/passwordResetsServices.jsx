@@ -1,4 +1,3 @@
-// data/passwordResetsServices.js
 import api from '../utils/api.js'; 
 
 export const requestPasswordReset = async (login) => {
@@ -18,4 +17,12 @@ export const fetchPasswordRequestsPending = async () => {
   return response.data;
 };
 
+export const approvePasswordReset = async (request_id, password) => {
+  const response = await api.patch(`/pw/patch/reset/${request_id}/approve`, { password });
+  return response.data;
+};
 
+export const rejectPasswordReset = async (request_id) => {
+  const response = await api.patch(`/pw/patch/reset/${request_id}/reject`);
+  return response.data;
+};

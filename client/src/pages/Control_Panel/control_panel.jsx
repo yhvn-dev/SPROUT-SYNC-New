@@ -159,8 +159,10 @@ function Control_panel() {
             </div>
           </div>
 
+
+
           {/* SPROUT-SYNC MONITORING */}
-          <div className="conb bg-white rounded-3xl p-7 shadow-lg border border-gray-50 hover:shadow-xl transition-all mb-6">
+          <div className="hidden conb bg-white rounded-3xl p-7 shadow-lg border border-gray-50 hover:shadow-xl transition-all mb-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--ptl-greend)] to-[var(--ptl-greene)] flex items-center justify-center shadow-md">

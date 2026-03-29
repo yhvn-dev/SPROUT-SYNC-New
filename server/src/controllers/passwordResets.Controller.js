@@ -1,8 +1,9 @@
 import * as resetModel from "../models/passwordResetModels.js";
 import * as userModel from "../models/userModels.js";
 import bcrypt from "bcrypt";
-import crypto from "crypto";
+// ← crypto removed, hindi na kailangan
 
+/* ================= REQUEST PASSWORD RESET (User) ================= */
 export const requestPasswordReset = async (req, res) => {
   try {
     const { login } = req.body;
@@ -10,7 +11,7 @@ export const requestPasswordReset = async (req, res) => {
 
     const user = await userModel.getUserByUsernameOrEmail(login);
     if (!user) return res.status(404).json({ message: "User not found" });
-
+    
     const existing = await resetModel.checkExistingRequest(user.user_id);
     if (existing) {
       return res.status(400).json({
@@ -30,7 +31,7 @@ export const requestPasswordReset = async (req, res) => {
   }
 };
 
-// Admin gets all pending requests
+/* ================= GET PENDING REQUESTS (Admin) ================= */
 export const getPendingRequests = async (req, res) => {
   try {
     const requests = await resetModel.getPendingResetRequests();
@@ -41,7 +42,7 @@ export const getPendingRequests = async (req, res) => {
   }
 };
 
-// Admin gets all requests (full history)
+/* ================= GET ALL REQUESTS (Admin) ================= */
 export const getAllRequests = async (req, res) => {
   try {
     const requests = await resetModel.getAllResetRequests();
@@ -52,40 +53,66 @@ export const getAllRequests = async (req, res) => {
   }
 };
 
-// Admin resets password
+
+
+
+/* ================= APPROVE & RESET PASSWORD (Admin) ================= */
 export const resetPasswordByAdmin = async (req, res) => {
   try {
     const { request_id } = req.params;
+    const { password } = req.body; // ← galing sa modal ng admin
 
-    // Get request record — hindi na kailangan ng user_id from body
+    // Validation
+    if (!password || password.trim() === "") {
+      return res.status(400).json({ message: "Password is required." });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters." });
+    }
+
     const resetRequest = await resetModel.getResetRequestById(request_id);
     if (!resetRequest) return res.status(404).json({ message: "Request not found" });
 
-    // Check if still pending
     if (resetRequest.status !== "Pending") {
       return res.status(400).json({ message: "Request is no longer pending" });
     }
 
     const { user_id } = resetRequest;
 
-    // Generate cryptographically secure temp password
-    const tempPassword = crypto.randomBytes(6).toString("hex");
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
-
-    // Update user password + force first_time_login
-    await userModel.updatePassword(user_id, hashedPassword);
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await userModel.updateUserPassword(user_id, hashedPassword);
     await userModel.updateFirstTimeLogin(user_id, true);
+    await resetModel.completeResetRequest(request_id); // status → "Completed"
 
-    // Mark request as completed
-    await resetModel.completeResetRequest(request_id);
-
-    res.status(200).json({
-      message: "Password reset successfully",
-      temp_password: tempPassword // ipapakita sa admin
-    });
+    res.status(200).json({ message: "Password reset successfully." });
 
   } catch (err) {
     console.error("Error resetting password:", err);
     res.status(500).json({ message: "Error resetting password" });
+  }
+};
+
+
+
+
+/* ================= REJECT PASSWORD RESET (Admin) ================= */
+export const rejectPasswordReset = async (req, res) => {
+  try {
+    const { request_id } = req.params;
+
+    const resetRequest = await resetModel.getResetRequestById(request_id);
+    if (!resetRequest) return res.status(404).json({ message: "Request not found" });
+
+    if (resetRequest.status !== "Pending") {
+      return res.status(400).json({ message: "Request is no longer pending" });
+    }
+
+    await resetModel.rejectResetRequest(request_id); // status → "Rejected"
+
+    res.status(200).json({ message: "Request rejected successfully." });
+
+  } catch (err) {
+    console.error("Error rejecting request:", err);
+    res.status(500).json({ message: "Error rejecting request" });
   }
 };

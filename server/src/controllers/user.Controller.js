@@ -2,7 +2,8 @@ import * as userModels from "../models/userModels.js";
 import * as authModels from "../models/authModels.js";
 import { getDeviceInfo } from "../utils/getDeviceInfo.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens.js";
-import { updateFirstTimeLogin } from "../models/userModels.js";
+import { updateFirstTimeLogin,updateUserPassword } from "../models/userModels.js";
+
 
 import bcrypt from "bcrypt";
 
@@ -278,6 +279,40 @@ export const updateUser = async (req, res) => {
 };
 
 
+
+
+// controllers/userController.js (or passwordController.js)
+
+export const handleUpdateUserPassword = async (req, res) => {
+  try {
+    const { user_id } = req.params;
+    const { password } = req.body;
+
+    // Validation
+    if (!password || password.trim() === "") {
+      return res.status(400).json({ message: "Password is required." });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters." });
+    }
+
+    const updatedUser = await updateUserPassword(user_id, password);
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    return res.status(200).json({
+      message: "Password updated successfully.",
+      user: updatedUser,
+    });
+
+  } catch (err) {
+    console.log(`CONTROLLER: Error updating password ${err}`);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
 
 
 

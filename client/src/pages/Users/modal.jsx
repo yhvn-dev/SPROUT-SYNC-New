@@ -235,9 +235,8 @@ export function Modal({
                     >
                       <option value="">Select Role</option>
                       <option value="admin">Admin</option>
-                      <option value="staff">Staff</option>       {/* ✅ keep if needed */}
-                      <option value="farmer">Farmer</option>     {/* ✅ updated */}
-                      {/* ❌ REMOVED: <option value="viewer">Viewer</option> */}
+                      <option value="farmer">Farmer</option>  
+               
                     </select>
                     {errors.role && <h6 className="text-red-600 text-sm mt-1">{errors.role}</h6>}
                   </div>

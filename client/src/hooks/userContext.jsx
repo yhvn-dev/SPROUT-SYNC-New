@@ -6,15 +6,11 @@ export const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [passwordRequests, setPasswordRequests] = useState([]); 
+  const [passwordRequests, setPasswordRequests] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [skippedRegister, setSkippedRegister] = useState(false);
 
-  useEffect(() => {
-    loadUser();
-    loadPasswordRequests();
-  }, []);
-
+  
   async function loadUser() {
     try {
       const loggedUser = await userService.fetchLoggedUser();
@@ -26,7 +22,7 @@ export function UserProvider({ children }) {
 
   const loadPasswordRequests = useCallback(async () => {
     try {
-      const res = await passwordRequestService.fetchPasswordRequestsAll()
+      const res = await passwordRequestService.fetchPasswordRequestsAll();
       setPasswordRequests(res);
     } catch (err) {
       console.error("Error fetching password requests:", err);
@@ -34,6 +30,13 @@ export function UserProvider({ children }) {
   }, []);
 
 
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken"); 
+    if (!token) return; 
+
+    loadUser();
+    loadPasswordRequests();
+  }, []);
 
   return (
     <UserContext.Provider
@@ -44,9 +47,9 @@ export function UserProvider({ children }) {
         setAllUsers,
         skippedRegister,
         setSkippedRegister,
-        passwordRequests,      
+        passwordRequests,
         setPasswordRequests,
-        loadPasswordRequests,  
+        loadPasswordRequests,
       }}
     >
       {children}
