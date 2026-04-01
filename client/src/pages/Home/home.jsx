@@ -1,5 +1,5 @@
 import { useState, useEffect, Suspense, lazy } from 'react';
-import { Menu, X, ArrowBigDown } from 'lucide-react';
+import { Menu, X,Download } from 'lucide-react';
 import { Load_Logo } from "../../components/logo";
 import { Link } from "react-router-dom";
 import { Header } from "../../components/header";
@@ -19,8 +19,7 @@ import {
   Farm_Info_Skeleton,
   BenefitSection_Skeleton,
   Footer_Skeleton,
-  Logo_Page_Skeleton,
-  Dashboard_Skeleton
+  Logo_Page_Skeleton
 } from '../../components/skeletons';
 
 import "./home.css";
@@ -70,7 +69,7 @@ export function InstallButton() {
       onClick={handleInstall}
       className="cursor-pointer hover:bg-[var(--sancgd)] flex items-center fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 
       px-4 py-3 md:px-6 md:py-4 rounded-full bg-[var(--sancgb)] text-white shadow-lg hover:shadow-xl transition-all text-sm md:text-base">
-      <ArrowBigDown className='mr-2 md:mr-4 w-5 h-5 md:w-6 md:h-6' />
+      <Download className='mr-2 md:mr-4 w-5 h-5 md:w-6 md:h-6' />
       <span className="hidden sm:inline">Install SproutSync</span>
       <span className="sm:hidden">Install</span>
     </button>
