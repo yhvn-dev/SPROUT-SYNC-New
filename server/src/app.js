@@ -14,7 +14,7 @@ import plantRoutes from "./routes/ProtectedRoutes/plant.Routes.js"
 import passwordResetPublicRoutes from "./routes/UnprotectedRoutes/passwordReset.public.Routes.js"
 import passwordResetPrivateRoutes from "./routes/ProtectedRoutes/passwordReset.private.Routes.js"
 
-
+  
 // ===== CORE =====
 import express from "express";
 import cors from "cors";
@@ -40,7 +40,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ===== CORS =====
 app.use(cors({
-  origin: process.env.DEV_URL || "http://localhost:3000",
+  origin: process.env.ORIGIN_URL || "http://localhost:3000",
   credentials: true
 }))
 
@@ -90,7 +90,7 @@ const server = http.createServer(app);
 // =====================================================
 export const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.DEV_URL  || "http://localhost:3000",
+    origin: process.env.ORIGIN_URL  || "http://localhost:3000",
     credentials: true}
 });
 

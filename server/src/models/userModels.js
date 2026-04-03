@@ -45,6 +45,12 @@ export const getUsers = async () => {
 };
 
 
+export const getUserById = async (user_id) => {
+  const { rows } = await query("SELECT * FROM users WHERE user_id = $1", [user_id]);
+  return rows[0];
+};
+
+
 export const getUserByUsernameOrEmail = async (login) => {
   const result = await query(
     `SELECT * FROM users 

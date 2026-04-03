@@ -26,3 +26,11 @@ export const rejectPasswordReset = async (request_id) => {
   const response = await api.patch(`/pw/patch/reset/${request_id}/reject`);
   return response.data;
 };
+
+
+export const deletePasswordResetRequest = async (request_id) => {
+  const response = await api.delete(`/pw/delete/reset-request/${request_id}`);
+  return response.data;
+};
+
+

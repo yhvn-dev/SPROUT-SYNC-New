@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback, useContext } from "react";
-import { Menu, KeyRound, Search, Check, X, Clock,  } from "lucide-react";
+import { Menu, KeyRound, Search, Check, X, Clock } from "lucide-react";
 import { Sidebar } from "../../components/sidebar";
 import { Db_Header } from "../../components/db_header";
 import { useUser } from "../../hooks/userContext.jsx";
@@ -8,20 +8,18 @@ import { LogoutModal } from "../../components/logoutModal.jsx";
 import { Notif_Modal } from "../../components/notifModal.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
 import { MessageContext } from "../../hooks/messageHooks.jsx";
-import Action_Confirmation_Modal from "./action_confirmation_modal.jsx"; // ← i-adjust yung path
-
-
+import Action_Confirmation_Modal from "./action_confirmation_modal.jsx";
 
 
 /* ── STATUS BADGE ───────────────────────────────────────────── */
 function StatusBadge({ status }) {
   const styles = {
-    Pending:  "bg-yellow-100 text-yellow-700",
+    Pending: "bg-yellow-100 text-yellow-700",
     Completed: "bg-green-100 text-green-700",
     Rejected: "bg-red-100 text-red-700",
   };
   const icons = {
-    Pending:  <Clock size={11} />,
+    Pending: <Clock size={11} />,
     Completed: <Check size={11} />,
     Rejected: <X size={11} />,
   };
@@ -32,8 +30,9 @@ function StatusBadge({ status }) {
   );
 }
 
+
 /* ── PASSWORD REQUEST TABLE ─────────────────────────────────── */
-function PasswordRequestTable({ requests, onApprove, onReject }) {
+function PasswordRequestTable({ requests, onApprove, onReject, onDelete }) {
   const [searchValue, setSearchValue] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
 
@@ -122,9 +121,17 @@ function PasswordRequestTable({ requests, onApprove, onReject }) {
                         </button>
                       </>
                     ) : (
-                      <span className="text-xs text-gray-400 italic">
-                        {r.completed_at ? new Date(r.completed_at).toLocaleDateString() : "—"}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400 italic">
+                          {r.completed_at ? new Date(r.completed_at).toLocaleDateString() : "—"}
+                        </span>
+                        <button
+                          onClick={() => onDelete(r)}
+                          className="cursor-pointer text-xs px-2.5 py-1 rounded-md bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-600 shadow hover:shadow-md transition"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     )}
                   </div>
                 </td>
@@ -141,6 +148,7 @@ function PasswordRequestTable({ requests, onApprove, onReject }) {
           </div>
         )}
       </div>
+
 
       {/* ── MOBILE ────────────────────────────────────────── */}
       <div className="md:hidden">
@@ -181,7 +189,8 @@ function PasswordRequestTable({ requests, onApprove, onReject }) {
             <p className="text-xs text-gray-400 mt-1">
               Requested: {new Date(r.requested_at).toLocaleDateString()}
             </p>
-            {r.status === "Pending" && (
+
+            {r.status === "Pending" ? (
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => onApprove(r)}
@@ -194,6 +203,18 @@ function PasswordRequestTable({ requests, onApprove, onReject }) {
                   className="cursor-pointer flex-1 text-xs px-2.5 py-1.5 rounded-md bg-[var(--color-danger-a)] text-white shadow hover:shadow-md transition"
                 >
                   Reject
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between mt-3">
+                <span className="text-xs text-gray-400 italic">
+                  {r.completed_at ? new Date(r.completed_at).toLocaleDateString() : "—"}
+                </span>
+                <button
+                  onClick={() => onDelete(r)}
+                  className="cursor-pointer text-xs px-2.5 py-1.5 rounded-md bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-600 shadow hover:shadow-md transition"
+                >
+                  Delete
                 </button>
               </div>
             )}
@@ -211,6 +232,7 @@ function PasswordRequestTable({ requests, onApprove, onReject }) {
     </>
   );
 }
+
 
 /* ── MAIN PAGE ──────────────────────────────────────────────── */
 export default function Password_Requests() {
@@ -245,16 +267,20 @@ export default function Password_Requests() {
   const handleReject = (r) =>
     setActionModal({ isOpen: true, mode: "reject", request: r });
 
+  const handleDelete = (r) =>
+    setActionModal({ isOpen: true, mode: "delete", request: r });
+
   const handleCloseActionModal = () =>
     setActionModal({ isOpen: false, mode: null, request: null });
 
-  // ← Refresh + success message after modal action
   const handleRefresh = useCallback(async (mode) => {
     await loadPasswordRequests();
     setSuccessMsg(
       mode === "approve"
         ? "Password reset approved successfully!"
-        : "Password reset rejected successfully!"
+        : mode === "reject"
+        ? "Password reset rejected successfully!"
+        : "Request deleted successfully!"
     );
   }, [loadPasswordRequests]);
 
@@ -302,6 +328,7 @@ export default function Password_Requests() {
             requests={passwordRequests}
             onApprove={handleApprove}
             onReject={handleReject}
+            onDelete={handleDelete}
           />
         </div>
       </main>
@@ -314,7 +341,6 @@ export default function Password_Requests() {
         <Notif_Modal isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
       )}
 
-      {/* ← FIXED: onRefresh na lang, wala nang onHandleOpenModal */}
       <Action_Confirmation_Modal
         isOpen={actionModal.isOpen}
         onClose={handleCloseActionModal}

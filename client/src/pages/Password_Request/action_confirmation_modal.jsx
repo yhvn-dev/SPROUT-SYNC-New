@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, ShieldCheck, ShieldX } from "lucide-react";
+import { X, ShieldCheck, ShieldX, Trash2 } from "lucide-react";
 import { useState } from "react";
 import * as passwordResetService from "../../data/passwordResetsServices";
 import { Eye, EyeOff } from "lucide-react";
@@ -47,6 +47,8 @@ function Action_Confirmation_Modal({
   if (!isOpen || !request) return null;
 
   const isApprove = actionMode === "approve";
+  const isReject  = actionMode === "reject";
+  const isDelete  = actionMode === "delete";
 
   const handleClose = () => {
     setStep("confirm");
@@ -56,24 +58,28 @@ function Action_Confirmation_Modal({
     onClose();
   };
 
-
-
-
   // ── CONFIRM BUTTON (Step 1)
   const handleConfirm = async () => {
     if (isApprove) {
       setStep("password");
-    } else {   
-      try {
-        setLoading(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      if (isReject) {
         await passwordResetService.rejectPasswordReset(request.request_id);
-        onRefresh?.(); 
-        handleClose();
-      } catch (err) {
-        console.error("Error rejecting request:", err);
-      } finally {
-        setLoading(false);
+      } else if (isDelete) {
+        await passwordResetService.deletePasswordResetRequest(request.request_id);
       }
+
+      onRefresh?.();
+      handleClose();
+    } catch (err) {
+      console.error("Error processing request:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,7 +101,7 @@ function Action_Confirmation_Modal({
     try {
       setLoading(true);
       await passwordResetService.approvePasswordReset(request.request_id, newPassword);
-      onRefresh?.(); 
+      onRefresh?.();
       handleClose();
     } catch (err) {
       console.error("Error approving request:", err);
@@ -104,6 +110,40 @@ function Action_Confirmation_Modal({
       setLoading(false);
     }
   };
+
+  // ── ICON & COLORS per mode
+  const iconBg  = isApprove ? "bg-[var(--sage-lighter)]" : isDelete ? "bg-orange-50" : "bg-red-50";
+  const icon    = isApprove
+    ? <ShieldCheck size={24} color="var(--sancgb)" />
+    : isDelete
+    ? <Trash2 size={24} className="text-orange-500" />
+    : <ShieldX size={24} className="text-red-500" />;
+
+  const confirmBtnClass = isApprove
+    ? "bg-[var(--sancgb)] hover:bg-[var(--sancgd)]"
+    : isDelete
+    ? "bg-orange-500 hover:bg-orange-600"
+    : "bg-red-500 hover:bg-red-600";
+
+  const confirmBtnLabel = loading
+    ? "Processing..."
+    : isApprove
+    ? "Yes, Proceed"
+    : isDelete
+    ? "Yes, Delete"
+    : "Yes, Reject";
+
+  const modalTitle = isApprove
+    ? "Approve Password Reset"
+    : isDelete
+    ? "Delete Request"
+    : "Reject Password Reset";
+
+  const modalDesc = isApprove
+    ? "Proceeding will allow you to set a new password for this user."
+    : isDelete
+    ? "This will permanently delete this request record. This action cannot be undone."
+    : "This will reject the user's password reset request. They will need to submit a new one.";
 
   return (
     <AnimatePresence>
@@ -135,14 +175,11 @@ function Action_Confirmation_Modal({
             {step === "confirm" && (
               <>
                 <div className="flex items-center gap-4 mb-5">
-                  <div className={`p-3 rounded-xl ${isApprove ? "bg-[var(--sage-lighter)]" : "bg-red-50"}`}>
-                    {isApprove
-                      ? <ShieldCheck size={24} color="var(--sancgb)" />
-                      : <ShieldX size={24} className="text-red-500" />
-                    }
+                  <div className={`p-3 rounded-xl ${iconBg}`}>
+                    {icon}
                   </div>
                   <h2 className="text-xl font-semibold text-gray-900">
-                    {isApprove ? "Approve Password Reset" : "Reject Password Reset"}
+                    {modalTitle}
                   </h2>
                 </div>
 
@@ -154,9 +191,7 @@ function Action_Confirmation_Modal({
                 </div>
 
                 <p className="text-sm text-gray-500 mb-6">
-                  {isApprove
-                    ? "Proceeding will allow you to set a new password for this user."
-                    : "This will reject the user's password reset request. They will need to submit a new one."}
+                  {modalDesc}
                 </p>
 
                 <div className="flex justify-end gap-3">
@@ -169,13 +204,9 @@ function Action_Confirmation_Modal({
                   <button
                     onClick={handleConfirm}
                     disabled={loading}
-                    className={`cursor-pointer px-5 py-2.5 rounded-xl text-white font-medium text-sm transition-colors disabled:opacity-50
-                      ${isApprove
-                        ? "bg-[var(--sancgb)] hover:bg-[var(--sancgd)]"
-                        : "bg-red-500 hover:bg-red-600"
-                      }`}
+                    className={`cursor-pointer px-5 py-2.5 rounded-xl text-white font-medium text-sm transition-colors disabled:opacity-50 ${confirmBtnClass}`}
                   >
-                    {loading ? "Processing..." : isApprove ? "Yes, Proceed" : "Yes, Reject"}
+                    {confirmBtnLabel}
                   </button>
                 </div>
               </>
@@ -253,5 +284,6 @@ function Action_Confirmation_Modal({
     </AnimatePresence>
   );
 }
+
 
 export default Action_Confirmation_Modal;

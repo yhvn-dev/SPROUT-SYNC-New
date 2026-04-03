@@ -76,3 +76,16 @@ export const rejectResetRequest = async (request_id) => {
   );
   return result.rows[0];
 };
+
+
+  
+
+export const deleteResetRequest = async (request_id) => {
+  const result = await query(
+    `DELETE FROM password_reset_requests
+     WHERE request_id = $1
+     RETURNING *`,
+    [request_id]
+  );
+  return result.rows[0] || null;
+};
