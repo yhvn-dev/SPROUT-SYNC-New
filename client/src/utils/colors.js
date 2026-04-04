@@ -338,3 +338,50 @@ export const getIconByType = (type) => {
       return Clock;
   }
 };
+
+
+
+
+
+export const passwordResetStatus = {
+  PENDING: "Pending",
+  COMPLETED: "Completed",
+};
+
+export const passwordResetStatusStyles = {
+  light: {
+    Pending: {
+      badge: "bg-yellow-100 text-yellow-700 border border-yellow-200",
+      dot: "bg-yellow-400",
+      icon: "text-yellow-500",
+    },
+    Completed: {
+      badge: "bg-green-100 text-green-700 border border-green-200",
+      dot: "bg-green-400",
+      icon: "text-green-500",
+    },
+  },
+  dark: {
+    Pending: {
+      badge: "bg-yellow-900/40 text-yellow-300 border border-yellow-700",
+      dot: "bg-yellow-400",
+      icon: "text-yellow-400",
+    },
+    Completed: {
+      badge: "bg-green-900/40 text-green-300 border border-green-700",
+      dot: "bg-green-400",
+      icon: "text-green-400",
+    },
+  },
+};
+
+export const getPasswordResetStatusStyle = (status, isDark = false) => {
+  const theme = isDark ? "dark" : "light";
+  return passwordResetStatusStyles[theme][status] ?? {
+    badge: isDark
+      ? "bg-gray-800 text-gray-400 border border-gray-600"
+      : "bg-gray-100 text-gray-600 border border-gray-200",
+    dot: "bg-gray-400",
+    icon: isDark ? "text-gray-400" : "text-gray-400",
+  };
+};

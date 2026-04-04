@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState, useCallback, useContext } from "react";
-import { Menu, KeyRound, Search, Check, X, Clock } from "lucide-react";
+import { getPasswordResetStatusStyle, passwordResetStatus } from "../../utils/colors.js";
+import { useDarkMode } from "../../hooks/useDarkmode.jsx";
+import { Menu, KeyRound, Search, Check, Clock } from "lucide-react";
 import { Sidebar } from "../../components/sidebar";
 import { Db_Header } from "../../components/db_header";
 import { useUser } from "../../hooks/userContext.jsx";
@@ -11,20 +13,19 @@ import { MessageContext } from "../../hooks/messageHooks.jsx";
 import Action_Confirmation_Modal from "./action_confirmation_modal.jsx";
 
 
+/* ── REUSABLE TEXT COLOR HELPER ─────────────────────────────── */
+const cellText = (isDark) => isDark ? "text-white" : "text-[#027c68]";
+
+
 /* ── STATUS BADGE ───────────────────────────────────────────── */
-function StatusBadge({ status }) {
-  const styles = {
-    Pending: "bg-yellow-100 text-yellow-700",
-    Completed: "bg-green-100 text-green-700",
-    Rejected: "bg-red-100 text-red-700",
-  };
+function StatusBadge({ status, isDark }) {
+  const styles = getPasswordResetStatusStyle(status, isDark);
   const icons = {
-    Pending: <Clock size={11} />,
-    Completed: <Check size={11} />,
-    Rejected: <X size={11} />,
+    Pending:   <Clock size={11} className={styles.icon} />,
+    Completed: <Check size={11} className={styles.icon} />,
   };
   return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${styles[status] ?? "bg-gray-100 text-gray-600"}`}>
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${styles.badge}`}>
       {icons[status]} {status}
     </span>
   );
@@ -32,8 +33,8 @@ function StatusBadge({ status }) {
 
 
 /* ── PASSWORD REQUEST TABLE ─────────────────────────────────── */
-function PasswordRequestTable({ requests, onApprove, onReject, onDelete }) {
-  const [searchValue, setSearchValue] = useState("");
+function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark }) {
+  const [searchValue, setSearchValue]   = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
 
   const filtered = requests.filter((r) => {
@@ -49,9 +50,9 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete }) {
     <>
       {/* ── DESKTOP ───────────────────────────────────────── */}
       <div className="hidden md:flex flex-col h-full">
-        <div className="bg-white w-full p-4 flex items-center justify-start">
+        <div className="conb rounded-2xl bg-white w-full p-4 flex items-center justify-start">
           <div className="w-1/2">
-            <span className="text-3xl font-bold text-[var(--metal-dark5)]">Password Requests</span>
+            <span className="text-3xl font-bold text-[var(--metal-dark5)] ">Password Requests</span>
           </div>
           <div className="flex items-center justify-end w-1/2 gap-2">
             <div className="relative">
@@ -72,12 +73,11 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete }) {
               <option value="All">All Status</option>
               <option value="Pending">Pending</option>
               <option value="Completed">Completed</option>
-              <option value="Rejected">Rejected</option>
             </select>
           </div>
         </div>
 
-        <table className="w-full overflow-y-auto">
+        <table className="w-full overflow-y-auto conb rounded-2xl">
           <thead className="bg-[var(--sancgb)]">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-semibold text-[var(--main-white)] uppercase tracking-wider">Full Name</th>
@@ -88,24 +88,24 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete }) {
               <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--main-white)] uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
+          
           <tbody className="divide-y divide-gray-200">
             {filtered.map((r, index) => (
               <tr
                 key={r.request_id}
-                className={`hover:bg-[#E8F3ED] transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
-              >
-                <td className="px-4 py-3 text-sm font-medium text-[#027c68]">{r.fullname}</td>
-                <td className="px-4 py-3 text-sm font-medium text-[#027c68]">{r.username}</td>
-                <td className="px-4 py-3 text-sm font-medium text-[#027c68]">{r.email}</td>
-                <td className="px-4 py-3 text-sm font-medium text-[#027c68] text-center">
+                className={`conb hover:bg-[#E8F3ED] transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                <td className={`px-4 py-3 text-sm font-medium ${cellText(isDark)}`}>{r.fullname}</td>
+                <td className={`px-4 py-3 text-sm font-medium ${cellText(isDark)}`}>{r.username}</td>
+                <td className={`px-4 py-3 text-sm font-medium ${cellText(isDark)}`}>{r.email}</td>
+                <td className={`px-4 py-3 text-sm font-medium text-center ${cellText(isDark)}`}>
                   {new Date(r.requested_at).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <StatusBadge status={r.status} />
+                  <StatusBadge status={r.status} isDark={isDark} />
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center justify-center gap-2">
-                    {r.status === "Pending" ? (
+                    {r.status === passwordResetStatus.PENDING ? (
                       <>
                         <button
                           onClick={() => onApprove(r)}
@@ -171,7 +171,6 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete }) {
             <option value="All">All Status</option>
             <option value="Pending">Pending</option>
             <option value="Completed">Completed</option>
-            <option value="Rejected">Rejected</option>
           </select>
         </div>
 
@@ -181,16 +180,17 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete }) {
             className="border-b border-gray-200 p-4 hover:bg-[#E8F3ED] transition-colors"
           >
             <div className="flex items-center justify-between mb-1">
-              <p className="text-sm font-semibold text-[#027c68]">{r.fullname}</p>
-              <StatusBadge status={r.status} />
+              {/* ✅ mobile texts din */}
+              <p className={`text-sm font-semibold ${cellText(isDark)}`}>{r.fullname}</p>
+              <StatusBadge status={r.status} isDark={isDark} />
             </div>
-            <p className="text-xs text-gray-500">@{r.username}</p>
-            <p className="text-xs text-gray-500">{r.email}</p>
+            <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>@{r.username}</p>
+            <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>{r.email}</p>
             <p className="text-xs text-gray-400 mt-1">
               Requested: {new Date(r.requested_at).toLocaleDateString()}
             </p>
 
-            {r.status === "Pending" ? (
+            {r.status === passwordResetStatus.PENDING ? (
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => onApprove(r)}
@@ -238,11 +238,12 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete }) {
 export default function Password_Requests() {
   const { user, passwordRequests, loadPasswordRequests } = useUser();
   const { messageContext, setMessageContext } = useContext(MessageContext);
+  const isDark = useDarkMode();
 
-  const [logoutOpen, setLogoutOpen] = useState(false);
+  const [logoutOpen, setLogoutOpen]   = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [notifOpen, setNotifOpen] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
+  const [notifOpen, setNotifOpen]     = useState(false);
+  const [successMsg, setSuccessMsg]   = useState("");
   const [actionModal, setActionModal] = useState({
     isOpen: false,
     mode: null,
@@ -261,14 +262,9 @@ export default function Password_Requests() {
     return () => clearTimeout(t);
   }, [successMsg]);
 
-  const handleApprove = (r) =>
-    setActionModal({ isOpen: true, mode: "approve", request: r });
-
-  const handleReject = (r) =>
-    setActionModal({ isOpen: true, mode: "reject", request: r });
-
-  const handleDelete = (r) =>
-    setActionModal({ isOpen: true, mode: "delete", request: r });
+  const handleApprove = (r) => setActionModal({ isOpen: true, mode: "approve", request: r });
+  const handleReject  = (r) => setActionModal({ isOpen: true, mode: "reject",  request: r });
+  const handleDelete  = (r) => setActionModal({ isOpen: true, mode: "delete",  request: r });
 
   const handleCloseActionModal = () =>
     setActionModal({ isOpen: false, mode: null, request: null });
@@ -276,11 +272,9 @@ export default function Password_Requests() {
   const handleRefresh = useCallback(async (mode) => {
     await loadPasswordRequests();
     setSuccessMsg(
-      mode === "approve"
-        ? "Password reset approved successfully!"
-        : mode === "reject"
-        ? "Password reset rejected successfully!"
-        : "Request deleted successfully!"
+      mode === "approve" ? "Password reset approved successfully!"
+      : mode === "reject" ? "Password reset rejected successfully!"
+      : "Request deleted successfully!"
     );
   }, [loadPasswordRequests]);
 
@@ -291,7 +285,6 @@ export default function Password_Requests() {
       overflow-y-auto md:overflow-hidden
       relative bg-gradient-to-br from-[#E8F3ED] to-[#C4DED0]">
 
-      {/* MOBILE HAMBURGER */}
       <button
         onClick={() => setSidebarOpen(true)}
         className="menu_button md:hidden fixed top-4 left-4 z-50 bg-white p-2.5 rounded-lg shadow-lg"
@@ -299,29 +292,18 @@ export default function Password_Requests() {
         <Menu size={22} className="text-[#027c68]" />
       </button>
 
-      {/* MOBILE OVERLAY */}
       {sidebarOpen && (
-        <div
-          className="md:hidden fixed inset-0 bg-black/50 z-40"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* SIDEBAR */}
       <aside className={`${sidebarOpen ? "fixed inset-y-0 left-0 w-64 z-50" : "hidden"} md:static md:block`}>
-        <Sidebar
-          user={user}
-          setLogoutOpen={setLogoutOpen}
-          setSidebarOpen={setSidebarOpen}
-        />
+        <Sidebar user={user} setLogoutOpen={setLogoutOpen} setSidebarOpen={setSidebarOpen} />
       </aside>
 
-      {/* HEADER */}
       <div className="col-start-1 col-span-full md:col-start-2">
         <Db_Header notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
       </div>
 
-      {/* MAIN CONTENT */}
       <main className="col-start-1 md:col-start-2 row-start-2 md:row-span-2 col-span-full conb bg-white overflow-hidden rounded-2xl">
         <div className="h-full overflow-y-auto rounded-2xl">
           <PasswordRequestTable
@@ -329,17 +311,13 @@ export default function Password_Requests() {
             onApprove={handleApprove}
             onReject={handleReject}
             onDelete={handleDelete}
+            isDark={isDark}
           />
         </div>
       </main>
 
-      {/* MODALS */}
-      {logoutOpen && (
-        <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
-      )}
-      {notifOpen && (
-        <Notif_Modal isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
-      )}
+      {logoutOpen && <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />}
+      {notifOpen  && <Notif_Modal isOpen={notifOpen}  onClose={() => setNotifOpen(false)} />}
 
       <Action_Confirmation_Modal
         isOpen={actionModal.isOpen}
@@ -349,7 +327,7 @@ export default function Password_Requests() {
         onRefresh={() => handleRefresh(actionModal.mode)}
       />
 
-      {successMsg && <FloatSuccessMsg txt={successMsg} clearMsg={() => setSuccessMsg("")} />}
+      {successMsg    && <FloatSuccessMsg txt={successMsg}    clearMsg={() => setSuccessMsg("")} />}
       {messageContext && <FloatSuccessMsg txt={messageContext} clearMsg={clearMsg} />}
     </section>
   );

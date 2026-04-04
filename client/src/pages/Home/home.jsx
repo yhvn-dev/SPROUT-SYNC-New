@@ -25,39 +25,63 @@ import {
 import "./home.css";
 
 
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    window.__deferredInstallPrompt = e;
+    console.log("✅ Install prompt saved globally");
+  });
+}
+
+
 export function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (window.location.hostname === 'localhost') {
+    if (window.__deferredInstallPrompt) {
+      setDeferredPrompt(window.__deferredInstallPrompt);
       setVisible(true);
     }
 
     const handler = (e) => {
       e.preventDefault();
+      window.__deferredInstallPrompt = e;
       setDeferredPrompt(e);
       setVisible(true);
       console.log("🔥 beforeinstallprompt fired");
     };
 
     window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+
+    const handleAppInstalled = () => {
+      window.__deferredInstallPrompt = null;
+      setDeferredPrompt(null);
+      setVisible(false);
+      console.log("✅ App installed successfully");
+    };
+
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
   }, []);
 
   const handleInstall = async () => {
-    if (!deferredPrompt) {
-      return;
-  }
-
-
+    if (!deferredPrompt) return;
 
     deferredPrompt.prompt();
     const choice = await deferredPrompt.userChoice;
 
     if (choice.outcome === "accepted") {
-      console.log("User installed SproutSync");
+      console.log("✅ User installed SproutSync");
+    } else {
+      console.log("❌ User dismissed install prompt");
     }
+
+    window.__deferredInstallPrompt = null;
     setDeferredPrompt(null);
     setVisible(false);
   };
@@ -75,6 +99,8 @@ export function InstallButton() {
     </button>
   );
 }
+
+
 
 
 function Home() {

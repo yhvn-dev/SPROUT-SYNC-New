@@ -4,7 +4,6 @@ import { useState } from "react";
 import * as passwordResetService from "../../data/passwordResetsServices";
 import { Eye, EyeOff } from "lucide-react";
 
-/* ── PASSWORD INPUT ─────────────────────────────────────────── */
 function PasswordInput({ value, onChange, placeholder = "Enter new password" }) {
   const [show, setShow] = useState(false);
   return (
@@ -21,23 +20,13 @@ function PasswordInput({ value, onChange, placeholder = "Enter new password" }) 
         onClick={() => setShow((p) => !p)}
         className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-gray-100 transition"
       >
-        {show
-          ? <EyeOff size={16} color="var(--sancgb)" />
-          : <Eye size={16} color="var(--sancgb)" />
-        }
+        {show ? <EyeOff size={16} color="var(--sancgb)" /> : <Eye size={16} color="var(--sancgb)" />}
       </button>
     </div>
   );
 }
 
-/* ── MAIN MODAL ─────────────────────────────────────────────── */
-function Action_Confirmation_Modal({
-  isOpen,
-  onClose,
-  actionMode,
-  request,
-  onRefresh,
-}) {
+function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRefresh }) {
   const [step, setStep] = useState("confirm");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -64,17 +53,15 @@ function Action_Confirmation_Modal({
       setStep("password");
       return;
     }
-
     try {
       setLoading(true);
-
       if (isReject) {
         await passwordResetService.rejectPasswordReset(request.request_id);
       } else if (isDelete) {
         await passwordResetService.deletePasswordResetRequest(request.request_id);
       }
-
-      onRefresh?.();
+      // ✅ await muna ang refresh bago isara ang modal
+      await onRefresh?.();
       handleClose();
     } catch (err) {
       console.error("Error processing request:", err);
@@ -97,11 +84,11 @@ function Action_Confirmation_Modal({
       setPasswordError("Passwords do not match.");
       return;
     }
-
     try {
       setLoading(true);
       await passwordResetService.approvePasswordReset(request.request_id, newPassword);
-      onRefresh?.();
+      // ✅ await muna ang refresh bago isara ang modal
+      await onRefresh?.();
       handleClose();
     } catch (err) {
       console.error("Error approving request:", err);
@@ -111,9 +98,8 @@ function Action_Confirmation_Modal({
     }
   };
 
-  // ── ICON & COLORS per mode
-  const iconBg  = isApprove ? "bg-[var(--sage-lighter)]" : isDelete ? "bg-orange-50" : "bg-red-50";
-  const icon    = isApprove
+  const iconBg = isApprove ? "bg-[var(--sage-lighter)]" : isDelete ? "bg-orange-50" : "bg-red-50";
+  const icon   = isApprove
     ? <ShieldCheck size={24} color="var(--sancgb)" />
     : isDelete
     ? <Trash2 size={24} className="text-orange-500" />
@@ -127,16 +113,13 @@ function Action_Confirmation_Modal({
 
   const confirmBtnLabel = loading
     ? "Processing..."
-    : isApprove
-    ? "Yes, Proceed"
-    : isDelete
-    ? "Yes, Delete"
+    : isApprove ? "Yes, Proceed"
+    : isDelete  ? "Yes, Delete"
     : "Yes, Reject";
 
   const modalTitle = isApprove
     ? "Approve Password Reset"
-    : isDelete
-    ? "Delete Request"
+    : isDelete ? "Delete Request"
     : "Reject Password Reset";
 
   const modalDesc = isApprove
@@ -161,7 +144,6 @@ function Action_Confirmation_Modal({
           exit={{ scale: 0.95, opacity: 0 }}
           transition={{ duration: 0.2 }}
         >
-          {/* Close Button */}
           <button
             onClick={handleClose}
             className="absolute top-5 right-5 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
@@ -170,17 +152,12 @@ function Action_Confirmation_Modal({
           </button>
 
           <div className="p-8">
-
-            {/* ── STEP 1: CONFIRM ─────────────────────────── */}
+            {/* ── STEP 1: CONFIRM */}
             {step === "confirm" && (
               <>
                 <div className="flex items-center gap-4 mb-5">
-                  <div className={`p-3 rounded-xl ${iconBg}`}>
-                    {icon}
-                  </div>
-                  <h2 className="text-xl font-semibold text-gray-900">
-                    {modalTitle}
-                  </h2>
+                  <div className={`p-3 rounded-xl ${iconBg}`}>{icon}</div>
+                  <h2 className="text-xl font-semibold text-gray-900">{modalTitle}</h2>
                 </div>
 
                 <div className="bg-[var(--sage-lighter)] rounded-xl p-4 mb-5 space-y-1 border border-[var(--sage-medium)]">
@@ -190,9 +167,7 @@ function Action_Confirmation_Modal({
                   <p className="text-sm text-gray-500">{request.email}</p>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-6">
-                  {modalDesc}
-                </p>
+                <p className="text-sm text-gray-500 mb-6">{modalDesc}</p>
 
                 <div className="flex justify-end gap-3">
                   <button
@@ -212,7 +187,7 @@ function Action_Confirmation_Modal({
               </>
             )}
 
-            {/* ── STEP 2: SET PASSWORD (approve only) ─────── */}
+            {/* ── STEP 2: SET PASSWORD (approve only) */}
             {step === "password" && (
               <>
                 <div className="flex items-center gap-4 mb-5">
@@ -227,36 +202,22 @@ function Action_Confirmation_Modal({
 
                 <div className="space-y-3 mb-5">
                   <div>
-                    <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">
-                      New Password
-                    </label>
+                    <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">New Password</label>
                     <PasswordInput
                       value={newPassword}
-                      onChange={(e) => {
-                        setNewPassword(e.target.value);
-                        setPasswordError("");
-                      }}
+                      onChange={(e) => { setNewPassword(e.target.value); setPasswordError(""); }}
                       placeholder="Enter new password"
                     />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">
-                      Confirm Password
-                    </label>
+                    <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">Confirm Password</label>
                     <PasswordInput
                       value={confirmPassword}
-                      onChange={(e) => {
-                        setConfirmPassword(e.target.value);
-                        setPasswordError("");
-                      }}
+                      onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(""); }}
                       placeholder="Re-enter new password"
                     />
                   </div>
-
-                  {passwordError && (
-                    <p className="text-red-500 text-xs mt-1">{passwordError}</p>
-                  )}
+                  {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
                 </div>
 
                 <div className="flex justify-end gap-3">
@@ -277,13 +238,11 @@ function Action_Confirmation_Modal({
                 </div>
               </>
             )}
-
           </div>
         </motion.div>
       </motion.div>
     </AnimatePresence>
   );
 }
-
 
 export default Action_Confirmation_Modal;
