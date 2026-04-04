@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Droplet, ChevronDown, ChevronUp, Sprout, Calendar, TrendingUp,  Clock, CheckCircle2 , LayoutDashboard, Plug, FileText, User, LogOut, Flower2 } from 'lucide-react';
+import { Droplet, ChevronDown, ChevronUp, Sprout, Calendar, TrendingUp,  Clock, CheckCircle2 , Lock,LayoutDashboard, Plug, FileText, User, LogOut, Flower2 } from 'lucide-react';
 
 export default function Dashboard_Mockup() {
   const [expandedZones, setExpandedZones] = useState({});
@@ -108,9 +108,14 @@ export default function Dashboard_Mockup() {
               <SidebarItem icon={FileText} label="Batch History" />
               <SidebarItem icon={Plug} label="Control Panel" />
               <SidebarItem icon={Flower2} label="Plants" />
+              <SidebarItem icon={Lock} label="Password Requests" /> 
               <SidebarItem icon={LogOut} label="Logout" />
             </nav>
           </aside>
+
+
+            
+               
 
           {/* CONTENT */}
           <main className="flex-1 p-2 md:p-6 overflow-y-auto">
