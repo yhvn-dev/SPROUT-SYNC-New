@@ -141,7 +141,7 @@ function Control_panel() {
                 <>
                   <Wifi size={24} className="text-green-500" />
                   <div>
-                    <p className="text-sm font-semibold text-[var(--color-dark-blue)] m-0">ESP32 Connected</p>
+                    <p className="text-sm font-semibold text-[var(--color-dark-blue)] m-0">Watering System Online</p>
                     <p className="text-xs text-[var(--gray_1--)] m-0 mt-1">Last updated: Just now</p>
                   </div>
                   <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_currentColor]" />
@@ -150,7 +150,7 @@ function Control_panel() {
                 <>
                   <WifiOff size={24} className="text-red-500" />
                   <div>
-                    <p className="text-sm font-semibold text-[var(--color-dark-blue)] m-0">ESP32 Disconnected</p>
+                    <p className="text-sm font-semibold text-[var(--color-dark-blue)] m-0">Watering System Offline</p>
                     <p className="text-xs text-[var(--gray_1--)] m-0 mt-1">Trying to reconnect...</p>
                   </div>
                   <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_currentColor]" />
