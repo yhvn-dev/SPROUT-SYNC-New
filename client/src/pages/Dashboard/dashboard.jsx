@@ -176,7 +176,7 @@ export function Dashboard() {
                   <>
                     <Wifi size={24} className="text-green-500 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm sm:text-base font-semibold text-[var(--color-dark-blue)] truncate m-0">ESP32 Connected</p>
+                      <p className="text-sm sm:text-base font-semibold text-[var(--color-dark-blue)] truncate m-0">Watering System Online</p>
                       <p className="text-xs text-[var(--gray_1--)] mt-1 truncate m-0">Last updated: Just now</p>
                     </div>
                     <div className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_currentColor] flex-shrink-0" />
@@ -185,7 +185,7 @@ export function Dashboard() {
                   <>
                     <WifiOff size={24} className="text-red-500 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm sm:text-base font-semibold text-[var(--color-dark-blue)] truncate m-0">ESP32 Disconnected</p>
+                      <p className="text-sm sm:text-base font-semibold text-[var(--color-dark-blue)] truncate m-0">Watering System Offline</p>
                       <p className="text-xs text-[var(--gray_1--)] mt-1 truncate m-0">Trying to reconnect...</p>
                     </div>
                     <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_currentColor] flex-shrink-0" />
