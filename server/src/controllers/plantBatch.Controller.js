@@ -270,9 +270,9 @@ export const updatePlantBatch = async (req, res) => {
 
     const updatedBatch = await plantBatchModels.updatePlantBatch(batchData, batch_id);
 
-    // ✅ Pass batch_id — force evaluate yung specific batch na na-update
+    
     await notifyBatchCreated(updatedBatch, "update");
-     await updatePastHarvestStatus(batch_id, true)
+    await updatePastHarvestStatus(batch_id, true)
     res.status(200).json(updatedBatch);
 
 

@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken"
 import * as userModels from "../models/userModels.js" 
 
-
-
 export const verifyAccessToken = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
@@ -10,10 +8,11 @@ export const verifyAccessToken = async (req, res, next) => {
 
     if (!token) return res.sendStatus(401);
 
-    // Synchronously verify token
     const payload = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
-    // Fetch user from DB
+  
+
+    // Normal users — query sa DB
     const userFromDB = await userModels.selectUser(payload.user_id);
     if (!userFromDB) return res.status(404).json({ message: "User not found" });
 
@@ -29,10 +28,6 @@ export const verifyAccessToken = async (req, res, next) => {
   }
 };
 
-
-
-
-
 export const verifyRefreshToken = (req, res, next) => {
   try {
     const refreshToken = req.cookies.refreshToken;
@@ -47,7 +42,6 @@ export const verifyRefreshToken = (req, res, next) => {
 
       req.user = user;
       next();
-      
     });
 
   } catch (err) {
@@ -55,4 +49,3 @@ export const verifyRefreshToken = (req, res, next) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
-

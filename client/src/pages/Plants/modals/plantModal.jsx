@@ -207,56 +207,7 @@ export function PlantModal({isOpen, onClose, plantModalMode, selectedPlant, setS
                       />
                     </FieldGroup>
 
-               
-
-                    {/* Moisture Preview Bar */}
-                    <div className="border border-gray-800 rounded-xl px-4 py-3">
-                      <div className="flex justify-between items-center mb-2.5">
-                        <span className="text-[10px] font-medium uppercase tracking-widest">
-                          Moisture Range Preview
-                        </span>
-                        <span className="text-[11px] font-semibold text-green-400">
-                          {minVal}% – {maxVal}%
-                        </span>
-                      </div>
-                      <div className="relative h-2 rounded-full overflow-hidden shadow-lg bg-[var(--main-white)]">
-                        {[25, 50, 75].map((t) => (
-                          <div
-                            key={t}
-                            className="absolute top-0 w-px h-full bg-white/5"
-                            style={{ left: `${t}%` }}
-                          />
-                        ))}
-                        <motion.div
-                          animate={{ left: `${barLeft}%`, width: `${barWidth}%` }}
-                          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                          className="absolute top-0 h-full bg-gradient-to-r from-green-700 to-green-400 rounded-full shadow-[0_0_8px_rgba(74,222,128,0.4)]"
-                        />
-                      </div>
-                      <div className="flex justify-between mt-1.5 text-[10px] text-gray-600">
-                        <span>0%</span>
-                        <span>50%</span>
-                        <span>100%</span>
-                      </div>
-                    </div>
-
-                    {/* General Error */}
-                    <AnimatePresence>
-                      {formErrors.general && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="flex items-center gap-2 bg-red-500/8 border border-red-500/20 rounded-lg px-3 py-2.5 text-sm text-red-300">
-                          <AlertTriangle size={13} className="text-red-400 shrink-0" />
-                          {formErrors.general}
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
                   </div>
-
-
-
 
 
 

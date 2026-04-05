@@ -288,9 +288,13 @@ function Home() {
                   <ul className="flex w-full sm:w-[10rem] md:w-[12rem] h-auto sm:h-[6rem] md:h-[8rem] p-3 sm:p-4 bg-white/20 backdrop-blur-3xl border border-white/30 rounded-xl sm:rounded-2xl shadow-lg">
                     <div className="absolute inset-0 bg-gray-200/20 rounded-xl sm:rounded-2xl" />
                     <div className="relative z-10">
-                      <h1 className="text-base sm:text-lg md:text-[2.617rem)] text-white font-semibold mb-1">
-                        100% Automated
-                      </h1>
+                      <div className='flex items-center justify-start gap-2'>                     
+                         <h1 className="text-base sm:text-lg md:text-[2.617rem)] text-white font-semibold mb-1">
+                          Automated
+                        </h1>
+                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      </div>
+                      
                       <p className="text-[0.55rem] sm:text-[0.6rem] md:text-[0.65rem] font-extralight text-gray-100">
                         Smart monitoring, healthier plants. Automatic watering, effortless care
                       </p>

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { X, Sprout, Calendar, TrendingUp, Trash2, AlertCircle, Leaf } from 'lucide-react';
 import * as batchModels from "../../../data/batchesData"
 
-export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, selectedBatch, setSuccessMsg, reloadBatches,reloadTrays}) {
+export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, selectedBatch, setSuccessMsg, reloadBatches, reloadTrays }) {
    
   const [formData, setFormData] = useState({
     tray_id: 0,
@@ -97,36 +97,29 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
   };
 
   const handleMarkAsHarvested = async () => {
-  if (!harvestConfirm) {
-    setHarvestConfirm(true);
-    return;
-  }
+    if (!harvestConfirm) {
+      setHarvestConfirm(true);
+      return;
+    }
 
-  try {
-    setHarvestLoading(true);
-    await batchModels.updateHarvestStatus(
-      selectedBatch.batch_id,
-      "Harvested"
-    );
+    try {
+      setHarvestLoading(true);
+      await batchModels.updateHarvestStatus(
+        selectedBatch.batch_id,
+        "Harvested"
+      );
 
-    setSuccessMsg(`${selectedBatch.plant_name} is Marked as Harvested`);
-    onClose();
-    reloadBatches();
+      setSuccessMsg(`${selectedBatch.plant_name} is Marked as Harvested`);
+      onClose();
+      reloadBatches();
 
-  } catch (error) {
-    console.error("Error marking batch as harvested:", error);
-  } finally {
-    setHarvestLoading(false);
-    setHarvestConfirm(false);
-  }
-};
-
-
-
-
-
-  
-  
+    } catch (error) {
+      console.error("Error marking batch as harvested:", error);
+    } finally {
+      setHarvestLoading(false);
+      setHarvestConfirm(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -181,8 +174,16 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
     setFormData({ ...formData, [e.target.name]: e.target.value });
   }
 
-
   const isAlreadyHarvested = selectedBatch?.harvest_status === "Harvested";
+
+  // ✅ FIX: Derive display values based on mode
+  const displayBatchNumber = batchModalMode === "insert"
+    ? selectedTray?.tray_number
+    : selectedBatch?.batch_number;
+
+  const displayPlantName = batchModalMode === "insert"
+    ? selectedTray?.plant
+    : selectedBatch?.plant_name;
 
   return (
     <motion.div
@@ -214,7 +215,7 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
                 <p className="text-xs mt-0.5 text-[#5A8F73]">
                   {batchModalMode === "delete" 
                     ? `Are you sure you want to delete this batch? This will move "${selectedBatch?.plant_name}" to Batch History. Only delete if the batch is already harvested or no longer active.`
-                    : `Manage plant batch for [${selectedBatch.batch_number}] ${selectedBatch?.plant_name}`}
+                    : `Manage plant batch for [${displayBatchNumber}] ${displayPlantName}`}
                 </p>
               </div>
             </div>
@@ -375,7 +376,7 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
 
               </div>
 
-              {/* ── MARK AS HARVESTED (update mode only) ── */}
+              {/* MARK AS HARVESTED (update mode only) */}
               {batchModalMode === "update" && (
                 <div className="pt-1">
                   {isAlreadyHarvested ? (
@@ -428,10 +429,6 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
                 </div>
               )}
 
-
-
-
-
               {/* FOOTER */}
               <div className="flex items-center justify-between pt-4 border-t border-[#C4DED0]">
                 {batchModalMode !== "delete" && (
@@ -456,8 +453,4 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
       </motion.div>
     </motion.div>
   );
-
-
-
-
 }

@@ -86,7 +86,7 @@ function App() {
               <PlantDataProvider>
                 <ValveProvider>
                   <ESP32Provider>
-                    <ProtectedRoute allowedRoles={['admin', 'farmer']}>
+                    <ProtectedRoute allowedRoles={['admin', 'farmer','superadmin']}>
                       <Dashboard />
                     </ProtectedRoute>
                   </ESP32Provider>
@@ -99,7 +99,7 @@ function App() {
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <ProtectedRoute allowedRoles={['admin','superadmin']}>
                     <Manage_Plants/>
                   </ProtectedRoute>
                 </ValveProvider>
@@ -111,7 +111,7 @@ function App() {
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <ProtectedRoute allowedRoles={['admin','superadmin']}>
                     <Users />
                   </ProtectedRoute>
                 </ValveProvider>
@@ -123,7 +123,7 @@ function App() {
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin', 'farmer']}>
+                  <ProtectedRoute allowedRoles={['admin', 'farmer','superadmin']}>
                     <Analytics />
                   </ProtectedRoute>
                 </ValveProvider>
@@ -135,7 +135,7 @@ function App() {
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin']}>
+                  <ProtectedRoute allowedRoles={['admin','superadmin']}>
                     <Batch_History />
                   </ProtectedRoute>
                 </ValveProvider>
@@ -170,6 +170,9 @@ function App() {
               </PlantDataProvider>
             </MessagesProvider>
           }/>
+
+
+
 
 
           <Route path='/password_request' element={

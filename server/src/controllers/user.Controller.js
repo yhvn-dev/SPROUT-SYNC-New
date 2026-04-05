@@ -1,12 +1,12 @@
+import dotenv from "dotenv";
+dotenv.config({ path: "./.env" });
 import * as userModels from "../models/userModels.js";
 import * as authModels from "../models/authModels.js";
 import { getDeviceInfo } from "../utils/getDeviceInfo.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/tokens.js";
 import { updateFirstTimeLogin,updateUserPassword } from "../models/userModels.js";
 
-
 import bcrypt from "bcrypt";
-
 
 
 /* ================= GET ALL USERS ================= */
@@ -20,6 +20,7 @@ export const getUsers = async (req, res) => {
     res.status(500).json({ message: "CONTROLLER: Error Getting Users" });
   }
 };
+
 
 /* ================= USER COUNTS ================= */
 export const getUsersCount = async (req, res) => {
@@ -63,12 +64,14 @@ export const getUserByStatus = async (req, res) => {
 };
 
 
+
+
 /* ================= LOGIN ================= */
 export const loginUser = async (req, res) => {
   try {
     const { loginInput, password } = req.body;
-    const user = await userModels.findUser(loginInput)
 
+    const user = await userModels.findUser(loginInput);
 
     if (!user) {
       return res.status(404).json({ message: "User Not Found" });
@@ -115,7 +118,7 @@ export const loginUser = async (req, res) => {
         role: user.role,
         status: user.status,
         created_at: user.created_at,
-        first_time_login:user.first_time_login
+        first_time_login: user.first_time_login,
       },
     });
   } catch (err) {
@@ -124,10 +127,7 @@ export const loginUser = async (req, res) => {
       .status(500)
       .json({ message: "CONTROLLER Error Getting Credentials" });
   }
-
 };
-
-
 
 
 
@@ -316,10 +316,24 @@ export const handleUpdateUserPassword = async (req, res) => {
 
 
 
+
 /* ================= DELETE USER ================= */
 export const deleteUser = async (req, res) => {
   try {
     const userId = req.params.user_id;
+
+    const targetUser = await userModels.selectUser(userId);
+    if (!targetUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (targetUser.role === "admin" && req.user.role !== "superadmin") {
+      return res.status(403).json({ message: "Cannot delete an admin account" });
+    }
+
+    if (targetUser.user_id === req.user.user_id) {
+      return res.status(403).json({ message: "Cannot delete your own account" });
+    }
 
     const deletedTokens = await authModels.deleteAllRefreshToken(userId);
     const user = await userModels.deleteUser(userId);
@@ -327,12 +341,9 @@ export const deleteUser = async (req, res) => {
     res.status(200).json({
       message: "CONTROLLER: User and tokens deleted successfully",
       user,
-      deletedTokensCount: deletedTokens
-        ? deletedTokens.length || 0
-        : 0,
+      deletedTokensCount: deletedTokens ? deletedTokens.length || 0 : 0,
     });
 
-    console.log("CONTROLLER: User Deleted Successfully");
   } catch (err) {
     console.error("CONTROLLER: Error deleting user", err);
     res.status(500).json({ message: "Error deleting user", err });
