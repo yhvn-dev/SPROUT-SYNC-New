@@ -52,7 +52,7 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark 
       <div className="hidden md:flex flex-col h-full">
         <div className="conb rounded-2xl bg-white w-full p-4 flex items-center justify-start">
           <div className="w-1/2">
-            <span className="text-3xl font-bold text-[var(--metal-dark5)] ">Password Requests</span>
+            <span className="pw-req-label text-3xl font-bold text-[var(--metal-dark5)]">Password Requests</span>
           </div>
           <div className="flex items-center justify-end w-1/2 gap-2">
             <div className="relative">
@@ -88,12 +88,13 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark 
               <th className="px-4 py-3 text-center text-xs font-semibold text-[var(--main-white)] uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
-          
+
           <tbody className="divide-y divide-gray-200">
             {filtered.map((r, index) => (
               <tr
                 key={r.request_id}
-                className={`conb hover:bg-[#E8F3ED] transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
+                className={`conb hover:bg-[#E8F3ED] transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50"}`}
+              >
                 <td className={`px-4 py-3 text-sm font-medium ${cellText(isDark)}`}>{r.fullname}</td>
                 <td className={`px-4 py-3 text-sm font-medium ${cellText(isDark)}`}>{r.username}</td>
                 <td className={`px-4 py-3 text-sm font-medium ${cellText(isDark)}`}>{r.email}</td>
@@ -127,7 +128,7 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark 
                         </span>
                         <button
                           onClick={() => onDelete(r)}
-                          className="cursor-pointer text-xs px-2.5 py-1 rounded-md bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-600 shadow hover:shadow-md transition"
+                          className="cursor-pointer text-xs px-2.5 py-1 rounded-md bg-[var(--color-danger-b)] text-white shadow hover:shadow-md transition"
                         >
                           Delete
                         </button>
@@ -180,7 +181,6 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark 
             className="border-b border-gray-200 p-4 hover:bg-[#E8F3ED] transition-colors"
           >
             <div className="flex items-center justify-between mb-1">
-              {/* ✅ mobile texts din */}
               <p className={`text-sm font-semibold ${cellText(isDark)}`}>{r.fullname}</p>
               <StatusBadge status={r.status} isDark={isDark} />
             </div>
@@ -212,7 +212,7 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark 
                 </span>
                 <button
                   onClick={() => onDelete(r)}
-                  className="cursor-pointer text-xs px-2.5 py-1.5 rounded-md bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-600 shadow hover:shadow-md transition"
+                  className="cursor-pointer text-xs px-2.5 py-1.5 rounded-md bg-[var(--color-danger-b)] text-white shadow hover:shadow-md transition"
                 >
                   Delete
                 </button>

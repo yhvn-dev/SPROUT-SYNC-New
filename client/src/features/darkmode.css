@@ -684,15 +684,13 @@ body.dark .batch_history_table tr:hover{
 body.dark .batch_history_table_mobile_box:hover{
   @apply bg-[var(--metal-dark2)];
 }
-body.dark .batch_history_table::-webkit-scrollbar{
- @apply bg-[var(--metal-dark1)];
+body.dark .pbh_scroll_div::-webkit-scrollbar {
+    @apply bg-[var(--metal-dark1)]; 
 }
-    body.dark .batch_history_table::-webkit-scrollbar{
-        @apply bg-[var(--metal-dark1)];
-    }
-    body.dark .batch_history_table::-webkit-scrollbar-thumb {
-     @apply bg-[var(--metal-dark4)] border-4 border-[var(--metal-dark1)] rounded-2xl;
-    }
+body.dark .pbh_scroll_div::-webkit-scrollbar-thumb {
+    @apply bg-[var(--metal-dark4)] border-4 border-[var(--metal-dark1)] rounded-2xl;
+}
+
     body.dark .batch_table tr:nth-child(odd){
         @apply bg-[var(--metal-dark1)];
     }
@@ -1277,3 +1275,14 @@ body.dark .browser_window_main_container{
             @apply bg-[var(--metal-dark3)] text-[var(--sancgc)];;
         }
         
+        
+/* password resets */
+body.dark .reset_pw_request_form{
+    @apply bg-[var(--metal-dark1)];
+}
+body.dark .password_reset_modal button {
+    @apply px-4 py-2 rounded-lg text-sm font-medium text-white border border-gray-700 hover:bg-white/5 transition-colors;
+}
+body.dark .pw-req-label{
+    @apply text-[var(--main-white)];
+}

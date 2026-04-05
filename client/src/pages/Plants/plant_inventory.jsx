@@ -10,6 +10,10 @@ export function Plant_Inventory({setPlantModal}) {
     const [searchValue, setSearchValue] = useState("");
     const [sortBy, setSortBy] = useState("");
 
+    const lockedPlants = [88, 89, 90];
+
+    const isLocked = (plant_id) =>
+        lockedPlants.includes(plant_id);
 
     const handleOpenAddPlants = () => {
         setPlantModal(prev => {
@@ -47,15 +51,12 @@ export function Plant_Inventory({setPlantModal}) {
         return 0;
     });
 
-
-
-    
   return (
     <>
-      <div className="plant_main_div rounded-2xl  h-full md:h-[95%] overflow-y-auto">
+      <div className="plant_main_div rounded-2xl h-full md:h-[95%] overflow-y-auto">
 
-        <div className="conb hidden md:flex items-center  rounded-2xl justify-center flex-col overflow-x-auto overflow-y-auto">
-         <div className="conb plant_invent_header  bg-white w-full p-4 flex items-center justify-start">
+        <div className="conb hidden md:flex items-center rounded-2xl justify-center flex-col overflow-x-auto overflow-y-auto">
+         <div className="conb plant_invent_header bg-white w-full p-4 flex items-center justify-start">
             <div className="w-1/2">
                 <span className="plants-text text-3xl font-bold text-[var(--metal-dark5)]">Plants Inventory</span>
             </div>
@@ -72,7 +73,6 @@ export function Plant_Inventory({setPlantModal}) {
                     />
                 </div>
 
-
                 <select 
                     value={sortBy} 
                     onChange={(e) => setSortBy(e.target.value)}
@@ -84,8 +84,7 @@ export function Plant_Inventory({setPlantModal}) {
                     <option value="created_at">Date Added</option>
                 </select>
 
-
-                 {user?.role === "admin" && (              
+                {user?.role === "admin" && (              
                     <button
                         onClick={handleOpenAddPlants}
                         className="cursor-pointer
@@ -99,12 +98,8 @@ export function Plant_Inventory({setPlantModal}) {
                         Add Plants
                     </button>
                 )}
-
             </div>
          </div>
-
-
-         
 
           <table className="conb pi_table w-full overflow-y-auto">
             <thead className="bg-[var(--sancgb)] plant_invent_tb_header overflow-y-auto">
@@ -127,7 +122,6 @@ export function Plant_Inventory({setPlantModal}) {
                     Actions
                 </th>         
                 )}   
-          
               </tr>            
             </thead>
 
@@ -151,19 +145,27 @@ export function Plant_Inventory({setPlantModal}) {
                     <td className="px-4 py-3 text-sm font-medium text-[#027c68]">
                        {new Date(p.created_at).toLocaleDateString()}
                     </td>
-                    {user.role === "admin" && (        
-                      <div className="flex items-center justify-center gap-4 mt-2">
-                        <button
-                            onClick={() => handleOpenUpdatePlants(p)}
-                            className="cursor-pointer text-xs px-2.5 py-1 rounded-md bg-[var(--purpluish--)] text-white shadow hover:shadow-md transition">
-                            UPDATE
-                        </button>
-                        <button
-                          onClick={() => handleOpenDeletePlants(p)}
-                          className="cursor-pointer text-xs px-2.5 py-1 rounded-md bg-[var(--color-danger-a)] text-white shadow hover:shadow-md transition">
-                          DELETE
-                        </button>
-                      </div>               
+                    {user?.role === "admin" && (        
+                      <td>
+                        {!isLocked(p.plant_id) ? (
+                          <div className="flex items-center justify-center gap-4">
+                            <button
+                                onClick={() => handleOpenUpdatePlants(p)}
+                                className="cursor-pointer text-xs px-2.5 py-1 rounded-md bg-[var(--purpluish--)] text-white shadow hover:shadow-md transition">
+                                UPDATE
+                            </button>
+                            <button
+                              onClick={() => handleOpenDeletePlants(p)}
+                              className="cursor-pointer text-xs px-2.5 py-1 rounded-md bg-[var(--color-danger-a)] text-white shadow hover:shadow-md transition">
+                              DELETE
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center">
+                            <span className="text-xs text-gray-400 italic">Locked</span>
+                          </div>
+                        )}
+                      </td>
                     )}     
                     
                 </tr>
@@ -173,16 +175,11 @@ export function Plant_Inventory({setPlantModal}) {
         </div>
 
 
-
-
-
-
-
         {/* ── MOBILE LIST ────────────────────────────────────── */}
         <div className="conb md:hidden">
 
             {/* Mobile Search + Sort */}
-            <div className=" p-4 flex flex-col gap-2">
+            <div className="p-4 flex flex-col gap-2">
                 <div className="relative">
                     <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input
@@ -211,9 +208,6 @@ export function Plant_Inventory({setPlantModal}) {
                         Add Plants
                     </button>
                 )}
-
-                                   
-
             </div>
 
           {filteredPlants.map((p, index) => (
@@ -225,8 +219,8 @@ export function Plant_Inventory({setPlantModal}) {
                 <p className="text-sm font-medium text-[#027c68]">Max: {p.moisture_max}%</p>
                 <p className="text-sm font-medium text-[#027c68]">{new Date(p.created_at).toLocaleDateString()}</p>
 
-
-                {user.role === "admin" && (        
+                {user?.role === "admin" && (
+                  !isLocked(p.plant_id) ? (
                     <div className="flex items-end justify-end md:items-center md:justify-center gap-4 mt-2">
                       <button
                           onClick={() => handleOpenUpdatePlants(p)}
@@ -238,18 +232,20 @@ export function Plant_Inventory({setPlantModal}) {
                         className="cursor-pointer text-xs px-2.5 py-1 rounded-md bg-[var(--color-danger-a)] text-white shadow hover:shadow-md transition">
                         DELETE
                       </button>
-                    </div>               
-                 )}
-
-                
+                    </div>
+                  ) : (
+                    <div className="flex items-end justify-end mt-2">
+                      <span className="text-xs text-gray-400 italic">Locked</span>
+                    </div>
+                  )
+                )}
             </div>
           ))}
         </div>
 
-
         {/* ── EMPTY STATE ────────────────────────────────────── */}
         {filteredPlants.length === 0 && (
-          <div className="conb h-full w-full  flex items-center flex-col justify-center  text-gray-500">
+          <div className="conb h-full w-full flex items-center flex-col justify-center text-gray-500">
             <Sprout size={48} className="mx-auto mb-4 opacity-50" />
             <p className="text-lg">No plants found</p>
             <p className="text-sm">Try adjusting your search or filters</p>

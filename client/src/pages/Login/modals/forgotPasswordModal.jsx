@@ -38,7 +38,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-sage-lighter">
+      <div className="conb bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-sage-lighter">
         {/* Header */}
         <div className="p-8 pb-4 border-b border-sage-medium">
           <h2 className="text-2xl font-bold text-sancga mb-2">Forgot Password?</h2>
@@ -59,7 +59,7 @@ function ForgotPasswordModal({ isOpen, onClose }) {
               value={login}
               onChange={(e) => setLogin(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border-2 border-sage-light focus:border-sage focus:ring-4 focus:ring-sage-lighter/50 bg-sage-lighter/50 text-sancga placeholder-sage-medium transition-all duration-200 text-base shadow-sm hover:shadow-md"
-              placeholder="jhunguidef@gmail.com or username"
+              placeholder="sproutsync031@gmail.com or username"
               disabled={isSubmitting}
             />
             {error && (

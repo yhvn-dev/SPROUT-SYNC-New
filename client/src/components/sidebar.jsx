@@ -155,8 +155,7 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen })
             {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Password Requests</p>}
           </NavLink>        
           }
-        
-        
+      
         {/* Device - First time login */}
         {user?.first_time_login && (
           <div className="flex justify-start w-full">
@@ -179,6 +178,9 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen })
           <LogOut strokeWidth={1.5} size={isMobile ? 18 : 18} />
           {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Logout</p>}
         </button>
+
+
+
 
       </div>
     </aside>

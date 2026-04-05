@@ -102,7 +102,7 @@ function Batch_History() {
     setModalOpen(true);
   };
 
-  const growthStages = ["All", "Sprout", "Seedling", "Vegetative", "Budding", "Flowering", "Fruiting", "Ready To Harvest"];
+  const growthStages = ["All", "Sprout", "Seedling", "Vegetative", "Budding", "Flowering", "Fruiting"];
 
   const handleOpenInfosModalBatchHistory = () => {
     setInfoModalPurpose("batch_history");
@@ -168,7 +168,7 @@ function Batch_History() {
               <select
                 value={selectedStage}
                 onChange={(e) => setSelectedStage(e.target.value)}
-                className="...">
+                className="border-[1px] border-[var(--main-white)] ml-4">
                 {growthStages.map(stage => (
                   <option key={stage} value={stage}>{stage}</option>
                 ))}
@@ -177,10 +177,12 @@ function Batch_History() {
             </div>
           </nav>
 
-          <div className="rounded-2xl shadow-lg h-full md:h-[57vh] overflow-y-auto">
 
-            {/* ✅ DESKTOP TABLE */}
-            <div className="hidden md:block overflow-x-auto overflow-y-auto">
+
+
+
+          <div className="pbh_scroll_div rounded-2xl shadow-lg h-full md:h-[57vh] overflow-y-auto">
+            <div className="hidden md:block overflow-x-auto ">
               <table className="w-full overflow-y-auto">
                 <thead className="bg-[var(--sancgb)] overflow-y-auto">
                   <tr>
@@ -291,10 +293,6 @@ function Batch_History() {
                
               const stageColors   = getStageColor(record.growth_stage, isDark);
               const harvestColors = getHarvestStatusColor(record.harvest_status, isDark);
-
-
-
-
 
                 return (
                   <div

@@ -207,37 +207,7 @@ export function PlantModal({isOpen, onClose, plantModalMode, selectedPlant, setS
                       />
                     </FieldGroup>
 
-                    {/* Moisture Row */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <FieldGroup label="Min Moisture %" required icon={<Droplets size={12} />} error={formErrors.moisture_min}>
-                        <input
-                          name="moisture_min"
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={formData.moisture_min}
-                          onChange={handleChange}
-                          placeholder="0 (optional)"
-                          className={`w-full border rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 outline-none transition-colors focus:border-green-500 ${
-                            formErrors.moisture_min ? "border-red-500" : "border-gray-700"
-                          }`}
-                        />
-                      </FieldGroup>
-                      <FieldGroup label="Max Moisture %" required icon={<Droplets size={12} />} error={formErrors.moisture_max}>
-                        <input
-                          name="moisture_max"
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={formData.moisture_max}
-                          onChange={handleChange}
-                          placeholder="100 (optional)"
-                          className={`w-full border rounded-lg px-3 py-2.5 text-sm placeholder-gray-600 outline-none transition-colors focus:border-green-500 ${
-                            formErrors.moisture_max ? "border-red-500" : "border-gray-700"
-                          }`}
-                        />
-                      </FieldGroup>
-                    </div>
+               
 
                     {/* Moisture Preview Bar */}
                     <div className="border border-gray-800 rounded-xl px-4 py-3">
@@ -285,6 +255,11 @@ export function PlantModal({isOpen, onClose, plantModalMode, selectedPlant, setS
                     </AnimatePresence>
                   </div>
 
+
+
+
+
+
                   {/* Footer */}
                   <div className="flex items-center justify-between gap-3 px-6 py-4 mt-3 border-t border-gray-800/60">
                     <span className="text-[11px] text-gray-600">* Required fields</span>
@@ -304,6 +279,10 @@ export function PlantModal({isOpen, onClose, plantModalMode, selectedPlant, setS
                       </button>
                     </div>
                   </div>
+
+
+
+
                 </form>
               )}
             </div>

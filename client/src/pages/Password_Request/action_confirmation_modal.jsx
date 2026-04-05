@@ -3,17 +3,25 @@ import { X, ShieldCheck, ShieldX, Trash2 } from "lucide-react";
 import { useState } from "react";
 import * as passwordResetService from "../../data/passwordResetsServices";
 import { Eye, EyeOff } from "lucide-react";
+import { useDarkMode } from "../../hooks/useDarkmode.jsx";
 
-function PasswordInput({ value, onChange, placeholder = "Enter new password" }) {
+
+
+
+function PasswordInput({ value, onChange, placeholder = "Enter new password", isDark }) {
   const [show, setShow] = useState(false);
   return (
-    <div className="relative">
+    <div className="conb relative">
       <input
         type={show ? "text" : "password"}
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="w-full px-4 py-3 pr-11 border-2 border-gray-200 rounded-xl text-sm focus:border-[var(--sancgb)] focus:outline-none transition-colors"
+        className={`w-full px-4 py-3 pr-11 border-2 rounded-xl text-sm focus:border-[var(--sancgb)] focus:outline-none transition-colors
+          ${isDark
+            ? "bg-gray-800 border-gray-600 text-white placeholder-gray-400"
+            : "bg-white border-gray-200 text-gray-900 placeholder-gray-400"
+          }`}
       />
       <button
         type="button"
@@ -27,6 +35,7 @@ function PasswordInput({ value, onChange, placeholder = "Enter new password" }) 
 }
 
 function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRefresh }) {
+  const isDark = useDarkMode();
   const [step, setStep] = useState("confirm");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -47,7 +56,6 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
     onClose();
   };
 
-  // ── CONFIRM BUTTON (Step 1)
   const handleConfirm = async () => {
     if (isApprove) {
       setStep("password");
@@ -60,7 +68,6 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
       } else if (isDelete) {
         await passwordResetService.deletePasswordResetRequest(request.request_id);
       }
-      // ✅ await muna ang refresh bago isara ang modal
       await onRefresh?.();
       handleClose();
     } catch (err) {
@@ -70,7 +77,6 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
     }
   };
 
-  // ── CONFIRM & APPROVE BUTTON (Step 2)
   const handlePasswordSubmit = async () => {
     if (!newPassword.trim()) {
       setPasswordError("Password is required.");
@@ -87,7 +93,6 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
     try {
       setLoading(true);
       await passwordResetService.approvePasswordReset(request.request_id, newPassword);
-      // ✅ await muna ang refresh bago isara ang modal
       await onRefresh?.();
       handleClose();
     } catch (err) {
@@ -98,18 +103,26 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
     }
   };
 
-  const iconBg = isApprove ? "bg-[var(--sage-lighter)]" : isDelete ? "bg-orange-50" : "bg-red-50";
-  const icon   = isApprove
+  // ── icon background
+  const iconBg = isApprove
+    ? isDark ? "bg-[var(--sage-lighter)]/20" : "bg-[var(--sage-lighter)]"
+    : isDelete
+    ? "bg-[var(--color-danger-b-light)]"
+    : "bg-[var(--color-danger-a-light)]";
+
+  // ── icon element
+  const icon = isApprove
     ? <ShieldCheck size={24} color="var(--sancgb)" />
     : isDelete
-    ? <Trash2 size={24} className="text-orange-500" />
-    : <ShieldX size={24} className="text-red-500" />;
+    ? <Trash2 size={24} color="var(--color-danger-b)" />
+    : <ShieldX size={24} color="var(--color-danger-a)" />;
 
+  // ── confirm button
   const confirmBtnClass = isApprove
     ? "bg-[var(--sancgb)] hover:bg-[var(--sancgd)]"
     : isDelete
-    ? "bg-orange-500 hover:bg-orange-600"
-    : "bg-red-500 hover:bg-red-600";
+    ? "bg-[var(--color-danger-b)] hover:bg-[var(--color-danger-b-dark)]"
+    : "bg-[var(--color-danger-a)] hover:bg-[var(--color-danger-a-dark)]";
 
   const confirmBtnLabel = loading
     ? "Processing..."
@@ -128,6 +141,27 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
     ? "This will permanently delete this request record. This action cannot be undone."
     : "This will reject the user's password reset request. They will need to submit a new one.";
 
+  // ── dark mode styles
+  const modalBg       = isDark ? "bg-gray-900"   : "bg-white";
+  const titleColor    = isDark ? "text-white"     : "text-gray-900";
+  const descColor     = isDark ? "text-gray-400"  : "text-gray-500";
+  const cancelBtn     = isDark
+    ? "text-gray-300 hover:bg-gray-700"
+    : "text-gray-700 hover:bg-gray-100";
+  const closeBtn      = isDark
+    ? "text-gray-400 hover:bg-gray-700"
+    : "text-gray-500 hover:bg-gray-100";
+  const requestCardBg = isDark
+    ? "bg-gray-800 border-gray-600"
+    : "bg-[var(--sage-lighter)] border-[var(--sage-medium)]";
+  const requestLabel  = isDark ? "text-gray-500"  : "text-gray-400";
+  const requestName   = isDark ? "text-[var(--sancgb)]" : "text-[var(--sancgb)]";
+  const requestSub    = isDark ? "text-gray-400"  : "text-gray-500";
+  const backBtn       = isDark
+    ? "text-gray-300 hover:bg-gray-700"
+    : "text-gray-700 hover:bg-gray-100";
+  const labelColor    = isDark ? "text-gray-300"  : "text-[var(--sancgb)]";
+
   return (
     <AnimatePresence>
       <motion.div
@@ -138,7 +172,7 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
         transition={{ duration: 0.2 }}
       >
         <motion.div
-          className="bg-white rounded-2xl shadow-2xl relative w-full max-w-[460px]"
+          className={`password_reset_modal conb rounded-2xl shadow-2xl relative w-full max-w-[460px] ${modalBg}`}
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
@@ -146,9 +180,9 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
         >
           <button
             onClick={handleClose}
-            className="absolute top-5 right-5 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+            className={`absolute top-5 right-5 p-2 rounded-lg transition-colors cursor-pointer ${closeBtn}`}
           >
-            <X size={18} className="text-gray-500" />
+            <X size={18} />
           </button>
 
           <div className="p-8">
@@ -157,22 +191,22 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
               <>
                 <div className="flex items-center gap-4 mb-5">
                   <div className={`p-3 rounded-xl ${iconBg}`}>{icon}</div>
-                  <h2 className="text-xl font-semibold text-gray-900">{modalTitle}</h2>
+                  <h2 className={`text-xl font-semibold ${titleColor}`}>{modalTitle}</h2>
                 </div>
 
-                <div className="bg-[var(--sage-lighter)] rounded-xl p-4 mb-5 space-y-1 border border-[var(--sage-medium)]">
-                  <p className="text-xs text-gray-400 mb-1">Request from</p>
-                  <p className="text-base font-semibold text-[var(--sancgb)]">{request.fullname}</p>
-                  <p className="text-sm text-gray-500">@{request.username}</p>
-                  <p className="text-sm text-gray-500">{request.email}</p>
+                <div className={`reset_pw_request_form rounded-xl p-4 mb-5 space-y-1 border ${requestCardBg}`}>
+                  <p className={`text-xs mb-1 ${requestLabel}`}>Request from</p>
+                  <p className={`text-base font-semibold ${requestName}`}>{request.fullname}</p>
+                  <p className={`text-sm ${requestSub}`}>@{request.username}</p>
+                  <p className={`text-sm ${requestSub}`}>{request.email}</p>
                 </div>
 
-                <p className="text-sm text-gray-500 mb-6">{modalDesc}</p>
+                <p className={`text-sm mb-6 ${descColor}`}>{modalDesc}</p>
 
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={handleClose}
-                    className="cursor-pointer px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium text-sm"
+                    className={`cursor-pointer px-5 py-2.5 rounded-xl transition-colors font-medium text-sm ${cancelBtn}`}
                   >
                     Cancel
                   </button>
@@ -191,40 +225,50 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
             {step === "password" && (
               <>
                 <div className="flex items-center gap-4 mb-5">
-                  <div className="p-3 rounded-xl bg-[var(--sage-lighter)]">
+                  <div className={`p-3 rounded-xl ${isDark ? "bg-[var(--sage-lighter)]/20" : "bg-[var(--sage-lighter)]"}`}>
                     <ShieldCheck size={24} color="var(--sancgb)" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-semibold text-gray-900">Set New Password</h2>
-                    <p className="text-xs text-gray-400 mt-0.5">for {request.fullname}</p>
+                    <h2 className={`text-xl font-semibold ${titleColor}`}>Set New Password</h2>
+                    <p className={`text-xs mt-0.5 ${isDark ? "text-gray-500" : "text-gray-400"}`}>
+                      for {request.fullname}
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-3 mb-5">
                   <div>
-                    <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">New Password</label>
+                    <label className={`block text-sm font-medium mb-1.5 ${labelColor}`}>
+                      New Password
+                    </label>
                     <PasswordInput
                       value={newPassword}
                       onChange={(e) => { setNewPassword(e.target.value); setPasswordError(""); }}
                       placeholder="Enter new password"
+                      isDark={isDark}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[var(--sancgb)] mb-1.5">Confirm Password</label>
+                    <label className={`block text-sm font-medium mb-1.5 ${labelColor}`}>
+                      Confirm Password
+                    </label>
                     <PasswordInput
                       value={confirmPassword}
                       onChange={(e) => { setConfirmPassword(e.target.value); setPasswordError(""); }}
                       placeholder="Re-enter new password"
+                      isDark={isDark}
                     />
                   </div>
-                  {passwordError && <p className="text-red-500 text-xs mt-1">{passwordError}</p>}
+                  {passwordError && (
+                    <p className="text-red-500 text-xs mt-1">{passwordError}</p>
+                  )}
                 </div>
 
                 <div className="flex justify-end gap-3">
                   <button
                     onClick={() => setStep("confirm")}
                     disabled={loading}
-                    className="cursor-pointer px-5 py-2.5 rounded-xl text-gray-700 hover:bg-gray-100 transition-colors font-medium text-sm disabled:opacity-50"
+                    className={`cursor-pointer px-5 py-2.5 rounded-xl transition-colors font-medium text-sm disabled:opacity-50 ${backBtn}`}
                   >
                     Back
                   </button>
@@ -243,6 +287,9 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
       </motion.div>
     </AnimatePresence>
   );
+
 }
+
+
 
 export default Action_Confirmation_Modal;
