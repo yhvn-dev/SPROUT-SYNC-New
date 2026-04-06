@@ -22,9 +22,13 @@ function RegisterDeviceModal({ onClose, userData }) {
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+      console.log("1️⃣ handleRegister called");
+
 
     try {
+          console.log("2️⃣ Getting push token...");
       const pushToken = await getPushToken();
+         console.log("3️⃣ Push token result:", pushToken);
 
       if (!pushToken) {
         console.warn("Push notifications permission denied");
@@ -39,7 +43,9 @@ function RegisterDeviceModal({ onClose, userData }) {
         device_info: JSON.stringify(deviceInfo),
       };
 
+         console.log("4️⃣ Calling registerDevice...");
       await registerDevice(payload);
+       console.log("5️⃣ Registration success!");
 
       setUser(prev => ({ ...prev, first_time_login: false }));
       setIsLoading(false);
