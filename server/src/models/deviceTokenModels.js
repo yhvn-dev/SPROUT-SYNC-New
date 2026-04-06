@@ -1,6 +1,5 @@
 import { query } from "../config/db.js";
 
-
 export const insertDeviceToken = async (
   user_id,
   push_token,
@@ -12,8 +11,9 @@ export const insertDeviceToken = async (
       `
       INSERT INTO device_tokens (user_id, push_token, device_type, device_info)
       VALUES ($1, $2, $3, $4)
-      ON CONFLICT (user_id, push_token)
+      ON CONFLICT (push_token)
       DO UPDATE SET
+        user_id = EXCLUDED.user_id,
         device_type = EXCLUDED.device_type,
         device_info = EXCLUDED.device_info,
         last_active = NOW()
@@ -27,6 +27,8 @@ export const insertDeviceToken = async (
     throw err;
   }
 };
+
+
 
 
 

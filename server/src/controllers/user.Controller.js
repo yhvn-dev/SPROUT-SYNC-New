@@ -131,31 +131,28 @@ export const loginUser = async (req, res) => {
 
 
 
-/* ================= LOGGED USER ================= */
 export const getLoggedUser = async (req, res) => {
   try {
     if (!req.user)
       return res.status(404).json({ message: "User not found" });
 
-      res.json({
-        user_id: req.user.user_id,
-        username: req.user.username,
-        fullname: req.user.fullname,
-        email: req.user.email,
-        phone_number: req.user.phone_number,
-        role: req.user.role,
-        status: req.user.status,
-        first_time_login: req.user.first_time_login,
-      });
+    const freshUser = await userModels.selectUser(req.user.user_id);
+
+    res.json({
+      user_id: req.user.user_id,
+      username: req.user.username,
+      fullname: req.user.fullname,
+      email: req.user.email,
+      phone_number: req.user.phone_number,
+      role: req.user.role,
+      status: req.user.status,
+      first_time_login: freshUser.first_time_login, 
+    });
   } catch (err) {
     console.error("CONTROLLER: Error Fetching Logged User", err);
-    return res
-      .status(500)
-      .json({ message: "Server Error Fetching Users" });
+    return res.status(500).json({ message: "Server Error Fetching Users" });
   }
 };
-
-
 
 
 /* ================= SELECT USER ================= */

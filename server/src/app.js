@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ===== CORS =====
 app.use(cors({
-  origin: process.env.ORIGIN_URL || "http://localhost:3000",
+  origin: process.env.DEV_URL || "http://localhost:3000",
   credentials: true
 }))
 
@@ -79,7 +79,7 @@ app.get("/api/hello", (req, res) => {
 });
 
 // ===== HTTP SERVER =====
-const port = process.env.PORT || 5000;
+const port = process.env.ORIGIN || 5000;
 const server = http.createServer(app);
 
 // =====================================================

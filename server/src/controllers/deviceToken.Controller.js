@@ -3,41 +3,46 @@ import { sendPushNotification } from "../utils/firebaseAdmin.js";
 import { updateFirstTimeLogin } from "../models/userModels.js";
 
 
-  export const registerDevice = async (req, res) => {
+export const registerDevice = async (req, res) => {
+  try {
+    const { user_id, push_token, device_type, device_info } = req.body;
+
+    if (!user_id || !push_token || !device_type) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+    }
+
+    // 1. I-save sa DB
+    const device = await deviceTokenModel.insertDeviceToken(
+      user_id, push_token, device_type, device_info
+    );
+
+    // 2. I-update agad ang first_time_login
+    await updateFirstTimeLogin(user_id, false);
+
     try {
-      const { user_id, push_token, device_type, device_info } = req.body;
-
-      if (!user_id || !push_token || !device_type) {
-        return res.status(400).json({
-          success: false,
-          message: "Missing required fields",
-        });
-      }
-      const device = await deviceTokenModel.insertDeviceToken(
-        user_id,
-        push_token,
-        device_type,
-        device_info
-      );
-
-      console.log("Device successfully inserted:", device);    
       await sendPushNotification(
         push_token,
         "Welcome to Sprout Sync!",
         "Your device is registered successfully"
       );
+    } catch (fcmErr) {
+      console.warn("FCM failed but registration succeeded:", fcmErr.message);
+    }
 
-      await updateFirstTimeLogin(user_id, false);
-      res.status(200).json({
-        success: true,
-        message: "Device registered successfully",
-        device,
-      });
-    } catch (err) {
-      console.error("Error registering device:", err);
-      res.status(500).json({ success: false, message: err.message });
-    }  
-  };
+    res.status(200).json({
+      success: true,
+      message: "Device registered successfully",
+      device,
+    });
+
+  } catch (err) {
+    console.error("Error registering device:", err);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
 
 
 
