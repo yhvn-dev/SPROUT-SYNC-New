@@ -12,31 +12,25 @@ export const getReadings = async (req, res) => {
     const readings = await readingModel.readReadings();
     res.status(200).json(readings);
     console.log("READINGS:", readings);
-
   } catch (err) {
     console.error("CONTROLLER: Error getting readings", err);
     res.status(500).json({ message: "Error getting readings", err });
   }
 };
 
-
 // ===== GET reading by ID =====
 export const getReadingById = async (req, res) => {
   try {
     const { reading_id } = req.params;
     const reading = await readingModel.readReadingById(reading_id);
-    
     if (!reading) return res.status(404).json({ message: "Reading not found" });
     res.status(200).json(reading);
     console.log("READING:", reading);
-
   } catch (err) {
     console.error("CONTROLLER: Error getting reading by ID", err);
     res.status(500).json({ message: "Error getting reading", err });
   }
 };
-
-
 
 // ===== GET readings for last 24 hours =====
 export const getReadingsLast24h = async (req, res) => {
@@ -50,14 +44,10 @@ export const getReadingsLast24h = async (req, res) => {
   }
 };
 
-
-
-
 // ===== GET latest reading per sensor =====
 export const getLatestReadingsPerSensor = async (req, res) => {
   try {
     const readings = await readingModel.readLatestReadingsPerSensor();
-
     res.status(200).json({
       success: true,
       count: readings.length,
@@ -72,7 +62,6 @@ export const getLatestReadingsPerSensor = async (req, res) => {
   }
 };
 
-
 export const getAverageReadings = async (req, res) => {
   try {
     const readings = await readingModel.readAverageMoisture()
@@ -85,14 +74,11 @@ export const getAverageReadings = async (req, res) => {
   }
 };
 
-
 export const getAverageBySensorType = async (req, res) => {
   try {
-    const { sensor_type} = req.params;
+    const { sensor_type } = req.params;
     if (!sensor_type) {
-      return res.status(400).json({
-        message: "sensorType parameter is required"
-      });
+      return res.status(400).json({ message: "sensorType parameter is required" });
     }
     const average = await readingModel.readAverageBySensorType(sensor_type)
     const averageReadings = parseFloat(average).toFixed(1);
@@ -100,18 +86,32 @@ export const getAverageBySensorType = async (req, res) => {
       sensor_type: sensor_type,
       average: Number(averageReadings)
     });
-
     console.log(`AVERAGE (${sensor_type}):`, averageReadings);
   } catch (err) {
     console.error("CONTROLLER: Error getting average by sensor type", err);
-    res.status(500).json({
-      message: "Error getting average sensor reading"
-    });
+    res.status(500).json({ message: "Error getting average sensor reading" });
   }
 };
 
 
-
+// ===== CENTRALIZED notify helper =====
+const notifyAllUsers = async (notifPayload) => {
+  try {
+    const allDevices = await deviceTokenModel.getAllDeviceTokens();
+    const sendPromises = allDevices.map(device =>
+      sendPushNotification(
+        device.push_token,
+        "Sprout Sync Alert",
+        notifPayload.message,
+        notifPayload.type,    
+        notifPayload.status   
+      )
+    );
+    await Promise.allSettled(sendPromises);
+  } catch (err) {
+    console.error("Error sending push notifications:", err);
+  }
+};
 
 export const createReadings = async (req, res) => {
   try {
@@ -128,7 +128,9 @@ export const createReadings = async (req, res) => {
       value: numericValue
     });
 
+    // Determine notification payload based on sensor type
     let notifPayload = null;
+
     if (existingSensor.sensor_type === "moisture") {
       notifPayload = await handleMoistureNotifications(existingSensor, numericValue);
     }
@@ -136,10 +138,9 @@ export const createReadings = async (req, res) => {
     if (existingSensor.sensor_type === "ultra_sonic") {
       notifPayload = await handleUltrasonicNotifications(sensor_id, numericValue);
     }
-    
-    // 🔔 IF MAY ALERT → CREATE ONLY 1 NOTIFICATION IN DB
+
+    // If a notification is triggered, save to DB and send push
     if (notifPayload) {
-      // ✅ Create single notification (not per user)
       await notificationModels.createNotif({
         related_sensor: sensor_id,
         type: notifPayload.type,
@@ -147,15 +148,9 @@ export const createReadings = async (req, res) => {
         message: notifPayload.message
       });
 
-      const devices = await deviceTokenModel.getAllDeviceTokens();
-      for (const device of devices) {
-        await sendPushNotification(
-          device.push_token,
-          "Sprout Sync Alert",
-          notifPayload.message
-        );
-      }
+      await notifyAllUsers(notifPayload);
     }
+
     res.status(201).json(reading);
 
   } catch (error) {
@@ -165,7 +160,7 @@ export const createReadings = async (req, res) => {
 };
 
 
-
+// ===== handlers now ONLY return payload, no push sending inside =====
 
 export const handleMoistureNotifications = async (existingSensor, value) => {
   const { tray_id } = existingSensor;
@@ -179,8 +174,7 @@ export const handleMoistureNotifications = async (existingSensor, value) => {
   );
   if (!selectedTrayGroup) return null;
 
-  const { min_moisture, max_moisture, tray_group_name, group_number } =
-    selectedTrayGroup;
+  const { min_moisture, max_moisture, tray_group_name, group_number } = selectedTrayGroup;
 
   const moisture = Number(value);
   const min = Number(min_moisture);
@@ -190,9 +184,7 @@ export const handleMoistureNotifications = async (existingSensor, value) => {
     return {
       type: "Alert",
       status: "High",
-      message: `💧 [${group_number}] ${tray_group_name} soil is TOO DRY! Needs watering (${moisture.toFixed(
-        1
-      )}%)`
+      message: `💧 [${group_number}] ${tray_group_name} soil is TOO DRY! Needs watering (${moisture.toFixed(1)}%)`
     };
   }
 
@@ -200,17 +192,12 @@ export const handleMoistureNotifications = async (existingSensor, value) => {
     return {
       type: "Alert",
       status: "High",
-      message: `💧 [${group_number}] ${tray_group_name} soil is TOO WET! Do not water (${moisture.toFixed(
-        1
-      )}%)`
+      message: `💧 [${group_number}] ${tray_group_name} soil is TOO WET! Do not water (${moisture.toFixed(1)}%)`
     };
   }
 
   return null;
 };
-
-
-
 
 
 export const handleUltrasonicNotifications = async (sensor_id, value) => {
@@ -234,11 +221,7 @@ export const handleUltrasonicNotifications = async (sensor_id, value) => {
   }
 
   return null;
-
 };
-
-
-
 
 
 // ===== UPDATE a reading =====
@@ -246,12 +229,11 @@ export const updateReadings = async (req, res) => {
   try {
     const { reading_id } = req.params;
     const readingData = req.body;
-    const {sensor_id} = readingData;
+    const { sensor_id } = readingData;
 
     const existingReading = await readingModel.readReadingById(reading_id);
     if (!existingReading) return res.status(404).json({ message: "Reading not found" });
 
-    // ✅ check sensor
     const existingSensor = await sensorModels.readSensorById(sensor_id);
     if (!existingSensor) {
       return res.status(404).json({ message: "Sensor with this id doesn't exist" });
@@ -267,8 +249,6 @@ export const updateReadings = async (req, res) => {
     res.status(500).json({ message: "Error updating reading", err });
   }
 };
-
-
 
 
 // ===== DELETE a reading =====
@@ -291,7 +271,8 @@ export const deleteReadings = async (req, res) => {
 
 
 
-// ===== DELETE a reading =====
+
+// ===== DELETE all readings =====
 export const deleteAllReadings = async (req, res) => {
   try {
     const result = await readingModel.deleteAllReadings();
@@ -304,7 +285,6 @@ export const deleteAllReadings = async (req, res) => {
     res.status(500).json({ message: "Error deleting readings" });
   }
 };
-
 
 
 
@@ -330,4 +310,3 @@ export const removeAllReadingsByType = async (req, res) => {
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-

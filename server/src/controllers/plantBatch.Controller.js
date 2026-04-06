@@ -109,15 +109,17 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
     const parseUTCDate = (dateStr) => {
       if (dateStr instanceof Date) {
         return new Date(Date.UTC(
-          dateStr.getFullYear(),
-          dateStr.getMonth(),
-          dateStr.getDate()
+          dateStr.getUTCFullYear(),  
+          dateStr.getUTCMonth(),
+          dateStr.getUTCDate()
         ));
       }
       const datePart = String(dateStr).split("T")[0];
       const [year, month, day] = datePart.split("-").map(Number);
       return new Date(Date.UTC(year, month - 1, day));
     };
+
+
 
     const pushToAllDevices = async (title, message, type = "info", status = "Low") => {
       const devices = await deviceTokenModel.getAllDeviceTokens();
@@ -139,20 +141,24 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
 
       const expected = harvestDate;
 
+      const diffMs = expected.getTime() - today.getTime();
+      const daysRemaining = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
       let newStatus;
       if (batch.harvested_at || batch.harvest_status === "Harvested") {
         newStatus = "Harvested";
-      } else if (expected.getTime() === today.getTime()) {
+      } else if (daysRemaining === 0) {
         newStatus = "Due Now";
-      } else if (expected.getTime() === tomorrow.getTime()) {
+      } else if (daysRemaining === 1) {
         newStatus = "Due Tomorrow";
-      } else if (expected > today) {
+      } else if (daysRemaining >= 2) {
         newStatus = "Not Ready";
       } else {
         newStatus = "Past Due";
       }
-
       const statusChanged = batch.harvest_status !== newStatus;
+
+
 
       if (statusChanged || forceUpdate) {
         await plantBatchModels.updateHarvestStatus(newStatus, batch.batch_id);
