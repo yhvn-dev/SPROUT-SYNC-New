@@ -140,7 +140,7 @@ export const getLoggedUser = async (req, res) => {
 
     res.json({
       user_id: req.user.user_id,
-      username: req.user.username,
+      username: req.user.username,  
       fullname: req.user.fullname,
       email: req.user.email,
       phone_number: req.user.phone_number,

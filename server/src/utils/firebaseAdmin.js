@@ -15,15 +15,36 @@ if (!admin.apps.length) {
   });
 }
 
+
+
+
 export const sendPushNotification = async (pushToken, title, body, type = "info", status = "Low", data = {}) => {
   try {
-    const dataMessage = {
+    const message = {
       token: pushToken,
-      data: { title, body, type, status, ...data }
+      notification: {
+        title,
+        body,
+      },
+      data: { title, body, type, status, ...data },
+      webpush: {
+        headers: { Urgency: "high" },
+        notification: {
+          title,
+          body,
+          icon: "/favicon.ico",
+        },
+        fcmOptions: {
+          link: "/dashboard"
+        }
+      }
     };
-    const dataResponse = await admin.messaging().send(dataMessage);
-    return { dataResponse };
+
+    const response = await admin.messaging().send(message);
+    console.log("✅ FCM Sent:", response);
+    return response;
   } catch (err) {
     console.error("❌ FCM Error:", err);
+    throw err; // ✅ i-throw na para malaman ng controller
   }
 };
