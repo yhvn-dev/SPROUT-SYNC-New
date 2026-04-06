@@ -33,7 +33,7 @@
       tag: "sprout-sync",
       renotify: true,
       vibrate: [200, 100, 200],
-      data: { url: "/dashboard" },
+      data: { url: "/dashboard" },  
     };
 
     self.registration.showNotification(title, options);

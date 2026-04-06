@@ -121,10 +121,9 @@ export const getPushToken = async () => {
     }
 
     // ✅ Check muna kung naka-register na
-    let registration = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
-  
+    let registration = await navigator.serviceWorker.getRegistration("/service-worker.js");
     if (!registration) {
-      registration = await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      registration = await navigator.serviceWorker.register("/service-worker.js");
     }
 
     await navigator.serviceWorker.ready;
