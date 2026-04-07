@@ -8,6 +8,7 @@ import { Db_Header } from "../../components/db_header";
 import { useUser } from "../../hooks/userContext.jsx";
 import { LogoutModal } from "../../components/logoutModal.jsx";
 import { Notif_Modal } from "../../components/notifModal.jsx";
+import RegisterDeviceModal from "../../pages/Dashboard/modals/registerDeviceModal.jsx"
 import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import Action_Confirmation_Modal from "./action_confirmation_modal.jsx";
@@ -236,11 +237,12 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark 
 
 /* ── MAIN PAGE ──────────────────────────────────────────────── */
 export default function Password_Requests() {
-  const { user, passwordRequests, loadPasswordRequests } = useUser();
+  const { user, passwordRequests, loadPasswordRequests,skippedRegister} = useUser();
   const { messageContext, setMessageContext } = useContext(MessageContext);
   const isDark = useDarkMode();
 
   const [logoutOpen, setLogoutOpen]   = useState(false);
+  const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen]     = useState(false);
   const [successMsg, setSuccessMsg]   = useState("");
@@ -250,11 +252,23 @@ export default function Password_Requests() {
     request: null,
   });
 
-  const clearMsg = useCallback(() => setMessageContext(""), []);
 
+
+  const clearMsg = useCallback(() => setMessageContext(""), []);
   useEffect(() => {
     loadPasswordRequests();
   }, []);
+
+
+  useEffect(() => {
+    if (user?.first_time_login && !skippedRegister) {
+      setRegisterModalVisible(true);
+    } else {
+      setRegisterModalVisible(false);
+    }
+  }, [user?.first_time_login, skippedRegister]);
+
+
 
   useEffect(() => {
     if (!successMsg) return;
@@ -278,6 +292,8 @@ export default function Password_Requests() {
     );
   }, [loadPasswordRequests]);
 
+
+
   return (
     <section className="con_main grid grid-cols-1 sm:grid-cols-[12fr_30fr_58fr]
       grid-rows-[8vh_auto_auto]
@@ -297,7 +313,12 @@ export default function Password_Requests() {
       )}
 
       <aside className={`${sidebarOpen ? "fixed inset-y-0 left-0 w-64 z-50" : "hidden"} md:static md:block`}>
-        <Sidebar user={user} setLogoutOpen={setLogoutOpen} setSidebarOpen={setSidebarOpen} />
+          <Sidebar
+            user={user}
+            setLogoutOpen={setLogoutOpen}
+            setSidebarOpen={setSidebarOpen}
+            setRegisterModalVisible={setRegisterModalVisible}  
+          />
       </aside>
 
       <div className="col-start-1 col-span-full md:col-start-2">
@@ -326,6 +347,14 @@ export default function Password_Requests() {
         request={actionModal.request}
         onRefresh={() => handleRefresh(actionModal.mode)}
       />
+
+
+      {isRegisterModalVisible && (
+        <RegisterDeviceModal
+          userData={user}
+          onClose={() => setRegisterModalVisible(false)}
+        />
+      )}
 
       {successMsg    && <FloatSuccessMsg txt={successMsg}    clearMsg={() => setSuccessMsg("")} />}
       {messageContext && <FloatSuccessMsg txt={messageContext} clearMsg={clearMsg} />}
