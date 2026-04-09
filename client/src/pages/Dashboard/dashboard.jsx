@@ -5,7 +5,7 @@ import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { getHarvestStatusColor, getStageColor,getSensorStatus,getTrayStatusColor} from "../../utils/colors.js";
 import { useDarkMode } from "../../hooks/useDarkmode.jsx";
 
-import { Menu, Droplet, ChevronDown, ChevronUp, Sprout, Calendar, Wifi, WifiOff, TrendingUp, Clock, CircleQuestionMark } from "lucide-react";
+import { Menu, Droplet, ChevronDown, ChevronUp, Sprout, Calendar, Wifi, WifiOff, TrendingUp, Clock, CircleQuestionMark,LayoutGrid } from "lucide-react";
 
 import { Sidebar } from "../../components/sidebar";
 import { Db_Header } from "../../components/db_header";
@@ -367,12 +367,28 @@ export function Dashboard() {
                     const stageColors   = getStageColor(batch.growth_stage, isDark);
                     const harvestColors = getHarvestStatusColor(batch.harvest_status, isDark);
 
+                    const getTrayInfo = (tray_id) => {
+                      const tray = trays.find(t => t.tray_id === tray_id);
+                      if (!tray) return null;
+                      return `${tray.plant} #${tray.tray_number ?? tray.tray_id} tray`;
+                    };
+
+                      const trayInfo      = getTrayInfo(batch.tray_id); // ← DAGDAG
+
+
                     return (
                       <div key={batch.batch_id} className="batch_div bg-gradient-to-br from-[#E8F3ED] to-white rounded-2xl p-4 border border-gray-100 w-full">
-                        <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-start justify-between flex-col mb-3">
                           <h3 className="text-base font-semibold text-gray-900">[{batch.batch_number}] {batch.plant_name}</h3>
+                                     {trayInfo && (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <LayoutGrid className="w-3 h-3 text-[#25a244]" />
+                            <span className="text-[11px] text-[#25a244] font-medium">{trayInfo}</span>
+                          </div>
+                        )}
                         </div>
 
+              
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-xs">
                             <Calendar className="w-3.5 h-3.5 text-gray-400" />
@@ -442,6 +458,10 @@ export function Dashboard() {
                 )}
               </div>
             </div>
+
+
+
+
           </div>
         </div>
       </div>

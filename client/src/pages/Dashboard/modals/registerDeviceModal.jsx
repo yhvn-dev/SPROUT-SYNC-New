@@ -119,7 +119,7 @@ function RegisterDeviceModal({ onClose, userData }) {
             <div className="flex justify-between text-sm">
               <span className="font-medium text-gray-500">
                 Device Type
-              </span>
+              </span>z
               <span>
                 {deviceInfo.device_type
                   ? deviceInfo.device_type.charAt(0).toUpperCase() +

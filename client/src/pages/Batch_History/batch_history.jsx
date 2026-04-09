@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useCallback } from 'react';
-import { Menu, Trash2, Calendar, Sprout, TrendingUp, AlertCircle, FileText, CircleQuestionMark } from "lucide-react";
+import { Menu, Trash2, Calendar, Sprout, TrendingUp, AlertCircle, FileText, CircleQuestionMark, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import { getStageColor, getHarvestStatusColor } from "../../utils/colors";
 
 import { Sidebar } from "../../components/sidebar";
@@ -11,14 +11,9 @@ import { useUser } from '../../hooks/userContext';
 import { usePlantData } from '../../hooks/plantContext';
 import InfosModal from '../../components/infosModal';
 import RegisterDeviceModal from '../Dashboard/modals/registerDeviceModal';
-
-
-
 import { DeleteNotifModal } from '../../components/deleteNotifModal';
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs";
-
-
 import { useDarkMode } from "../../hooks/useDarkmode.jsx";
 
 
@@ -37,11 +32,21 @@ const StatsCard = ({ icon: Icon, title, value, subtitle, color }) => (
   </div>
 );
 
+
+// ===== SORT ICON HELPER =====
+const SortIcon = ({ field, sortConfig }) => {
+  if (sortConfig.key !== field) return <ArrowUpDown size={12} className="text-gray-400 ml-1 inline" />;
+  return sortConfig.direction === "asc"
+    ? <ArrowUp size={12} className="text-white ml-1 inline" />
+    : <ArrowDown size={12} className="text-white ml-1 inline" />;
+};
+
+
 function Batch_History() {
   const { user, skippedRegister } = useUser();
   const { openDeleteNotifModal, setOpenDeleteNotifModal, selectedNotif,
     deleteMode, messageContext, setMessageContext } = useContext(MessageContext);
-  const isDark = useDarkMode(); 
+  const isDark = useDarkMode();
 
   const { batchHistory, loadBatchHistory, loadNotifs } = usePlantData();
   const [filteredData, setFilteredData] = useState(batchHistory);
@@ -56,6 +61,10 @@ function Batch_History() {
   const [infoModalPurpose, setInfoModalPurpose] = useState("");
   const [successMsg, setSuccessMsg] = useState(null);
   const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
+
+  // ===== SORT STATE =====
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
+  const [mobileSortValue, setMobileSortValue] = useState("default");
 
   const clearMsg = useCallback(() => {
     setSuccessMsg("");
@@ -83,19 +92,118 @@ function Batch_History() {
       : 0
   };
 
+
+  // ===== SORT FUNCTION =====
+  const sortData = useCallback((data, config) => {
+    if (!config.key) return data;
+
+    return [...data].sort((a, b) => {
+      let aVal, bVal;
+
+      switch (config.key) {
+        case "plant_name":
+          aVal = (a.plant_name || "").toLowerCase();
+          bVal = (b.plant_name || "").toLowerCase();
+          break;
+        case "date_recorded":
+          aVal = new Date(a.date_recorded).getTime();
+          bVal = new Date(b.date_recorded).getTime();
+          break;
+        case "fully_grown_seedlings":
+          aVal = Number(a.fully_grown_seedlings) || 0;
+          bVal = Number(b.fully_grown_seedlings) || 0;
+          break;
+        case "dead_seedlings":
+          aVal = Number(a.dead_seedlings) || 0;
+          bVal = Number(b.dead_seedlings) || 0;
+          break;
+        case "replanted_seedlings":
+          aVal = Number(a.replanted_seedlings) || 0;
+          bVal = Number(b.replanted_seedlings) || 0;
+          break;
+        case "total_seedlings":
+          aVal = Number(a.total_seedlings) || 0;
+          bVal = Number(b.total_seedlings) || 0;
+          break;
+        case "expected_harvest_days":
+          aVal = Number(a.expected_harvest_days) || 0;
+          bVal = Number(b.expected_harvest_days) || 0;
+          break;
+        case "growth_stage":
+          aVal = (a.growth_stage || "").toLowerCase();
+          bVal = (b.growth_stage || "").toLowerCase();
+          break;
+        case "harvest_status":
+          aVal = (a.harvest_status || "").toLowerCase();
+          bVal = (b.harvest_status || "").toLowerCase();
+          break;
+        default:
+          return 0;
+      }
+
+      if (aVal < bVal) return config.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return config.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, []);
+
+
+  // ===== HANDLE COLUMN HEADER CLICK SORT =====
+  const handleSort = (key) => {
+    setSortConfig(prev => ({
+      key,
+      direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc"
+    }));
+  };
+
+
+  // ===== HANDLE MOBILE SORT DROPDOWN =====
+  const handleMobileSort = (value) => {
+    setMobileSortValue(value);
+    if (value === "default") {
+      setSortConfig({ key: null, direction: "asc" });
+      return;
+    }
+    const [key, direction] = value.split("_");
+    // edge case: plant_name has underscore in it
+    if (value.startsWith("plant_name")) {
+      setSortConfig({ key: "plant_name", direction: value.endsWith("asc") ? "asc" : "desc" });
+    } else if (value.startsWith("date_recorded")) {
+      setSortConfig({ key: "date_recorded", direction: value.endsWith("asc") ? "asc" : "desc" });
+    } else if (value.startsWith("fully_grown")) {
+      setSortConfig({ key: "fully_grown_seedlings", direction: value.endsWith("asc") ? "asc" : "desc" });
+    } else if (value.startsWith("dead")) {
+      setSortConfig({ key: "dead_seedlings", direction: value.endsWith("asc") ? "asc" : "desc" });
+    } else if (value.startsWith("replanted")) {
+      setSortConfig({ key: "replanted_seedlings", direction: value.endsWith("asc") ? "asc" : "desc" });
+    } else if (value.startsWith("total")) {
+      setSortConfig({ key: "total_seedlings", direction: value.endsWith("asc") ? "asc" : "desc" });
+    } else if (value.startsWith("harvest_days")) {
+      setSortConfig({ key: "expected_harvest_days", direction: value.endsWith("asc") ? "asc" : "desc" });
+    }
+  };
+
+
+  // ===== FILTER + SORT EFFECT =====
   useEffect(() => {
     let filtered = batchHistory;
+
     if (searchValue) {
       filtered = filtered.filter(record =>
         record.plant_name.toLowerCase().includes(searchValue.toLowerCase()) ||
         record.growth_stage.toLowerCase().includes(searchValue.toLowerCase())
       );
     }
+
     if (selectedStage !== "All") {
       filtered = filtered.filter(record => record.growth_stage === selectedStage);
     }
-    setFilteredData(filtered);
-  }, [searchValue, selectedStage, batchHistory]);
+
+    const sorted = sortData(filtered, sortConfig);
+    setFilteredData(sorted);
+
+  }, [searchValue, selectedStage, batchHistory, sortConfig, sortData]);
+
 
   const handleDelete = (historyData) => {
     setSelectedBatch(historyData);
@@ -108,6 +216,17 @@ function Batch_History() {
     setInfoModalPurpose("batch_history");
     setInfoModalOpen(true);
   };
+
+  // Sortable column header helper
+  const SortableTh = ({ label, field, className = "" }) => (
+    <th
+      onClick={() => handleSort(field)}
+      className={`px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider cursor-pointer select-none hover:bg-[#1a7a30] transition-colors ${className}`}
+    >
+      {label}
+      <SortIcon field={field} sortConfig={sortConfig} />
+    </th>
+  );
 
   return (
     <section className="con_main grid grid-cols-1 sm:grid-cols-[12fr_30fr_58fr] 
@@ -164,48 +283,73 @@ function Batch_History() {
                 <CircleQuestionMark onClick={handleOpenInfosModalBatchHistory} className='mr-4 w-4 h-4 cursor-pointer' />
               </button>
             </div>
-            <div className='flex items-center justify-start flex-row-reverse w-1/2'>
-              <select
-                value={selectedStage}
-                onChange={(e) => setSelectedStage(e.target.value)}
-                className="border-[1px] border-[var(--main-white)] ml-4">
-                {growthStages.map(stage => (
-                  <option key={stage} value={stage}>{stage}</option>
-                ))}
-              </select>
-              <label className="text-sm font-medium text-[#027c68]">Filter by Stage:</label>
+            <div className='flex items-center justify-end flex-wrap gap-2 w-1/2 pr-4'>
+
+              {/* STAGE FILTER */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-[#027c68] whitespace-nowrap">Stage:</label>
+                <select
+                  value={selectedStage}
+                  onChange={(e) => setSelectedStage(e.target.value)}
+                  className="border-[1px] border-[var(--main-white)] text-sm">
+                  {growthStages.map(stage => (
+                    <option key={stage} value={stage}>{stage}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* MOBILE SORT DROPDOWN — visible on mobile only */}
+              <div className="flex items-center gap-2 md:hidden">
+                <label className="text-sm font-medium text-[#027c68] whitespace-nowrap">Sort:</label>
+                <select
+                  value={mobileSortValue}
+                  onChange={(e) => handleMobileSort(e.target.value)}
+                  className="border-[1px] border-[var(--main-white)] text-sm">
+                  <option value="default">Default</option>
+                  <option value="plant_name_asc">Name A-Z</option>
+                  <option value="plant_name_desc">Name Z-A</option>
+                  <option value="date_recorded_asc">Date (Oldest)</option>
+                  <option value="date_recorded_desc">Date (Newest)</option>
+                  <option value="total_asc">Total (Low-High)</option>
+                  <option value="total_desc">Total (High-Low)</option>
+                  <option value="fully_grown_asc">Grown (Low-High)</option>
+                  <option value="fully_grown_desc">Grown (High-Low)</option>
+                  <option value="dead_asc">Dead (Low-High)</option>
+                  <option value="dead_desc">Dead (High-Low)</option>
+                  <option value="replanted_asc">Replanted (Low-High)</option>
+                  <option value="replanted_desc">Replanted (High-Low)</option>
+                  <option value="harvest_days_asc">Harvest Days (Low-High)</option>
+                  <option value="harvest_days_desc">Harvest Days (High-Low)</option>
+                </select>
+              </div>
+
             </div>
           </nav>
 
-
-
-
-
           <div className="pbh_scroll_div rounded-2xl shadow-lg h-full md:h-[57vh] overflow-y-auto">
-            <div className="hidden md:block overflow-x-auto ">
+
+            {/* ===== DESKTOP TABLE ===== */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full overflow-y-auto">
                 <thead className="bg-[var(--sancgb)] overflow-y-auto">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Plant Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Date Planted</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">Total</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">Grown</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">Replanted</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">Dead</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Stage</th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold text-white uppercase tracking-wider">Harvest Stage</th>
-                    <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">Harvest Day/s</th>
+                    <SortableTh label="Plant Name" field="plant_name" />
+                    <SortableTh label="Date Planted" field="date_recorded" />
+                    <SortableTh label="Total" field="total_seedlings" className="text-center" />
+                    <SortableTh label="Grown" field="fully_grown_seedlings" className="text-center" />
+                    <SortableTh label="Replanted" field="replanted_seedlings" className="text-center" />
+                    <SortableTh label="Dead" field="dead_seedlings" className="text-center" />
+                    <SortableTh label="Stage" field="growth_stage" />
+                    <SortableTh label="Harvest Stage" field="harvest_status" />
+                    <SortableTh label="Harvest Day/s" field="expected_harvest_days" className="text-center" />
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
 
                 <tbody className="batch_history_table divide-y divide-gray-200">
                   {filteredData.map((record, index) => {
-     
-
-
-                   const stageColors   = getStageColor(record.growth_stage, isDark);
-                   const harvestColors = getHarvestStatusColor(record.harvest_status, isDark);
+                    const stageColors = getStageColor(record.growth_stage, isDark);
+                    const harvestColors = getHarvestStatusColor(record.harvest_status, isDark);
 
                     return (
                       <tr
@@ -242,7 +386,6 @@ function Batch_History() {
                           }
                         </td>
 
-                        {/* ✅ GROWTH STAGE - pill/badge style */}
                         <td className="px-4 py-3 text-sm">
                           <span
                             className="bh_growth_stage inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold"
@@ -255,7 +398,6 @@ function Batch_History() {
                           </span>
                         </td>
 
-                        {/* ✅ HARVEST STATUS - dot indicator style */}
                         <td className="px-4 py-3 text-sm">
                           <span
                             className="bh_harvest_status inline-flex items-center gap-1.5 text-xs font-semibold"
@@ -287,12 +429,11 @@ function Batch_History() {
               </table>
             </div>
 
-            {/* ✅ MOBILE LIST */}
+            {/* ===== MOBILE LIST ===== */}
             <div className="h-full md:hidden">
               {filteredData.map((record) => {
-               
-              const stageColors   = getStageColor(record.growth_stage, isDark);
-              const harvestColors = getHarvestStatusColor(record.harvest_status, isDark);
+                const stageColors = getStageColor(record.growth_stage, isDark);
+                const harvestColors = getHarvestStatusColor(record.harvest_status, isDark);
 
                 return (
                   <div
@@ -312,8 +453,6 @@ function Batch_History() {
                     </div>
 
                     <div className="flex items-center justify-start w-auto gap-2 mb-2">
-
-                      {/* ✅ GROWTH STAGE - pill/badge */}
                       <span
                         className="bh_stage px-2 py-0.5 rounded-md text-xs font-semibold"
                         style={{
@@ -324,7 +463,6 @@ function Batch_History() {
                         {record.growth_stage}
                       </span>
 
-                      {/* ✅ HARVEST STATUS - dot indicator */}
                       <span
                         className="bh_harvest inline-flex items-center gap-1.5 text-xs font-semibold"
                         style={{ color: harvestColors.text }}>

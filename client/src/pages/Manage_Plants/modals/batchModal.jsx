@@ -1,5 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
+import { harvestStatusStyles } from '../../../utils/colors';
 import { X, Sprout, Calendar, TrendingUp, Trash2, AlertCircle, Leaf } from 'lucide-react';
 import * as batchModels from "../../../data/batchesData"
 
@@ -376,58 +378,71 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
 
               </div>
 
-              {/* MARK AS HARVESTED (update mode only) */}
-              {batchModalMode === "update" && (
-                <div className="pt-1">
-                  {isAlreadyHarvested ? (
-                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl border-2 border-green-200 bg-green-50">
-                      <Leaf className="w-4 h-4 text-green-600" />
-                      <p className="text-sm font-semibold text-green-700">This batch is already marked as Harvested.</p>
+               {batchModalMode === "update" && (
+              <div className="pt-1">
+                {isAlreadyHarvested ? (
+                  <div className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 ${harvestStatusStyles.harvested}`}>
+                    <Leaf className={`w-4 h-4 ${harvestStatusStyles.harvestedText}`} />
+                    <p className={`text-sm font-semibold ${harvestStatusStyles.harvestedText}`}>
+                      This batch is already marked as Harvested.
+                    </p>
+                  </div>
+
+                ) : harvestConfirm ? (
+
+                  // ✅ Confirm banner — apply styles dito
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-2 ${harvestStatusStyles.confirm}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className={`w-4 h-4 flex-shrink-0 ${harvestStatusStyles.confirmIcon}`} />
+                      <p className={`text-xs font-medium ${harvestStatusStyles.confirmText}`}>
+                        Mark <strong>[{selectedBatch?.batch_number}] {selectedBatch?.plant_name}</strong> as Harvested? This cannot be undone.
+                      </p>
                     </div>
-                  ) : harvestConfirm ? (
-                    <motion.div
-                      initial={{ opacity: 0, y: -6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-2 border-amber-300 bg-amber-50"
-                    >
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                        <p className="text-xs text-amber-800 font-medium">
-                          Mark <strong>[{selectedBatch?.batch_number}] {selectedBatch?.plant_name}</strong> as Harvested? This cannot be undone.
-                        </p>
-                      </div>
-                      <div className="flex gap-2 shrink-0">
-                        <button
-                          type="button" onClick={() => setHarvestConfirm(false)}
-                          className="cursor-pointer text-xs px-3 py-1.5 rounded-lg font-medium border-2 border-amber-300 text-amber-700 hover:bg-amber-100 transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          type="button" onClick={handleMarkAsHarvested} disabled={harvestLoading}
-                          className="cursor-pointer text-xs px-3 py-1.5 rounded-lg font-medium text-white bg-amber-500 hover:bg-amber-600 transition-colors disabled:opacity-60"
-                        >
-                          {harvestLoading ? "Saving..." : "Confirm"}
-                        </button>
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <button
-                      type="button" onClick={handleMarkAsHarvested}
-                      className="cursor-pointer w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 border-[#C4DED0] bg-[#E8F3ED] text-[#155d27] hover:bg-[#d4edde] hover:border-[#208b3a] transition-all font-semibold text-sm"
-                    >
-                      <span className="flex items-center gap-2">
-                        <Leaf className="w-4 h-4" />
-                        Mark Batch as Harvested
-                      </span>
-                      <span className="text-xs px-2 py-0.5 rounded-full bg-[#C4DED0] text-[#155d27] font-medium">
-                        Record Harvest
-                      </span>
-                    </button>
-                  )}
-                </div>
-              )}
+                    <div className="flex gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setHarvestConfirm(false)}
+                        className={`cursor-pointer text-xs px-3 py-1.5 rounded-lg font-medium border-2 transition-colors ${harvestStatusStyles.confirmCancelBtn}`}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleMarkAsHarvested}
+                        disabled={harvestLoading}
+                        className="cursor-pointer text-xs px-3 py-1.5 rounded-lg font-medium text-white bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700 transition-colors disabled:opacity-60"
+                      >
+                        {harvestLoading ? "Saving..." : "Confirm"}
+                      </button>
+                    </div>
+                  </motion.div>
+
+                ) : (
+
+                  // ✅ Default harvest button — apply styles dito
+                  <button
+                    type="button"
+                    onClick={handleMarkAsHarvested}
+                    className={`cursor-pointer w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-semibold text-sm ${harvestStatusStyles.defaultBtn}`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Leaf className="w-4 h-4" />
+                      Mark Batch as Harvested
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${harvestStatusStyles.defaultBadge}`}>
+                      Record Harvest
+                    </span>
+                  </button>
+
+                )}
+              </div>
+            )}
+
 
               {/* FOOTER */}
               <div className="flex items-center justify-between pt-4 border-t border-[#C4DED0]">

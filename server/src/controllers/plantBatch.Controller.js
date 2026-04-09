@@ -90,9 +90,6 @@ export const getSeedlingGrowthOverTime = async (req, res) => {
 
 
 
-
-
-
 export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate = false) => {  
   try {
     const allBatches = await plantBatchModels.readPlantBatches();
@@ -119,8 +116,6 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
       return new Date(Date.UTC(year, month - 1, day));
     };
 
-
-
     const pushToAllDevices = async (title, message, type = "info", status = "Low") => {
       const devices = await deviceTokenModel.getAllDeviceTokens();
       if (devices.length > 0) {
@@ -133,6 +128,12 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
     };
 
     for (const batch of batches) {
+      // ✅ SKIP na kung Harvested na — huwag i-override ng date logic
+      if (batch.harvest_status === "Harvested" || batch.harvested_at) {
+        console.log(`Skipping ${batch.batch_number} — already harvested`);
+        continue;
+      }
+
       if (!batch.date_planted || batch.expected_harvest_days == null) continue;
 
       const planted = parseUTCDate(batch.date_planted);
@@ -145,9 +146,7 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
       const daysRemaining = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
       let newStatus;
-      if (batch.harvested_at || batch.harvest_status === "Harvested") {
-        newStatus = "Harvested";
-      } else if (daysRemaining === 0) {
+      if (daysRemaining === 0) {
         newStatus = "Due Now";
       } else if (daysRemaining === 1) {
         newStatus = "Due Tomorrow";
@@ -156,9 +155,8 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
       } else {
         newStatus = "Past Due";
       }
+
       const statusChanged = batch.harvest_status !== newStatus;
-
-
 
       if (statusChanged || forceUpdate) {
         await plantBatchModels.updateHarvestStatus(newStatus, batch.batch_id);
@@ -218,22 +216,6 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
           );
         }
 
-      } else if (newStatus === "Harvested") {
-        console.log(`Notifying: Harvested — ${batch.batch_number}`);
-        await createNotif({
-          type: "Success",
-          status: "Low",
-          message: `Batch Harvested!\n[${batch.batch_number}] ${batch.plant_name} is Successfully Harvested\nPlanted: ${plantedStr}\nHarvested: ${harvestStr}`
-        });
-
-        if (statusChanged || forceUpdate) {
-          await pushToAllDevices(
-            "Batch Harvested!",
-            `[${batch.batch_number}] ${batch.plant_name} is Successfully Harvested`,
-            "Success",
-            "Low"
-          ); 
-        }
       } else {
         console.log(`No notify for ${batch.batch_number} — status: ${newStatus}`);
       }
@@ -243,16 +225,6 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
     console.error("Error updating harvest status:", err);
   }
 };
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -275,12 +247,8 @@ export const updatePlantBatch = async (req, res) => {
     if (!existingBatch) return res.status(404).json({ message: "Plant batch not found" });
 
     const updatedBatch = await plantBatchModels.updatePlantBatch(batchData, batch_id);
-
-    
-    await notifyBatchCreated(updatedBatch, "update");
-    await updatePastHarvestStatus(batch_id, true)
     res.status(200).json(updatedBatch);
-
+    await updatePastHarvestStatus(batch_id, false); 
 
   } catch (err) {
     console.error("CONTROLLER: Error updating plant batch", err);
@@ -289,22 +257,18 @@ export const updatePlantBatch = async (req, res) => {
 };
 
 
-
 export const markBatchAsHarvested = async (req, res) => {
-    try {
-      const {batch_id} = req.params;
-      const {harvest_status} = req.body;
+  try {
+    const { batch_id } = req.params;
+    const { harvest_status } = req.body;
 
-      const batch = await plantBatchModels.updateHarvestStatus(harvest_status, batch_id);
-  
-      await notifyBatchCreated(batch, "update");
-     await updatePastHarvestStatus(batch_id, true)
+    const batch = await plantBatchModels.updateHarvestStatus(harvest_status, batch_id);
 
-      res.status(200).json({ message: `Harvest status updated successfully`, data: batch });
-    } catch (error) {
-      console.error("Error updating batch's harvest status:", error);
-      res.status(500).json({ message: "Error updating harvest status" });
-    }
+    await notifyBatchCreated(batch, "update");
+    res.status(200).json({ message: `Harvest status updated successfully`, data: batch });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating harvest status" });
+  }
 };
 
 

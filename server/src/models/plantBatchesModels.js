@@ -203,19 +203,22 @@ export const updatePlantBatch = async (batchData, batch_id) => {
     } = batchData;
 
     const total = Number(total_seedlings) || 0;
-
-    // ✅ Dead cannot exceed total
     const dead = Math.min(Number(dead_seedlings) || 0, total);
-
-    // ✅ Alive = total - dead
     const alive = total - dead;
-
-    // ✅ Replanted = recovery of dead, cannot exceed dead count
     const replanted = Math.min(Number(replanted_seedlings) || 0, dead);
-
     const grown = Math.min(Number(fully_grown_seedlings) || 0, alive - replanted);
 
-    const harvest_status = computeHarvestStatus(date_planted, expected_harvest_days);
+    const currentResult = await query(
+      `SELECT harvest_status FROM plant_batches WHERE batch_id = $1`,
+      [batch_id]
+    );
+    const current = currentResult.rows[0];
+
+    const protectedStatuses = ["Harvested"];
+    
+    const harvest_status = protectedStatuses.includes(current?.harvest_status)
+      ? current.harvest_status  
+      : computeHarvestStatus(date_planted, expected_harvest_days); 
 
     const sql = `
       UPDATE plant_batches
@@ -245,7 +248,7 @@ export const updatePlantBatch = async (batchData, batch_id) => {
       date_planted,
       expected_harvest_days,
       harvest_status,
-      batch_id
+      batch_id,
     ];
 
     const result = await query(sql, values);
@@ -256,7 +259,6 @@ export const updatePlantBatch = async (batchData, batch_id) => {
     throw err;
   }
 };
-
 
 
   

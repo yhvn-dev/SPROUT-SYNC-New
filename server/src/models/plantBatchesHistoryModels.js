@@ -2,20 +2,14 @@
 import { query } from "../config/db.js";
 
 
-// ===== READ all history WITH DISPLAY ID =====
 export const readPlantBatchHistory = async () => {
   try {
     const sql = `
       SELECT 
         *,
-        CASE 
-          WHEN batch_id IS NOT NULL THEN 
-            CONCAT(plant_name, ' #', batch_number, '.H', history_number)
-          ELSE 
-            CONCAT(plant_name, ' #', batch_number, '.H', history_number)
-        END AS display_id
+        CONCAT(plant_name, '.H', history_number) AS display_id
       FROM plant_batch_history 
-      ORDER BY date_recorded DESC
+      ORDER BY history_id DESC  -- ← pinakabago laging nasa taas
     `;
     const result = await query(sql);
     return result.rows;
@@ -23,6 +17,7 @@ export const readPlantBatchHistory = async () => {
     throw error;
   }
 };
+
 
 
 

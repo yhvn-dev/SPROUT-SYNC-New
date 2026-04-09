@@ -14,8 +14,6 @@ import { playNotifSound } from "../utils/notificationSounds";
 const PlantDataContext = createContext(null);
 
 
-
-
 export const PlantDataProvider = ({ children }) => {
   // ------------------- STATES -------------------
   const [trayGroups, setTrayGroups] = useState([]);

@@ -3,8 +3,6 @@ import * as historyModels from "../models/plantBatchesHistoryModels.js";
 
 
 
-
-
 // ===== GET all history records =====
 export const getPlantBatchHistory = async (req, res) => {
   try {
