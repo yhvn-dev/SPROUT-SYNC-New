@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
+import { useDarkMode } from "../../../hooks/useDarkMode";
 import { harvestStatusStyles } from '../../../utils/colors';
 import { X, Sprout, Calendar, TrendingUp, Trash2, AlertCircle, Leaf } from 'lucide-react';
 import * as batchModels from "../../../data/batchesData"
@@ -23,6 +24,7 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
   const [formErrors, setFormErrors] = useState({});
   const [harvestConfirm, setHarvestConfirm] = useState(false);
   const [harvestLoading, setHarvestLoading] = useState(false);
+  const isDark = useDarkMode();
 
   if (!isOpen) return null;
   
@@ -186,6 +188,9 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
   const displayPlantName = batchModalMode === "insert"
     ? selectedTray?.plant
     : selectedBatch?.plant_name;
+
+
+  const styles = harvestStatusStyles(isDark);
 
   return (
     <motion.div
@@ -381,25 +386,25 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
                {batchModalMode === "update" && (
               <div className="pt-1">
                 {isAlreadyHarvested ? (
-                  <div className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 ${harvestStatusStyles.harvested}`}>
-                    <Leaf className={`w-4 h-4 ${harvestStatusStyles.harvestedText}`} />
-                    <p className={`text-sm font-semibold ${harvestStatusStyles.harvestedText}`}>
+                  <div className={`flex items-center gap-2 px-4 py-3 rounded-xl border-2 ${styles.harvested}`}>
+                    <Leaf className={`w-4 h-4 ${styles.harvestedText}`} />
+                    <p className={`text-sm font-semibold ${styles.harvestedText}`}>
                       This batch is already marked as Harvested.
                     </p>
                   </div>
 
                 ) : harvestConfirm ? (
 
-                  // ✅ Confirm banner — apply styles dito
+          
                   <motion.div
                     initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
-                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-2 ${harvestStatusStyles.confirm}`}
+                    className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl border-2 ${styles.confirm}`}
                   >
                     <div className="flex items-center gap-2">
-                      <AlertCircle className={`w-4 h-4 flex-shrink-0 ${harvestStatusStyles.confirmIcon}`} />
-                      <p className={`text-xs font-medium ${harvestStatusStyles.confirmText}`}>
+                      <AlertCircle className={`w-4 h-4 flex-shrink-0 ${styles.confirmIcon}`} />
+                      <p className={`text-xs font-medium ${styles.confirmText}`}>
                         Mark <strong>[{selectedBatch?.batch_number}] {selectedBatch?.plant_name}</strong> as Harvested? This cannot be undone.
                       </p>
                     </div>
@@ -407,7 +412,7 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
                       <button
                         type="button"
                         onClick={() => setHarvestConfirm(false)}
-                        className={`cursor-pointer text-xs px-3 py-1.5 rounded-lg font-medium border-2 transition-colors ${harvestStatusStyles.confirmCancelBtn}`}
+                        className={`cursor-pointer text-xs px-3 py-1.5 rounded-lg font-medium border-2 transition-colors ${styles.confirmCancelBtn}`}
                       >
                         Cancel
                       </button>

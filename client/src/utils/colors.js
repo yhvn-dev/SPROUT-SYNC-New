@@ -386,14 +386,36 @@ export const getPasswordResetStatusStyle = (status, isDark = false) => {
   };
 };
 
+export const harvestStatusStyles = (isDark) => ({
+  harvested: isDark
+    ? "border-green-800 bg-green-950"
+    : "border-green-200 bg-green-50",
 
-export const harvestStatusStyles = {
-  harvested: "border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950",
-  harvestedText: "text-green-700 dark:text-green-400",
-  confirm: "border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950",
-  confirmText: "text-amber-800 dark:text-amber-300",
-  confirmIcon: "text-amber-600 dark:text-amber-400",
-  confirmCancelBtn: "border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900",
-  defaultBtn: "border-[#C4DED0] bg-[#E8F3ED] text-[#155d27] hover:bg-[#d4edde] dark:border-green-800 dark:bg-green-950 dark:text-green-400 dark:hover:bg-green-900",
-  defaultBadge: "bg-[#C4DED0] text-[#155d27] dark:bg-green-900 dark:text-green-400",
-};
+  harvestedText: isDark
+    ? "text-green-400"
+    : "text-green-700",
+
+  confirm: isDark
+    ? "border-amber-700 bg-amber-950"
+    : "border-amber-300 bg-amber-50",
+
+  confirmText: isDark
+    ? "text-amber-300"
+    : "text-amber-800",
+
+  confirmIcon: isDark
+    ? "text-amber-400"
+    : "text-amber-600",
+
+  confirmCancelBtn: isDark
+    ? "border-amber-700 text-amber-400 hover:bg-amber-900"
+    : "border-amber-300 text-amber-700 hover:bg-amber-100",
+
+  defaultBtn: isDark
+    ? "border-green-800 bg-green-950 text-green-400 hover:bg-green-900"
+    : "border-[#C4DED0] bg-[#E8F3ED] text-[#155d27] hover:bg-[#d4edde]",
+
+  defaultBadge: isDark
+    ? "bg-green-900 text-green-400"
+    : "bg-[#C4DED0] text-[#155d27]",
+});
