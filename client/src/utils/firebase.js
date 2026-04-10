@@ -111,7 +111,6 @@ export const showInPageNotification = (title, body, type = "info", status = "Low
 
 
 
-
 export const getPushToken = async () => {
   try {
     const permission = await Notification.requestPermission();
@@ -120,8 +119,7 @@ export const getPushToken = async () => {
       return null;
     }
 
-    // ✅ Check muna kung naka-register na
-    let registration = await navigator.serviceWorker.getRegistration("/service-worker.js");
+    let registration = await navigator.serviceWorker.getRegistration("/firebase-messaging.js");
     if (!registration) {
       registration = await navigator.serviceWorker.register("/service-worker.js");
     }
