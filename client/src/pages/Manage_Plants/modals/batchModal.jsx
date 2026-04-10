@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from "framer-motion";
-import { useDarkMode } from "../../../hooks/useDarkMode";
+import { useDarkMode } from "../../../hooks/useDarkmode.jsx";
 import { harvestStatusStyles } from '../../../utils/colors';
 import { X, Sprout, Calendar, TrendingUp, Trash2, AlertCircle, Leaf } from 'lucide-react';
 import * as batchModels from "../../../data/batchesData"
