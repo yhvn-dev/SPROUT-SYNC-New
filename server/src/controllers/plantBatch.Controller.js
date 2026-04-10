@@ -230,9 +230,6 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
 
 
 
-
-
-
 // ===== UPDATE a plant batch =====
 export const updatePlantBatch = async (req, res) => {
   try {
@@ -248,7 +245,6 @@ export const updatePlantBatch = async (req, res) => {
 
     const updatedBatch = await plantBatchModels.updatePlantBatch(batchData, batch_id);
     res.status(200).json(updatedBatch);
-    await updatePastHarvestStatus(batch_id, false); 
 
   } catch (err) {
     console.error("CONTROLLER: Error updating plant batch", err);
