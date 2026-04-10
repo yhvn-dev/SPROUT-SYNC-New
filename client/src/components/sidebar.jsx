@@ -111,7 +111,7 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen })
         )}
 
         {/* Control Panel - Admin only */}
-        {user?.role === "admin" &&
+        {/* {user?.role === "admin" &&
           <NavLink
             to="/control_panel"
             className={({ isActive }) =>
@@ -124,7 +124,7 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen })
             <Plug strokeWidth={1.5} size={isMobile ? 18 : 18} />
             {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Control Panel</p>}
           </NavLink>
-        }
+        } */}
 
         {/* Plants */}
         <NavLink

@@ -1,7 +1,5 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
-import {lazy, Suspense, useEffect, useState} from "react";
-
-
+import {lazy, Suspense, useEffect} from "react";
 
 const Login = lazy(() => import("./pages/Login/login.jsx"));
 const Home = lazy(() => import("./pages/Home/home.jsx"));
@@ -10,7 +8,6 @@ const Manage_Plants = lazy(() => import("./pages/Manage_Plants/manage_plants.jsx
 const Users = lazy(() => import("./pages/Users/users.jsx"));
 const Analytics = lazy(() => import('./pages/Analytics/analytics.jsx'));
 const Batch_History = lazy(() => import("./pages/Batch_History/batch_history.jsx"));
-const Control_Panel = lazy(() => import("./pages/Control_Panel/control_panel.jsx"));
 const Plants = lazy(() => import("./pages/Plants/plants.jsx"));
 const PasswordRequests =  lazy(() => import("./pages/Password_Request/password_request_page.jsx"));
 
@@ -24,6 +21,8 @@ import { listenForMessages } from "./utils/firebase.js";
 import { markAudioUnlocked } from './utils/notificationSounds'; 
 
 import './styles.css';
+
+
 
 function App() {
 
@@ -61,7 +60,6 @@ function App() {
     };
     init();
   }, []);
-
 
   
   return (
@@ -143,20 +141,6 @@ function App() {
             </MessagesProvider>
           }/>
 
-          <Route path='/control_panel' element={
-             <MessagesProvider> 
-              <PlantDataProvider>
-                <ValveProvider>
-                  <ESP32Provider>
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <Control_Panel />
-                    </ProtectedRoute>
-                  </ESP32Provider>
-                </ValveProvider>
-              </PlantDataProvider>
-            </MessagesProvider>
-          }/>
-
           <Route path='/plants' element={
             <MessagesProvider> 
               <PlantDataProvider>
@@ -170,10 +154,6 @@ function App() {
               </PlantDataProvider>
             </MessagesProvider>
           }/>
-
-
-
-
 
           <Route path='/password_request' element={
             <MessagesProvider> 
