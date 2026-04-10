@@ -128,11 +128,11 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
     };
 
     for (const batch of batches) {
-      // ✅ SKIP na kung Harvested na — huwag i-override ng date logic
-      if (batch.harvest_status === "Harvested" || batch.harvested_at) {
+    
+      if (String(batch.harvest_status).toLowerCase() === "harvested") {
         console.log(`Skipping ${batch.batch_number} — already harvested`);
         continue;
-      }
+     }
 
       if (!batch.date_planted || batch.expected_harvest_days == null) continue;
 
