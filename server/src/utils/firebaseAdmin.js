@@ -15,17 +15,11 @@ if (!admin.apps.length) {
   });
 }
 
-
-
-
 export const sendPushNotification = async (pushToken, title, body, type = "info", status = "Low", data = {}) => {
   try {
     const message = {
       token: pushToken,
-      notification: {
-        title,
-        body,
-      },
+      notification: { title, body },
       data: { title, body, type, status, ...data },
       webpush: {
         headers: { Urgency: "high" },
@@ -34,17 +28,27 @@ export const sendPushNotification = async (pushToken, title, body, type = "info"
           body,
           icon: "/favicon.ico",
         },
-        fcmOptions: {
-          link: "/dashboard"
-        }
+        fcmOptions: { link: "/dashboard" }
       }
     };
-
     const response = await admin.messaging().send(message);
     console.log("✅ FCM Sent:", response);
-    return response;
+    return { success: true, response };
+
   } catch (err) {
+    const isInvalidToken =
+      err.errorInfo?.code === 'messaging/registration-token-not-registered' ||
+      err.errorInfo?.code === 'messaging/invalid-registration-token';
+
+    if (isInvalidToken) {
+      console.warn(`⚠️ Stale token skipped: ${pushToken}`);
+      return { success: false, shouldRemove: true, token: pushToken };
+    }
+
     console.error("❌ FCM Error:", err);
-    throw err; // ✅ i-throw na para malaman ng controller
+    return { success: false, token: pushToken };
   }
 };
+
+
+

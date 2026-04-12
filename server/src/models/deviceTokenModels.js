@@ -1,20 +1,15 @@
 import { query } from "../config/db.js";
 
-export const insertDeviceToken = async (
-  user_id,
-  push_token,
-  device_type,
-  device_info
-) => {
+
+export const upsertDeviceToken = async (user_id, push_token, device_type, device_info) => {
   try {
     const { rows } = await query(
       `
       INSERT INTO device_tokens (user_id, push_token, device_type, device_info)
       VALUES ($1, $2, $3, $4)
-      ON CONFLICT (push_token)
+      ON CONFLICT (user_id, device_type)
       DO UPDATE SET
-        user_id = EXCLUDED.user_id,
-        device_type = EXCLUDED.device_type,
+        push_token = EXCLUDED.push_token,
         device_info = EXCLUDED.device_info,
         last_active = NOW()
       RETURNING *;
@@ -23,11 +18,10 @@ export const insertDeviceToken = async (
     );
     return rows[0];
   } catch (err) {
-    console.error("MODELS: Error Inserting Device Token", err);
+    console.error("MODELS: Error Upserting Device Token", err);
     throw err;
   }
 };
-
 
 
 

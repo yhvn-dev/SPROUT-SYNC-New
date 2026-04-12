@@ -4,6 +4,7 @@ import { useUser } from "../../hooks/userContext";
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { getHarvestStatusColor, getStageColor,getSensorStatus,getTrayStatusColor} from "../../utils/colors.js";
 import { useDarkMode } from "../../hooks/useDarkmode.jsx";
+import { registerPushToken } from "../../utils/registerPushToken";
 
 import { Menu, Droplet, ChevronDown, ChevronUp, Sprout, Calendar, Wifi, WifiOff, TrendingUp, Clock, CircleQuestionMark,LayoutGrid } from "lucide-react";
 
@@ -85,6 +86,13 @@ export function Dashboard() {
     if (value > max) return { status: 'high', color: '#2563eb', label: 'High' };
     return { status: 'optimal', color: '#25a244', label: 'Optimal' };
   };
+
+    useEffect(() => {
+    if (user?.user_id) {
+      registerPushToken(user.user_id);
+    }
+  }, [user?.user_id]);
+
 
   const toggleZone = (zoneId) => {
     setExpandedZones(prev => ({

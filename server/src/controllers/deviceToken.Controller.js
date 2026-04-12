@@ -2,7 +2,6 @@ import  * as deviceTokenModel from "../models/deviceTokenModels.js";
 import { sendPushNotification } from "../utils/firebaseAdmin.js";
 import { updateFirstTimeLogin } from "../models/userModels.js";
 
-
 export const registerDevice = async (req, res) => {
   try {
     const { user_id, push_token, device_type, device_info } = req.body;
@@ -14,23 +13,17 @@ export const registerDevice = async (req, res) => {
       });
     }
 
-    // 1. I-save sa DB
-    const device = await deviceTokenModel.insertDeviceToken(
+    const device = await deviceTokenModel.upsertDeviceToken(
       user_id, push_token, device_type, device_info
     );
 
-    // 2. I-update agad ang first_time_login
     await updateFirstTimeLogin(user_id, false);
 
-    try {
-      await sendPushNotification(
-        push_token,
-        "Welcome to Sprout Sync!",
-        "Your device is registered successfully"
-      );
-    } catch (fcmErr) {
-      console.warn("FCM failed but registration succeeded:", fcmErr.message);
-    }
+    await sendPushNotification(
+      push_token,
+      "Welcome to Sprout Sync!",
+      "Your device is registered successfully"
+    );
 
     res.status(200).json({
       success: true,
@@ -43,6 +36,10 @@ export const registerDevice = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+
+
 
 
 

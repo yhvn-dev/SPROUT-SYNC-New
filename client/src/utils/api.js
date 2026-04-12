@@ -77,12 +77,14 @@ api.interceptors.response.use(
         localStorage.removeItem('accessToken')
         
      
-        window.location.replace('/login') // ← replace, hindi href
+        window.location.replace('/login') 
         return Promise.reject(err)
       }
     }
     return Promise.reject(error)
   }
+
+  
 )
 
 export default api

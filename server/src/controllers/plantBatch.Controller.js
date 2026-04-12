@@ -243,7 +243,10 @@ export const updatePlantBatch = async (req, res) => {
     const existingBatch = await plantBatchModels.readPlantBatchById(batch_id);
     if (!existingBatch) return res.status(404).json({ message: "Plant batch not found" });
 
+    
     const updatedBatch = await plantBatchModels.updatePlantBatch(batchData, batch_id);
+    await notifyBatchCreated(existingBatch, "update");
+    await updatePastHarvestStatus(existingBatch .batch_id, true); 
     res.status(200).json(updatedBatch);
 
   } catch (err) {

@@ -43,7 +43,7 @@ function RegisterDeviceModal({ onClose, userData }) {
         device_info: JSON.stringify(deviceInfo),
       };
 
-         console.log("4️⃣ Calling registerDevice...");
+      console.log("4️⃣ Calling registerDevice...");
       await registerDevice(payload);
        console.log("5️⃣ Registration success!");
 
