@@ -106,7 +106,6 @@ export default function Dashboard_Mockup() {
               <SidebarItem icon={User} label="Users" />
               <SidebarItem icon={TrendingUp} label="Analytics" />
               <SidebarItem icon={FileText} label="Batch History" />
-              <SidebarItem icon={Plug} label="Control Panel" />
               <SidebarItem icon={Flower2} label="Plants" />
               <SidebarItem icon={Lock} label="Password Requests" /> 
               <SidebarItem icon={LogOut} label="Logout" />

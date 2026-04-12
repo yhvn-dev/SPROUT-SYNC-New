@@ -38,18 +38,14 @@ export const getPlantBatchById = async (req, res) => {
 
 // ===== GET totals of all plant batches =====
 export const getPlantBatchTotals = async (req, res) => {
-
   try {
     const totals = await plantBatchModels.getPlantBatchTotals()
     res.status(200).json(totals);
-
   } catch (err) {
     console.error("CONTROLLER: Error getting plant batch totals", err);
     res.status(500).json({ message: "Error getting plant batch totals", err });
   }
-  
 };
-
 
 
 // ===== GET Seedling Growth Over Time per Batch =====
@@ -86,27 +82,21 @@ export const getSeedlingGrowthOverTime = async (req, res) => {
 };
 
 
-
-
-
-
-export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate = false) => {  
+export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate = false) => {
   try {
     const allBatches = await plantBatchModels.readPlantBatches();
-    
-    const batches = forceBatchId 
+
+    const batches = forceBatchId
       ? allBatches.filter(b => Number(b.batch_id) === Number(forceBatchId))
       : allBatches;
 
     const now = new Date();
     const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-    const tomorrow = new Date(today);
-    tomorrow.setUTCDate(tomorrow.getUTCDate() + 1);
 
     const parseUTCDate = (dateStr) => {
       if (dateStr instanceof Date) {
         return new Date(Date.UTC(
-          dateStr.getUTCFullYear(),  
+          dateStr.getUTCFullYear(),
           dateStr.getUTCMonth(),
           dateStr.getUTCDate()
         ));
@@ -128,11 +118,11 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
     };
 
     for (const batch of batches) {
-    
+
       if (String(batch.harvest_status).toLowerCase() === "harvested") {
         console.log(`Skipping ${batch.batch_number} — already harvested`);
         continue;
-     }
+      }
 
       if (!batch.date_planted || batch.expected_harvest_days == null) continue;
 
@@ -140,23 +130,36 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
       const harvestDate = new Date(planted);
       harvestDate.setUTCDate(harvestDate.getUTCDate() + Number(batch.expected_harvest_days));
 
-      const expected = harvestDate;
 
-      const diffMs = expected.getTime() - today.getTime();
+      
+      const diffMs = harvestDate.getTime() - today.getTime();
       const daysRemaining = Math.round(diffMs / (1000 * 60 * 60 * 24));
 
+      console.log("=== DEBUG ===");
+      console.log("date_planted raw:", batch.date_planted);
+      console.log("expected_harvest_days:", batch.expected_harvest_days);
+      console.log("planted (parsed):", planted.toISOString());
+      console.log("harvestDate:", harvestDate.toISOString());
+      console.log("today:", today.toISOString());
+      console.log("diffMs:", diffMs);
+      console.log("daysRemaining:", daysRemaining);
+      console.log("=============");
+
+
       let newStatus;
-      if (daysRemaining === 0) {
-        newStatus = "Due Now";
+      if (daysRemaining < 0) {
+        newStatus = "Past Due";        // lagpas na sa harvest date
+      } else if (daysRemaining === 0) {
+        newStatus = "Due Now";         // harvest date is today
       } else if (daysRemaining === 1) {
-        newStatus = "Due Tomorrow";
-      } else if (daysRemaining >= 2) {
-        newStatus = "Not Ready";
+        newStatus = "Due Tomorrow";    // harvest date is tomorrow
       } else {
-        newStatus = "Past Due";
+        newStatus = "Not Ready";       // 2+ days pa
       }
 
       const statusChanged = batch.harvest_status !== newStatus;
+
+      console.log(`[${batch.batch_number}] daysRemaining: ${daysRemaining} | old: ${batch.harvest_status} | new: ${newStatus} | changed: ${statusChanged}`);
 
       if (statusChanged || forceUpdate) {
         await plantBatchModels.updateHarvestStatus(newStatus, batch.batch_id);
@@ -165,56 +168,48 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
       const plantedStr = planted.toISOString().slice(0, 10);
       const harvestStr = harvestDate.toISOString().slice(0, 10);
 
-      if (newStatus === "Due Tomorrow") {
+      // FIX: Notify when statusChanged OR forceUpdate (covers update trigger)
+      if (newStatus === "Due Tomorrow" && (statusChanged || forceUpdate)) {
         console.log(`Notifying: Due Tomorrow — ${batch.batch_number}`);
         await createNotif({
           type: "Warning",
           status: "Medium",
           message: `Harvest Reminder\n1 Day Remaining before harvest\n\nPlant: [${batch.batch_number}] ${batch.plant_name}\nPlanted: ${plantedStr}\nExpected Harvest: ${harvestStr}`
         });
+        await pushToAllDevices(
+          "Harvest Reminder",
+          `[${batch.batch_number}] ${batch.plant_name} is 1 day away from harvest`,
+          "Warning",
+          "Medium"
+        );
 
-        if (statusChanged || forceUpdate) {
-          await pushToAllDevices(
-            "Harvest Reminder",
-            `[${batch.batch_number}] ${batch.plant_name} is a Day Remaining before harvest`,
-            "Warning",
-            "Medium"
-          );
-        }
-
-      } else if (newStatus === "Due Now") {
+      } else if (newStatus === "Due Now" && (statusChanged || forceUpdate)) {
         console.log(`Notifying: Due Now — ${batch.batch_number}`);
         await createNotif({
           type: "Success",
           status: "Low",
           message: `Harvest Day!\nIt's time to harvest today!\n\nPlant: [${batch.batch_number}] ${batch.plant_name}\nPlanted: ${plantedStr}\nHarvest Date: ${harvestStr}`
         });
+        await pushToAllDevices(
+          "Harvest Day!",
+          `[${batch.batch_number}] ${batch.plant_name} harvest is today!`,
+          "Success",
+          "Low"
+        );
 
-        if (statusChanged || forceUpdate) {
-          await pushToAllDevices(
-            "Harvest Day!",
-            `[${batch.batch_number}] ${batch.plant_name} harvest is today!`,
-            "Success",
-            "Low"
-          );
-        }
-
-      } else if (newStatus === "Past Due") {
+      } else if (newStatus === "Past Due" && (statusChanged || forceUpdate)) {
         console.log(`Notifying: Past Due — ${batch.batch_number}`);
         await createNotif({
           type: "Critical",
           status: "High",
           message: `Overdue Harvest!\nThis batch is past its harvest date!\n\nPlant: [${batch.batch_number}] ${batch.plant_name}\nPlanted: ${plantedStr}\nExpected Harvest: ${harvestStr}`
         });
-
-        if (statusChanged || forceUpdate) {
-          await pushToAllDevices(
-            "Overdue Harvest!",
-            `[${batch.batch_number}] ${batch.plant_name}'s This batch is past its harvest date!`,
-            "Critical",
-            "High"
-          );
-        }
+        await pushToAllDevices(
+          "Overdue Harvest!",
+          `[${batch.batch_number}] ${batch.plant_name} is past its harvest date!`,
+          "Critical",
+          "High"
+        );
 
       } else {
         console.log(`No notify for ${batch.batch_number} — status: ${newStatus}`);
@@ -225,9 +220,6 @@ export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate =
     console.error("Error updating harvest status:", err);
   }
 };
-
-
-
 
 
 // ===== UPDATE a plant batch =====
@@ -248,6 +240,10 @@ export const updatePlantBatch = async (req, res) => {
     await notifyBatchCreated(existingBatch, "update");
     await updatePastHarvestStatus(existingBatch .batch_id, true); 
     res.status(200).json(updatedBatch);
+
+    // FIX: dating "batch" — undefined, dapat "updatedBatch"
+    await notifyBatchCreated(updatedBatch, "update");
+    await updatePastHarvestStatus(updatedBatch.batch_id, true);
 
   } catch (err) {
     console.error("CONTROLLER: Error updating plant batch", err);
@@ -271,8 +267,6 @@ export const markBatchAsHarvested = async (req, res) => {
 };
 
 
-
-
 export const createPlantBatch = async (req, res) => {
   try {
     const batchData = req.body;
@@ -282,17 +276,19 @@ export const createPlantBatch = async (req, res) => {
     if (!existingTray) return res.status(404).json({ message: "Selected Tray not found" });
 
     const batch = await plantBatchModels.createPlantBatch(batchData);
-    await trayModels.updateTrayStatus(tray_id, "Occupied")
+    await trayModels.updateTrayStatus(tray_id, "Occupied");
 
     res.status(201).json(batch);
 
     await notifyBatchCreated(batch, "insert");
-    await updatePastHarvestStatus(batch.batch_id, true); 
+    await updatePastHarvestStatus(batch.batch_id, true);
   } catch (err) {
     console.error("CONTROLLER: Error creating plant batch", err);
     res.status(500).json({ message: "Error creating plant batch", err });
   }
 };
+
+
 
 
 

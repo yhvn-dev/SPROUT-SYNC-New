@@ -1,4 +1,13 @@
-// public/service-worker.js
+// ===== WORKBOX PRECACHING (injected by VitePWA build) =====
+importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.0.0/workbox-sw.js');
+
+const { precacheAndRoute, cleanupOutdatedCaches } = workbox.precaching;
+const { registerRoute, NavigationRoute } = workbox.routing;
+const { NetworkFirst, CacheFirst, StaleWhileRevalidate } = workbox.strategies;
+
+// This line is replaced by VitePWA with the actual file manifest at build time
+precacheAndRoute(self.__WB_MANIFEST || []);
+cleanupOutdatedCaches();
 
 // ===== FIREBASE MESSAGING =====
 importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
@@ -17,15 +26,15 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log("[SW] Background message:", payload);
-  
+
   if (!payload.notification && payload.data) {
     console.log("[SW] Skipping data-only → Foreground will handle");
-    return; 
+    return;
   }
-  
+
   const title = payload.notification?.title || payload.data?.title || "SPROUT-SYNC";
   const body = payload.notification?.body || payload.data?.body || "New notification";
-  
+
   self.registration.showNotification(title, {
     body,
     icon: "/favicon.ico",
@@ -49,52 +58,37 @@ self.addEventListener("notificationclick", (event) => {
     });
 });
 
+// ===== RUNTIME CACHING =====
+// Cache API calls with NetworkFirst (fresh data kung may network, fallback sa cache kung wala)
+registerRoute(
+  ({ url }) => url.pathname.startsWith('/api/'),
+  new NetworkFirst({ cacheName: 'api-cache' })
+);
 
-// ===== PWA CACHING =====
-const CACHE_NAME = "sproutsync-cache-v3";
-const urlsToCache = ["/", "/index.html", "/manifest.json", "/vite.svg"];
+// Cache static assets with CacheFirst
+registerRoute(
+  ({ request }) => request.destination === 'image',
+  new CacheFirst({ cacheName: 'image-cache' })
+);
 
+// ===== OFFLINE FALLBACK (SPA Navigation) =====
+// Lahat ng page navigation ay ibabalik sa index.html para gumana ang React Router offline
+registerRoute(
+  new NavigationRoute(
+    new NetworkFirst({
+      cacheName: 'navigation-cache',
+      networkTimeoutSeconds: 3,
+    })
+  )
+);
+
+// ===== SW LIFECYCLE =====
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)));
+  console.log("[SW] Installed");
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) =>
-      Promise.all(cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name)))
-    )
-  );
+  console.log("[SW] Activated");
   self.clients.claim();
-});
-
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
-
-  if (request.mode === "navigate" || request.headers.get("accept")?.includes("text/html")) {
-    event.respondWith(
-      fetch(request)
-        .then((networkResponse) => {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
-          return networkResponse;
-        })
-        .catch(() => caches.match("/index.html"))
-    );
-    return;
-  }
-
-  event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      if (cachedResponse) return cachedResponse;
-      return fetch(request).then((networkResponse) => {
-        if (url.origin === self.location.origin) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
-        }
-        return networkResponse;
-      });
-    })
-  );
 });
