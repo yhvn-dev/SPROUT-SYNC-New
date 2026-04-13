@@ -202,8 +202,8 @@
               </div>
 
 
-            
-            
+        
+                  
             <div className='w-1/3 flex items-center justify-end'>
               <CircleQuestionMark onClick={handleOpenInfosModalUsers} className='mr-4 w-4 h-4 cursor-pointer'/>            
             </div>

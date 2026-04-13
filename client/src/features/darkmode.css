@@ -1276,6 +1276,8 @@ body.dark .browser_window_main_container{
         }
         
         
+
+        
 /* password resets */
 body.dark .reset_pw_request_form{
     @apply bg-[var(--metal-dark1)];
@@ -1285,4 +1287,8 @@ body.dark .password_reset_modal button {
 }
 body.dark .pw-req-label{
     @apply text-[var(--main-white)];
+}
+
+body.dark .manual_div{
+    @apply bg-red-500;
 }

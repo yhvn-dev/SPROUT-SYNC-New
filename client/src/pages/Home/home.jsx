@@ -245,7 +245,6 @@ function Home() {
             }
           />
 
-
           {/* Hero Section */}
           <section className="hero_section relative h-screen w-full overflow-hidden bg-white">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">

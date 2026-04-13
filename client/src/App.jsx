@@ -10,6 +10,8 @@ const Analytics = lazy(() => import('./pages/Analytics/analytics.jsx'));
 const Batch_History = lazy(() => import("./pages/Batch_History/batch_history.jsx"));
 const Plants = lazy(() => import("./pages/Plants/plants.jsx"));
 const PasswordRequests =  lazy(() => import("./pages/Password_Request/password_request_page.jsx"));
+const UserGuide = lazy(() => import("./pages/User_Guide/user_guide.jsx"))
+
 
 import { Dashboard_Skeleton } from "./components/skeletons.jsx";
 import { ProtectedRoute } from "./routes/ProtectedRoutes/page.Routes.jsx";
@@ -168,8 +170,16 @@ function App() {
               </PlantDataProvider>
             </MessagesProvider>
           }/>
-          
 
+
+          <Route path='/user_guide' element={  
+            <PlantDataProvider>    
+                <ProtectedRoute allowedRoles={['admin', 'farmer']}>
+                  <UserGuide/>                  
+                </ProtectedRoute>
+              </PlantDataProvider>
+          }/>
+        
 
         </Routes>
       </Suspense>
