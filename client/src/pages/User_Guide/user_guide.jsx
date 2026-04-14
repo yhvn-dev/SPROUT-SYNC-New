@@ -56,7 +56,7 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
           style={{ background: "#027e6910" }}>
           <div className="flex items-center gap-2">
             <BookOpen size={14} className="text-[#027e69]" />
-            <span className="text-xs font-bold text-[#027e69] tracking-wide uppercase">
+            <span className="text-sm font-bold text-[#027e69] tracking-wide uppercase">
               {title}
             </span>
           </div>
@@ -89,7 +89,7 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
               onClick={() => { setActiveSection(s.id); onClose(); }}
               className={`
                 w-full flex items-center justify-between text-left
-                px-3 py-2 rounded-lg mb-0.5 text-xs transition-all duration-150
+                px-3 py-2 rounded-lg mb-0.5 text-sm transition-all duration-150
                 ${activeSection === s.id
                   ? "text-white font-semibold shadow-sm"
                   : "text-gray-600 hover:bg-[#f0faf5] hover:text-[#027e69]"

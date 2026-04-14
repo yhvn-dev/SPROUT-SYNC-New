@@ -15,14 +15,13 @@ import { FloatSuccessMsg } from '../../components/messages.jsx';
 import Water_level from './water_level.jsx';
 import * as closeValveServices from "../../data/closeValveServices";
 import RegisterDeviceModal from '../Dashboard/modals/registerDeviceModal';
+import Imou_camera_monitoring from './imou_camera_monitoring';
 
 
 function Control_panel() {
   const { user, skippedRegister } = useUser();
   const { openDeleteNotifModal, setOpenDeleteNotifModal, selectedNotif,
     deleteMode, messageContext, setMessageContext } = useContext(MessageContext);
-
-  // ✅ Kumuha ng valveStatus at getValveStatus from ESP32Context
   const { ESP32Status, valveStatus, getValveStatus } = useContext(ESP32Context);
 
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -159,89 +158,17 @@ function Control_panel() {
             </div>
           </div>
 
-
-
-          {/* SPROUT-SYNC MONITORING */}
-          <div className="hidden conb bg-white rounded-3xl p-7 shadow-lg border border-gray-50 hover:shadow-xl transition-all mb-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--ptl-greend)] to-[var(--ptl-greene)] flex items-center justify-center shadow-md">
-                  <Radio size={18} className="text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-[var(--color-dark-blue)] m-0">SPROUT-SYNC</h2>
-                  <p className="text-[10px] text-[var(--gray_1--)] m-0 font-medium tracking-widest uppercase">Monitoring</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${loading ? 'bg-yellow-50 text-yellow-600' : error ? 'bg-red-50 text-red-500' : running ? 'bg-red-50 text-red-600' : 'bg-gray-100 text-gray-500'}`}>
-                  {loading ? <Loader2 size={10} className="animate-spin" /> : <span className={`w-2 h-2 rounded-full ${running ? 'bg-red-500 animate-pulse' : error ? 'bg-red-400' : 'bg-gray-400'}`} />}
-                  {loading ? (running ? 'Stopping...' : 'Starting...') : error ? 'Error' : running ? 'LIVE' : 'Idle'}
-                </span>
-                {!running ? (
-                  <button onClick={start} disabled={loading} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-md ${loading ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60' : 'bg-gradient-to-br from-[var(--ptl-greend)] to-[var(--ptl-greene)] text-white hover:opacity-90 hover:-translate-y-0.5 cursor-pointer'}`}>
-                    {loading ? <Loader2 size={15} className="animate-spin" /> : <Video size={15} />}
-                    {loading ? 'Starting...' : 'Start Stream'}
-                  </button>
-                ) : (
-                  <button onClick={stop} disabled={loading} className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all shadow-md ${loading ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-60' : 'bg-gradient-to-br from-red-500 to-red-600 text-white hover:opacity-90 hover:-translate-y-0.5 cursor-pointer'}`}>
-                    {loading ? <Loader2 size={15} className="animate-spin" /> : <VideoOff size={15} />}
-                    {loading ? 'Stopping...' : 'Stop Stream'}
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="relative w-full bg-gray-900 rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9", minHeight: "220px" }}>
-              {running && (
-                <video key="live-video" ref={videoRef} muted autoPlay playsInline controls
-                  onCanPlay={(e) => { e.target.play().catch(err => console.warn("onCanPlay play() failed:", err)); }}
-                  onError={(e) => console.error("❌ Video element error:", e.target.error)}
-                  className="absolute inset-0 w-full h-full object-cover z-0"
-                />
-              )}
-              {!running && !loading && !error && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-4 pointer-events-none">
-                  <Video size={40} className="text-white/20" />
-                  <p className="text-white/50 font-semibold text-sm m-0">Camera Offline</p>
-                  <p className="text-white/25 text-xs m-0">Press Start Stream to begin monitoring</p>
-                </div>
-              )}
-              {loading && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 pointer-events-none">
-                  <Loader2 size={36} className="text-yellow-400 animate-spin" />
-                  <p className="text-white/50 font-semibold text-sm m-0">Starting stream...</p>
-                  <p className="text-white/25 text-xs m-0">Please wait</p>
-                </div>
-              )}
-              {error && !loading && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-6 text-center z-10">
-                  <AlertTriangle size={36} className="text-red-400" />
-                  <p className="text-red-400 font-semibold text-sm m-0">Stream Error</p>
-                  <p className="text-white/30 text-xs m-0 max-w-xs">{error}</p>
-                  <button onClick={start} className="mt-1 px-4 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium">Retry</button>
-                </div>
-              )}
-              {running && !loading && (
-                <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 bg-black/60 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-white text-[10px] font-bold tracking-widest">LIVE</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-3">
-              <span className="text-xs text-[var(--gray_1--)]">Protocol: <strong className="text-[var(--color-dark-blue)]">HLS</strong></span>
-              <span className="text-xs text-[var(--gray_1--)]">Stream: <strong className={running ? 'text-green-500' : 'text-gray-400'}>{running ? 'Active' : 'Inactive'}</strong></span>
-              {!running && !loading && (
-                <button onClick={refreshStatus} className="text-xs text-[var(--ptl-greend)] font-semibold hover:underline bg-transparent border-none p-0 cursor-pointer">
-                  Refresh Status
-                </button>
-              )}
-            </div>
-          </div>
-
+        <Imou_camera_monitoring
+            running={running}
+            loading={loading}
+            error={error}
+            videoRef={videoRef}
+            start={start}
+            stop={stop}
+            refreshStatus={refreshStatus}
+          />
           <Water_level formattedWaterLevel={formattedWaterLevel} isDark={isDark} waterLevel={waterLevel} />
+
 
           {/* Valve Controls */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-auto">

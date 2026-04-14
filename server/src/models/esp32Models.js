@@ -1,6 +1,7 @@
 import { query } from "../config/db.js"
 
-// Get valve status by name
+
+
 export const getValveStatus = async (name) => {
     const result = await query(
         'SELECT * FROM valve_status WHERE name = $1', [name]
@@ -13,7 +14,6 @@ export const getAllValveStatus = async () => {
     const result = await query('SELECT * FROM valve_status');
     return result.rows;
 };
-
 
 export const updateValveStatus = async (name, status, force_close) => {
     await query(

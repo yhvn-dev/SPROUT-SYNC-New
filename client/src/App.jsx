@@ -7,6 +7,7 @@ const Dashboard = lazy(() => import("./pages/Dashboard/dashboard.jsx"));
 const Manage_Plants = lazy(() => import("./pages/Manage_Plants/manage_plants.jsx"))
 const Users = lazy(() => import("./pages/Users/users.jsx"));
 const Analytics = lazy(() => import('./pages/Analytics/analytics.jsx'));
+const Irrigation_Monitoring_Logs  = lazy(() => import('./pages/Irrigation_Monitoring_Logs/irrigation_monitoring_logs.jsx'));
 const Batch_History = lazy(() => import("./pages/Batch_History/batch_history.jsx"));
 const Plants = lazy(() => import("./pages/Plants/plants.jsx"));
 const PasswordRequests =  lazy(() => import("./pages/Password_Request/password_request_page.jsx"));
@@ -131,6 +132,17 @@ function App() {
             </MessagesProvider>
           }/>
 
+
+          <Route path='/irrigation_monitoring_logs' element={
+            <MessagesProvider> 
+              <PlantDataProvider>         
+                    <ProtectedRoute allowedRoles={['admin', 'farmer']}>
+                  <Irrigation_Monitoring_Logs/>
+                    </ProtectedRoute>             
+              </PlantDataProvider>
+            </MessagesProvider>
+          }/>
+          
           <Route path='/batch_history' element={
             <MessagesProvider>
               <PlantDataProvider>

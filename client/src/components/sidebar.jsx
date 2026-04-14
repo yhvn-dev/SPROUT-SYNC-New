@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { User, LayoutPanelTop, ChartNoAxesCombined, LogOut, FileText, Settings, Plug,BookOpen,Flower2, Sprout,Lock } from "lucide-react";
+import { User, LayoutPanelTop, ChartNoAxesCombined, LogOut, FileText, Settings, Plug,BookOpen,Flower2, Sprout,Lock,SquareActivity} from "lucide-react";
 import * as Logo from "../components/logo";
 
 export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen}) {
@@ -90,8 +90,25 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen}) 
           }>
 
           <ChartNoAxesCombined strokeWidth={1.5} size={isMobile ? 18 : 18} />
-          {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Analytics</p>}
+          {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Reports</p>}
         </NavLink>
+
+
+        {/* Irrigation Monitoring and Logs */}
+        <NavLink
+          to="/irrigation_monitoring_logs"
+          className={({ isActive }) =>
+            `flex justify-center items-center ${isMobile ? 'w-full h-12' : 'gap-2 py-1 px-2 justify-start'} transition-all duration-300 rounded-[10px] my-2 w-full
+            ${isActive
+              ? "text-white bg-[var(--sancgb)] shadow-lg"
+              : "hover:bg-[var(--sage-light)] hover:text-[var(--acc-darkb)]"
+            }`
+          }>
+
+          <SquareActivity strokeWidth={1.5} size={isMobile ? 18 : 18} />
+          {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Irrigation Monitoring and Logs</p>}
+        </  NavLink>
+        
 
         {/* Batch History - Admin only */}
         {user?.role === "admin" && (
