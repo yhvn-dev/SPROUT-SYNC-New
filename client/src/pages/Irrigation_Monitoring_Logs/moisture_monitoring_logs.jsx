@@ -1,24 +1,8 @@
-import { useState,useMemo } from "react";
+import { useState, useMemo,usEe} from "react";
 import { FilterBtn, TableWrap, Tr, Td, Pager, Th, EmptyRow, SearchInput } from "./components/irrigation_monitoring_components";
-
-const moistureData = [
-  { id: 1,  sensor_id: 5, value: "72.50", recorded_at: "2025-04-14T14:28:00" },
-  { id: 2,  sensor_id: 6, value: "45.00", recorded_at: "2025-04-14T14:25:00" },
-  { id: 3,  sensor_id: 7, value: "28.00", recorded_at: "2025-04-14T14:22:00" },
-  { id: 4,  sensor_id: 5, value: "68.00", recorded_at: "2025-04-14T12:00:00" },
-  { id: 5,  sensor_id: 6, value: "30.00", recorded_at: "2025-04-14T12:00:00" },
-  { id: 6,  sensor_id: 7, value: "55.00", recorded_at: "2025-04-14T12:00:00" },
-  { id: 7,  sensor_id: 5, value: "80.00", recorded_at: "2025-04-14T08:00:00" },
-  { id: 8,  sensor_id: 6, value: "18.00", recorded_at: "2025-04-14T08:00:00" },
-  { id: 9,  sensor_id: 7, value: "62.00", recorded_at: "2025-04-14T08:00:00" },
-  { id: 10, sensor_id: 5, value: "40.00", recorded_at: "2025-04-13T20:00:00" },
-  { id: 11, sensor_id: 6, value: "75.00", recorded_at: "2025-04-13T20:00:00" },
-  { id: 12, sensor_id: 7, value: "22.00", recorded_at: "2025-04-13T20:00:00" },
-].sort((a, b) => b.recorded_at.localeCompare(a.recorded_at));
 
 const PLANT_MAP = { 5: "Bokchoy", 6: "Pechay", 7: "Mustasa" };
 const PAGE_SIZE = 8;
-
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function fmtTs(ts) {
@@ -27,7 +11,6 @@ function fmtTs(ts) {
     " " + d.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
-
 function getMoistureMeta(v) {
   const n = parseFloat(v);
   if (n >= 60) return { label: "High",   color: "bg-emerald-100 text-emerald-800", dot: "bg-emerald-500" };
@@ -35,34 +18,35 @@ function getMoistureMeta(v) {
   return            { label: "Low",    color: "bg-red-100 text-red-800",           dot: "bg-red-500" };
 }
 
-// ── Crop Moisture Monitoring ─────────────────────────────────────────────────
-function MoistureMonitoring() {
+// ── Plant Moisture Monitoring ─────────────────────────────────────────────────
+function MoistureMonitoring({ moistureReadings = [] }) {
   const [plantFilter, setPlantFilter] = useState("All");
   const [search, setSearch]  = useState("");
   const [page, setPage]      = useState(1);
 
+
   const filtered = useMemo(() => {
-    return moistureData.filter(r => {
+    return moistureReadings.filter(r => {
       const plant = PLANT_MAP[r.sensor_id] || "";
       if (plantFilter !== "All" && plant !== plantFilter) return false;
       if (search && !fmtTs(r.recorded_at).toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [plantFilter, search]);
+  }, [moistureReadings, plantFilter, search]);
 
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const onFilter = (f) => { setPlantFilter(f); setPage(1); };
   const onSearch = (v) => { setSearch(v); setPage(1); };
 
   const avg = (arr) => arr.length ? (arr.reduce((s, v) => s + parseFloat(v), 0) / arr.length).toFixed(1) : "—";
-  const bk  = moistureData.filter(r => r.sensor_id === 5).map(r => r.value);
-  const pc  = moistureData.filter(r => r.sensor_id === 6).map(r => r.value);
-  const mt  = moistureData.filter(r => r.sensor_id === 7).map(r => r.value);
+  const bk  = moistureReadings.filter(r => r.sensor_id === 5).map(r => r.value);
+  const pc  = moistureReadings.filter(r => r.sensor_id === 6).map(r => r.value);
+  const mt  = moistureReadings.filter(r => r.sensor_id === 7).map(r => r.value);
 
   return (
     <div>
       <div className="mb-5">
-        <h2 className="text-xl font-bold text-gray-800">Crop Moisture Monitoring</h2>
+        <h2 className="text-xl font-bold text-gray-800">Plant Moisture Monitoring</h2>
         <p className="text-xs text-gray-400 mt-0.5">Soil sensor readings — real-time moisture data per plant</p>
       </div>
 
@@ -98,7 +82,7 @@ function MoistureMonitoring() {
             const m     = getMoistureMeta(r.value);
             const val   = parseFloat(r.value);
             return (
-              <Tr key={r.id}>
+              <Tr key={r.reading_id}>
                 <Td className="text-xs text-gray-400 tabular-nums">{fmtTs(r.recorded_at)}</Td>
                 <Td>
                   <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#e1f5ee] text-[#085041]">
