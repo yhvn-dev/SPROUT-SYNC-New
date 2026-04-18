@@ -13,6 +13,7 @@ import streamRoutes from "./routes/ProtectedRoutes/streams.Routes.js";
 import plantRoutes from "./routes/ProtectedRoutes/plant.Routes.js"
 import passwordResetPublicRoutes from "./routes/UnprotectedRoutes/passwordReset.public.Routes.js"
 import passwordResetPrivateRoutes from "./routes/ProtectedRoutes/passwordReset.private.Routes.js"
+import wateringLogs from "./routes/ProtectedRoutes/wateringLogs.Routes.js"
 
 // ===== CORE =====
 import express from "express";
@@ -70,6 +71,8 @@ app.use("/stream", streamRoutes);
 app.use("/plants", plantRoutes)
 app.use("/pw",passwordResetPublicRoutes)
 app.use("/pw",passwordResetPrivateRoutes)
+app.use("/wateringLogs",wateringLogs)
+
 
 
 // ===== TEST =====

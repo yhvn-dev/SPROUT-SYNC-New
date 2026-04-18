@@ -20,6 +20,7 @@ import { MessagesProvider } from "./hooks/messageHooks.jsx";
 import { PlantDataProvider } from "./hooks/plantContext.jsx";
 import { ESP32Provider } from "./hooks/esp32Hooks.jsx";
 import { ValveProvider } from "./hooks/valveContext.jsx";
+import { WateringLogProvider } from "./hooks/wateringLogsContext.jsx"
 import { listenForMessages } from "./utils/firebase.js";
 import { markAudioUnlocked } from './utils/notificationSounds'; 
 
@@ -87,7 +88,7 @@ function App() {
               <PlantDataProvider>
                 <ValveProvider>
                   <ESP32Provider>
-                    <ProtectedRoute allowedRoles={['admin', 'farmer','superadmin']}>
+                    <ProtectedRoute allowedRoles={['admin', 'farmer']}>
                       <Dashboard />
                     </ProtectedRoute>
                   </ESP32Provider>
@@ -100,7 +101,7 @@ function App() {
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin','superadmin']}>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <Manage_Plants/>
                   </ProtectedRoute>
                 </ValveProvider>
@@ -112,7 +113,7 @@ function App() {
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin','superadmin']}>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <Users />
                   </ProtectedRoute>
                 </ValveProvider>
@@ -120,11 +121,11 @@ function App() {
             </MessagesProvider>
           }/>
 
-          <Route path='/analytics' element={
+          <Route path='/reports' element={
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin', 'farmer','superadmin']}>
+                  <ProtectedRoute allowedRoles={['admin', 'farmer']}>
                     <Analytics />
                   </ProtectedRoute>
                 </ValveProvider>
@@ -135,10 +136,12 @@ function App() {
 
           <Route path='/irrigation_monitoring_logs' element={
             <MessagesProvider> 
-              <PlantDataProvider>         
+              <PlantDataProvider>     
+                <WateringLogProvider>
                     <ProtectedRoute allowedRoles={['admin', 'farmer']}>
-                  <Irrigation_Monitoring_Logs/>
-                    </ProtectedRoute>             
+                        <Irrigation_Monitoring_Logs/>
+                    </ProtectedRoute>         
+                </WateringLogProvider>       
               </PlantDataProvider>
             </MessagesProvider>
           }/>

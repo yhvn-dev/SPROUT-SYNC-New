@@ -76,12 +76,26 @@ export const deleteAllReadings = async () =>{
     }
 }
 
+
 export const deleteAllReadingsByType = async (sensor_type) => {
   try {
     const res = await api.delete(`/readings/delete/readings/type/${sensor_type}`);
     return res;
   } catch (error) {
-    const errorMsg = error.response.data.message
-    throw errorMsg
+    const errorMsg = error?.response?.data?.message || error?.message || "Something went wrong";
+    console.error("Error deleting readings by type:", errorMsg);
+    throw new Error(errorMsg);
+  }
+};
+
+
+export const deleteReading = async (reading_id) => {
+  try {
+    const res = await api.delete(`/readings/delete/readings/${reading_id}`);
+    return res;
+  } catch (error) {
+    const errorMsg = error?.response?.data?.message || error?.message || "Something went wrong";
+    console.error("Error deleting reading:", errorMsg);
+    throw new Error(errorMsg);
   }
 };

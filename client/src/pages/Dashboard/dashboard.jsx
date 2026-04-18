@@ -21,7 +21,6 @@ import InfosModal from '../../components/infosModal';
 import RegisterDeviceModal from "./modals/registerDeviceModal.jsx";
 
 
-
 export function Dashboard() {
   const { user, skippedRegister } = useUser();
   const { openDeleteNotifModal, setOpenDeleteNotifModal, selectedNotif, deleteMode, messageContext, setMessageContext } = useContext(MessageContext);

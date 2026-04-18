@@ -80,7 +80,7 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen}) 
 
         {/* Analytics */}
         <NavLink
-          to="/analytics"
+          to="/reports"
           className={({ isActive }) =>
             `flex justify-center items-center ${isMobile ? 'w-full h-12' : 'gap-2 py-1 px-2 justify-start'} transition-all duration-300 rounded-[10px] my-2 w-full
             ${isActive
@@ -157,7 +157,6 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen}) 
           <Flower2 strokeWidth={1.5} size={isMobile ? 18 : 18} />
           {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Plants</p>}
         </NavLink>
-
 
 
         {/* Passwords Request  */}
