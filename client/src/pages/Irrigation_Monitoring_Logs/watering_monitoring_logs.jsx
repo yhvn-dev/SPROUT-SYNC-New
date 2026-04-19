@@ -45,7 +45,9 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
       "#": i + 1,
       Timestamp: fmtTs(r.ts),
       "Plant Name": r.plant_name,
-      "Duration (secs)": r.duration,
+      "Started At": r.started_at ? fmtTs(r.started_at) : "—",
+      "Ended At": r.ended_at ? fmtTs(r.ended_at) : "—",
+      "Duration (secs)": r.duration ?? "—",
     }));
   }, [filtered]);
 
@@ -61,7 +63,6 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
           <h2 className="text-xl font-bold text-gray-800">Watering Logs</h2>
           <p className="text-xs text-gray-400 mt-0.5">Irrigation events — plant watering history and duration</p>
         </div>
-
         <ExcelDownloadBtn
           data={exportData}
           filename={exportFilename}
@@ -72,9 +73,9 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
-          { label: "Total Logs",     value: totalLogs,                    color: "text-[#027e69]"  },
-          { label: "Unique Plants",  value: uniquePlants,                 color: "text-blue-600"   },
-          { label: "Total Duration", value: fmtDuration(totalDuration),   color: "text-orange-500" },
+          { label: "Total Logs",     value: totalLogs,                  color: "text-[#027e69]"  },
+          { label: "Unique Plants",  value: uniquePlants,               color: "text-blue-600"   },
+          { label: "Total Duration", value: fmtDuration(totalDuration), color: "text-orange-500" },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-xl border border-gray-100 px-4 py-3 shadow-sm">
             <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
@@ -86,7 +87,6 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
       {/* Search + Delete All */}
       <div className="flex flex-row-reverse flex-wrap items-center justify-start gap-2 mb-4">
         <SearchInput value={search} onChange={onSearch} placeholder="Search plant name..." />
-
         <button
           onClick={onDeleteAll}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
@@ -103,12 +103,14 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
             <Th>#</Th>
             <Th>Timestamp</Th>
             <Th>Plant Name</Th>
+            <Th>Started At</Th>
+            <Th>Ended At</Th>
             <Th>Duration</Th>
             <Th>Action</Th>
           </tr>
         </thead>
         <tbody>
-          {!paged.length ? <EmptyRow cols={5} /> : paged.map((r, index) => (
+          {!paged.length ? <EmptyRow cols={7} /> : paged.map((r, index) => (
             <Tr key={r.watering_log_id}>
               <Td className="text-xs text-gray-400 tabular-nums">
                 {(page - 1) * PAGE_SIZE + index + 1}
@@ -120,6 +122,12 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
                 <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
                   🌿 {r.plant_name}
                 </span>
+              </Td>
+              <Td className="text-xs text-gray-400 tabular-nums">
+                {r.started_at ? fmtTs(r.started_at) : "—"}
+              </Td>
+              <Td className="text-xs text-gray-400 tabular-nums">
+                {r.ended_at ? fmtTs(r.ended_at) : "—"}
               </Td>
               <Td>
                 <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
@@ -144,8 +152,5 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
     </div>
   );
 }
-
-
-
 
 export default Watering_Logs;
