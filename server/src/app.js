@@ -15,6 +15,7 @@ import passwordResetPublicRoutes from "./routes/UnprotectedRoutes/passwordReset.
 import passwordResetPrivateRoutes from "./routes/ProtectedRoutes/passwordReset.private.Routes.js"
 import wateringLogs from "./routes/ProtectedRoutes/wateringLogs.Routes.js"
 
+
 // ===== CORE =====
 import express from "express";
 import cors from "cors";
@@ -44,6 +45,7 @@ app.use(cors({
   credentials: true
 }))
 
+
 app.use(cookieParser());
 app.use("/streams", express.static(path.resolve(__dirname, "../streams"), {
   setHeaders: (res, filePath) => {
@@ -72,7 +74,6 @@ app.use("/plants", plantRoutes)
 app.use("/pw",passwordResetPublicRoutes)
 app.use("/pw",passwordResetPrivateRoutes)
 app.use("/wateringLogs",wateringLogs)
-
 
 
 // ===== TEST =====
