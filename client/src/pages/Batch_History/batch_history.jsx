@@ -137,6 +137,11 @@ function Batch_History() {
           aVal = (a.harvest_status || "").toLowerCase();
           bVal = (b.harvest_status || "").toLowerCase();
           break;
+        case "season":
+          aVal = (a.season || "").toLowerCase();
+          bVal = (b.season || "").toLowerCase();
+          break;
+      
         default:
           return 0;
       }
@@ -320,6 +325,8 @@ function Batch_History() {
                   <option value="replanted_desc">Replanted (High-Low)</option>
                   <option value="harvest_days_asc">Harvest Days (Low-High)</option>
                   <option value="harvest_days_desc">Harvest Days (High-Low)</option>
+                    <option value="harvest_days_asc">Season (Low-High)</option>
+                  <option value="harvest_days_desc">Season Days (High-Low)</option>
                 </select>
               </div>
 
@@ -342,6 +349,7 @@ function Batch_History() {
                     <SortableTh label="Stage" field="growth_stage" />
                     <SortableTh label="Harvest Stage" field="harvest_status" />
                     <SortableTh label="Harvest Day/s" field="expected_harvest_days" className="text-center" />
+                    <SortableTh label="Season" field="season" className="text-center" />
                     <th className="px-4 py-3 text-center text-xs font-semibold text-white uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
@@ -413,6 +421,11 @@ function Batch_History() {
                         <td className="px-4 py-3 text-sm text-center font-medium text-[#027c68]">
                           {record.expected_harvest_days}
                         </td>
+
+                        <td className="px-4 py-3 text-sm text-center font-medium text-[#027c68]">
+                          {record.season}
+                        </td>
+
 
                         <td className="px-4 py-3 text-sm text-center">
                           <button

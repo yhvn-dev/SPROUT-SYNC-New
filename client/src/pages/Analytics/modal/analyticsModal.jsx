@@ -6,8 +6,6 @@ function AnalyticsModal({setScsMsg,setErrMsg,deleteModalMode, isModalOpen, onClo
   if (!isModalOpen) return null; 
 
 
-
-
     const handleSubmit = async () => {
       try {
         const sensorType = deleteModalMode === "moisture" ? "moisture" : "ultra_sonic";
@@ -15,8 +13,7 @@ function AnalyticsModal({setScsMsg,setErrMsg,deleteModalMode, isModalOpen, onClo
 
         setScsMsg("Sensor Readings Successfully Deleted");
         reloadReadings();
-
-        // Close modal after a tiny delay
+        
         setTimeout(() => {
           onClose();
         }, 100); 
@@ -26,8 +23,6 @@ function AnalyticsModal({setScsMsg,setErrMsg,deleteModalMode, isModalOpen, onClo
         onClose();
       }
      };
-
-
 
 
   return (

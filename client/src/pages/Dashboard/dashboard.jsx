@@ -5,8 +5,10 @@ import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { getHarvestStatusColor, getStageColor,getSensorStatus,getTrayStatusColor} from "../../utils/colors.js";
 import { useDarkMode } from "../../hooks/useDarkmode.jsx";
 import { registerPushToken } from "../../utils/registerPushToken";
+import { getSeasonLabel } from "@/utils/seasonUtils";
 
-import { Menu, Droplet, ChevronDown, ChevronUp, Sprout, Calendar, Wifi, WifiOff, TrendingUp, Clock, CircleQuestionMark,LayoutGrid } from "lucide-react";
+import { Menu, Droplet, ChevronDown, ChevronUp, Sprout, Calendar, Wifi,
+WifiOff, TrendingUp, Clock, CircleQuestionMark,LayoutGrid,Leaf} from "lucide-react";
 
 import { Sidebar } from "../../components/sidebar";
 import { Db_Header } from "../../components/db_header";
@@ -19,7 +21,6 @@ import { usePlantData } from "../../hooks/plantContext.jsx";
 import { ESP32Context } from "../../hooks/esp32Hooks.jsx";
 import InfosModal from '../../components/infosModal';
 import RegisterDeviceModal from "./modals/registerDeviceModal.jsx";
-
 
 
 export function Dashboard() {
@@ -381,7 +382,7 @@ export function Dashboard() {
                       return `${tray.plant} #${tray.tray_number ?? tray.tray_id} tray`;
                     };
 
-                      const trayInfo      = getTrayInfo(batch.tray_id); // ← DAGDAG
+                      const trayInfo      = getTrayInfo(batch.tray_id); 
 
 
                     return (
@@ -440,6 +441,16 @@ export function Dashboard() {
                               {batch.harvest_status}
                             </span>
                           </div>
+
+                          <div className="flex items-center gap-2 text-xs">
+                            <Leaf className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-gray-500">Season:</span>
+                            <span className="font-medium text-[#25a244]">
+                              {getSeasonLabel(batch.season)}
+                            </span>
+
+                          </div>
+
                         </div>
 
                         <div className="active_plant_batches_nursery_data grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-gray-200">
@@ -466,6 +477,9 @@ export function Dashboard() {
                 )}
               </div>
             </div>
+
+
+            
 
 
 
@@ -511,6 +525,9 @@ export function Dashboard() {
       {messageContext && (
         <FloatSuccessMsg txt={messageContext} clearMsg={clearMsg} />
       )}
+
+
+      
     </section>
   );
 }

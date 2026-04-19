@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import { User, LayoutPanelTop, ChartNoAxesCombined, LogOut, FileText, Settings, Plug, Flower2, Sprout,Lock } from "lucide-react";
+import { User, LayoutPanelTop, ChartNoAxesCombined, LogOut, FileText, Settings, Plug,BookOpen,Flower2, Sprout,Lock,SquareActivity} from "lucide-react";
 import * as Logo from "../components/logo";
 
-export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen }) {
+export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen}) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -80,18 +80,35 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen })
 
         {/* Analytics */}
         <NavLink
-          to="/analytics"
+          to="/reports"
           className={({ isActive }) =>
             `flex justify-center items-center ${isMobile ? 'w-full h-12' : 'gap-2 py-1 px-2 justify-start'} transition-all duration-300 rounded-[10px] my-2 w-full
             ${isActive
               ? "text-white bg-[var(--sancgb)] shadow-lg"
               : "hover:bg-[var(--sage-light)] hover:text-[var(--acc-darkb)]"
             }`
-          }
-        >
+          }>
+
           <ChartNoAxesCombined strokeWidth={1.5} size={isMobile ? 18 : 18} />
-          {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Analytics</p>}
+          {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Reports</p>}
         </NavLink>
+
+
+        {/* Irrigation Monitoring and Logs */}
+        <NavLink
+          to="/irrigation_monitoring_logs"
+          className={({ isActive }) =>
+            `flex justify-center items-center ${isMobile ? 'w-full h-12' : 'gap-2 py-1 px-2 justify-start'} transition-all duration-300 rounded-[10px] my-2 w-full
+            ${isActive
+              ? "text-white bg-[var(--sancgb)] shadow-lg"
+              : "hover:bg-[var(--sage-light)] hover:text-[var(--acc-darkb)]"
+            }`
+          }>
+
+          <SquareActivity strokeWidth={1.5} size={isMobile ? 18 : 18} />
+          {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Irrigation Monitoring and Logs</p>}
+        </  NavLink>
+        
 
         {/* Batch History - Admin only */}
         {user?.role === "admin" && (
@@ -126,6 +143,7 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen })
           </NavLink>
         } */}
 
+
         {/* Plants */}
         <NavLink
           to="/plants"
@@ -141,6 +159,7 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen })
         </NavLink>
 
 
+        {/* Passwords Request  */}
         {user?.role === "admin" &&
             <NavLink
             to="/password_request"
@@ -170,15 +189,35 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen })
             </button>
           </div>
         )}
+  
 
-        {/* Logout Button */}
-        <button
-          className={`text-sm cursor-pointer flex justify-center items-center ${isMobile ? 'w-full h-12' : 'gap-2 py-1 px-2 justify-start'} transition-all duration-300 rounded-[10px] my-2 w-full hover:bg-[var(--sage-light)] hover:text-[var(--acc-darkb)]`}
-          onClick={() => setLogoutOpen(true)}>
-          <LogOut strokeWidth={1.5} size={isMobile ? 18 : 18} />
-          {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Logout</p>}
-        </button>
+       <div className="flex items-center flex-col justify-start py-12 my-12 border-t-1 border-[var(--metal-dark4)] w-full">
 
+          {/* User Guide */}
+          <NavLink
+            to="/user_guide"
+
+            className={({ isActive }) =>
+              `flex justify-center items-center ${isMobile ? 'w-full h-12' : 'gap-2 py-1 px-2 justify-start'} transition-all duration-300 rounded-[10px] my-2 w-full
+              ${isActive
+                ? "text-white bg-[var(--sancgb)] shadow-lg"
+                : "hover:bg-[var(--sage-light)] hover:text-[var(--acc-darkb)]"
+              }`
+            }>
+            <BookOpen  strokeWidth={1.5} size={isMobile ? 18 : 18} />
+            {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">User Guide</p>}
+          </NavLink>        
+
+          {/* Logout Button */}
+          <button
+            className={`text-sm cursor-pointer flex justify-center items-center ${isMobile ? 'w-full h-12' : 'gap-2 py-1 px-2 justify-start'} transition-all duration-300 rounded-[10px] my-2 w-full hover:bg-[var(--sage-light)] hover:text-[var(--acc-darkb)]`}
+            onClick={() => setLogoutOpen(true)}>
+            <LogOut strokeWidth={1.5} size={isMobile ? 18 : 18} />
+            {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Logout</p>}
+          </button>
+
+        </div>
+    
 
 
 

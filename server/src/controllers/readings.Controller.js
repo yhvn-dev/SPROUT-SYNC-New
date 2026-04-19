@@ -128,9 +128,8 @@ export const createReadings = async (req, res) => {
       value: numericValue
     });
 
-    // Determine notification payload based on sensor type
-    let notifPayload = null;
 
+    let notifPayload = null;
     if (existingSensor.sensor_type === "moisture") {
       notifPayload = await handleMoistureNotifications(existingSensor, numericValue);
     }

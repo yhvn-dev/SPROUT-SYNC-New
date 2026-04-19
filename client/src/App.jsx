@@ -1,5 +1,6 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
 import {lazy, Suspense, useEffect} from "react";
+import api from './utils/api.js'
 
 const Login = lazy(() => import("./pages/Login/login.jsx"));
 const Home = lazy(() => import("./pages/Home/home.jsx"));
@@ -7,9 +8,12 @@ const Dashboard = lazy(() => import("./pages/Dashboard/dashboard.jsx"));
 const Manage_Plants = lazy(() => import("./pages/Manage_Plants/manage_plants.jsx"))
 const Users = lazy(() => import("./pages/Users/users.jsx"));
 const Analytics = lazy(() => import('./pages/Analytics/analytics.jsx'));
+const Irrigation_Monitoring_Logs  = lazy(() => import('./pages/Irrigation_Monitoring_Logs/irrigation_monitoring_logs.jsx'));
 const Batch_History = lazy(() => import("./pages/Batch_History/batch_history.jsx"));
 const Plants = lazy(() => import("./pages/Plants/plants.jsx"));
 const PasswordRequests =  lazy(() => import("./pages/Password_Request/password_request_page.jsx"));
+const UserGuide = lazy(() => import("./pages/User_Guide/user_guide.jsx"))
+
 
 import { Dashboard_Skeleton } from "./components/skeletons.jsx";
 import { ProtectedRoute } from "./routes/ProtectedRoutes/page.Routes.jsx";
@@ -17,6 +21,7 @@ import { MessagesProvider } from "./hooks/messageHooks.jsx";
 import { PlantDataProvider } from "./hooks/plantContext.jsx";
 import { ESP32Provider } from "./hooks/esp32Hooks.jsx";
 import { ValveProvider } from "./hooks/valveContext.jsx";
+import { WateringLogProvider } from "./hooks/wateringLogsContext.jsx"
 import { listenForMessages } from "./utils/firebase.js";
 import { markAudioUnlocked } from './utils/notificationSounds'; 
 
@@ -26,7 +31,19 @@ import './styles.css';
 
 function App() {
 
+   useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        await api.post('/auth/refresh-token', {}, { withCredentials: true })
+      } catch (err) {
+      }
+    }, 1000) 
 
+    return () => clearInterval(interval)
+  }, [])
+  
+
+  
     useEffect(() => {
     const unlock = () => {
       const audio = new Audio('/sounds/NORMAL_NOTIF.mp3');
@@ -84,7 +101,7 @@ function App() {
               <PlantDataProvider>
                 <ValveProvider>
                   <ESP32Provider>
-                    <ProtectedRoute allowedRoles={['admin', 'farmer','superadmin']}>
+                    <ProtectedRoute allowedRoles={['admin', 'farmer']}>
                       <Dashboard />
                     </ProtectedRoute>
                   </ESP32Provider>
@@ -97,7 +114,7 @@ function App() {
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin','superadmin']}>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <Manage_Plants/>
                   </ProtectedRoute>
                 </ValveProvider>
@@ -109,7 +126,7 @@ function App() {
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin','superadmin']}>
+                  <ProtectedRoute allowedRoles={['admin']}>
                     <Users />
                   </ProtectedRoute>
                 </ValveProvider>
@@ -117,11 +134,11 @@ function App() {
             </MessagesProvider>
           }/>
 
-          <Route path='/analytics' element={
+          <Route path='/reports' element={
             <MessagesProvider>
               <PlantDataProvider>
                 <ValveProvider>
-                  <ProtectedRoute allowedRoles={['admin', 'farmer','superadmin']}>
+                  <ProtectedRoute allowedRoles={['admin', 'farmer']}>
                     <Analytics />
                   </ProtectedRoute>
                 </ValveProvider>
@@ -129,6 +146,19 @@ function App() {
             </MessagesProvider>
           }/>
 
+
+          <Route path='/irrigation_monitoring_logs' element={
+            <MessagesProvider> 
+              <PlantDataProvider>     
+                <WateringLogProvider>
+                    <ProtectedRoute allowedRoles={['admin', 'farmer']}>
+                        <Irrigation_Monitoring_Logs/>
+                    </ProtectedRoute>         
+                </WateringLogProvider>       
+              </PlantDataProvider>
+            </MessagesProvider>
+          }/>
+          
           <Route path='/batch_history' element={
             <MessagesProvider>
               <PlantDataProvider>
@@ -168,8 +198,16 @@ function App() {
               </PlantDataProvider>
             </MessagesProvider>
           }/>
-          
 
+
+          <Route path='/user_guide' element={  
+            <PlantDataProvider>    
+                <ProtectedRoute allowedRoles={['admin', 'farmer']}>
+                  <UserGuide/>                  
+                </ProtectedRoute>
+              </PlantDataProvider>
+          }/>
+        
 
         </Routes>
       </Suspense>
