@@ -103,7 +103,6 @@ export default function Irrigation_Monitoring_Logs() {
     } catch (err) {
       console.error("Delete failed:", err?.message || err);
     } finally {
-      // ✅ laging mag-close ang modal after action, success man o error
       closeDeleteModal();
     }
   };
@@ -163,9 +162,12 @@ export default function Irrigation_Monitoring_Logs() {
   const current = PAGES.find(p => p.id === activePage);
   if (!user) return <div>Loading...</div>;
 
-  return (
-    <section className="con_main w-full min-h-screen bg-gradient-to-br from-[#E8F3ED] to-[#C4DED0] flex flex-col md:grid md:grid-cols-[15fr_85fr] md:grid-rows-[auto_1fr] gap-4 overflow-hidden relative">
 
+
+
+  
+  return (
+    <section className="con_main w-full min-h-screen bg-gradient-to-br overflow-hidden  from-[#E8F3ED] to-[#C4DED0] flex flex-col md:grid md:grid-cols-[15fr_85fr] md:grid-rows-[auto_1fr] gap-4 relative">
       <button onClick={() => setSidebarOpen(true)}
         className="menu_button md:hidden fixed top-4 left-4 z-40 bg-white p-2.5 rounded-lg shadow-lg">
         <Menu size={22} />
@@ -179,7 +181,7 @@ export default function Irrigation_Monitoring_Logs() {
         <Sidebar user={user} setLogoutOpen={setLogoutOpen} setSidebarOpen={setSidebarOpen} />
       </aside>
 
-      <div className="md:col-start-2 flex flex-col gap-4 overflow-y-auto pb-4">
+      <div className="md:col-start-2 flex flex-col gap-4 pb-4">
         <Db_Header setNotifOpen={setNotifOpen} />
 
         <div className="w-full max-w-full sm:max-w-7xl mx-auto space-y-4 px-4 sm:px-0">
@@ -197,7 +199,8 @@ export default function Irrigation_Monitoring_Logs() {
             </nav>
           </div>
 
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+          {/* ── CONTENT CARD with internal scroll ── */}
+          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 overflow-hidden">
             {current?.component}
           </div>
 

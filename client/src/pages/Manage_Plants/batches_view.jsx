@@ -1,6 +1,7 @@
-import {Sprout, TrendingUp, Pencil, Trash2, Calendar, Clock, LayoutGrid} from "lucide-react";
+import {Sprout, TrendingUp, Pencil, Trash2, Calendar, Clock, LayoutGrid,Leaf} from "lucide-react";
 import { getHarvestStatusColor,getStageColor} from '../../utils/colors'; 
 import { useDarkMode } from "../../hooks/useDarkmode";
+import { getSeasonLabel } from "../../utils/seasonUtils"; 
 
 function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, trays}) {
   const isDark = useDarkMode()
@@ -11,7 +12,6 @@ function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, tr
     return `${tray.plant} #${tray.tray_number ?? tray.tray_id} tray`;
   };
     
- 
 
   return (
     <section className="conb bg-white rounded-3xl p-4 sm:p-6 shadow-sm w-full">
@@ -111,7 +111,18 @@ function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, tr
                       </span>
                 
                   </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <Leaf className="w-3.5 h-3.5 text-gray-400" />
+                    <span className="text-gray-500">Season:</span>
+                    <span className="font-medium text-[#25a244]">
+                      {getSeasonLabel(batch.season)}
+                    </span>
+
+                  </div>
+                  
                 </div>
+
+
 
                 <div className="grid grid-cols-4 gap-1 pt-3 border-t border-gray-200 text-center">
                   <div>

@@ -48,8 +48,11 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
 
   const exportFilename = `water-level-logs-${statusFilter.toLowerCase().replace(" ", "-")}`;
 
+
+
+
   return (
-    <div>
+   <div className="overflow-y-auto max-h-[450px]">
       {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>
@@ -99,6 +102,7 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
       </div>
 
       {/* Table */}
+     <div className="overflow-y-auto">
       <TableWrap>
         <thead>
           <tr>
@@ -159,10 +163,13 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
           )}
         </tbody>
       </TableWrap>
+    </div>
 
       <Pager page={page} total={filtered.length} onPage={setPage} />
     </div>
   );
+
+  
 }
 
 

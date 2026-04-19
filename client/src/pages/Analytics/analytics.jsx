@@ -149,7 +149,6 @@ export default function Analytics() {
 
 
 
-
       {/* NAVIGATION TABS */}
       <nav className="analytics_nav row-start-2 row-end-2 col-start-1 col-span-full md:col-start-2 py-3 flex items-center justify-between gap-2 px-4 md:px-0">
         {/* LEFT: Tabs */}
@@ -164,7 +163,7 @@ export default function Analytics() {
                 : "bg-white/50 hover:bg-white text-[#5A8F73] dark:bg-metal-dark5 dark:hover:bg-[var(--metal-dark4)]"
               }
             `}>
-            Overview
+           Growing Summary
           </button>
 
           <button
@@ -178,7 +177,7 @@ export default function Analytics() {
               }
             `}
             >
-            Seedling Stats
+            Seedling Performance
           </button>
 
 
