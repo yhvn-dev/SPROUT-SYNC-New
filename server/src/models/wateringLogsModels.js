@@ -3,15 +3,15 @@ import { query } from '../config/db.js';
 /* =========================
    CREATE WATERING LOG
 ========================= */
-export const createWateringLog = async (plant_name, duration) => {
+export const createWateringLog = async (plant_name, started_at, ended_at, duration) => {
   try {
     const { rows } = await query(
       `
-      INSERT INTO watering_logs (plant_name, duration)
-      VALUES ($1, $2)
+      INSERT INTO watering_logs (plant_name, started_at, ended_at, duration)
+      VALUES ($1, $2, $3, $4)
       RETURNING *;
       `,
-      [plant_name, duration]
+      [plant_name, started_at, ended_at, duration]
     );
     return rows[0];
   } catch (err) {
@@ -70,16 +70,16 @@ export const getWateringLogsByPlantName = async (plant_name) => {
 /* =========================
    UPDATE WATERING LOG
 ========================= */
-export const updateWateringLog = async (watering_log_id, plant_name, duration) => {
+export const updateWateringLog = async (watering_log_id, plant_name, started_at, ended_at, duration) => {
   try {
     const { rows } = await query(
       `
       UPDATE watering_logs
-      SET plant_name = $1, duration = $2
-      WHERE watering_log_id = $3
+      SET plant_name = $1, started_at = $2, ended_at = $3, duration = $4
+      WHERE watering_log_id = $5
       RETURNING *;
       `,
-      [plant_name, duration, watering_log_id]
+      [plant_name, started_at, ended_at, duration, watering_log_id]
     );
     return rows[0] || null;
   } catch (err) {
@@ -87,9 +87,6 @@ export const updateWateringLog = async (watering_log_id, plant_name, duration) =
     throw err;
   }
 };
-
-
-
 
 /* =========================
    DELETE WATERING LOG
@@ -105,20 +102,21 @@ export const deleteWateringLog = async (watering_log_id) => {
     console.error("MODELS: Error deleting watering log", err);
     throw err;
   }
-  
 };
 
 
 
-
-
-export const deleteALlWateringLogs = async () => {
+/* =========================
+   DELETE ALL WATERING LOGS
+========================= */
+export const deleteAllWateringLogs = async () => {
   try {
     const { rows } = await query(
-      `DELETE FROM watering_logs RETURNING *;`);
-    return rows[0] || null;
+      `DELETE FROM watering_logs RETURNING *;`
+    );
+    return rows;
   } catch (err) {
-    console.error("MODELS: Error deleting watering log", err);
+    console.error("MODELS: Error deleting all watering logs", err);
     throw err;
   }
 };

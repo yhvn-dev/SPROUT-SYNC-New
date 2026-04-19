@@ -10,6 +10,14 @@ function fmtTs(ts) {
     " " + d.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
+function fmtDuration(secs) {
+  if (!secs && secs !== 0) return "—";
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  if (m > 0) return `${m}m ${s}s`;
+  return `${s}s`;
+}
+
 function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -29,7 +37,7 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
   const onSearch = (v) => { setSearch(v); setPage(1); };
 
   const totalLogs     = wateringLogs.length;
-  const totalDuration = wateringLogs.reduce((sum, r) => sum + r.duration, 0);
+  const totalDuration = wateringLogs.reduce((sum, r) => sum + (r.duration || 0), 0);
   const uniquePlants  = new Set(wateringLogs.map(r => r.plant_name)).size;
 
   const exportData = useMemo(() => {
@@ -37,7 +45,7 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
       "#": i + 1,
       Timestamp: fmtTs(r.ts),
       "Plant Name": r.plant_name,
-      "Duration (mins)": r.duration,
+      "Duration (secs)": r.duration,
     }));
   }, [filtered]);
 
@@ -64,9 +72,9 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
-          { label: "Total Logs",     value: totalLogs,               color: "text-[#027e69]"  },
-          { label: "Unique Plants",  value: uniquePlants,            color: "text-blue-600"   },
-          { label: "Total Duration", value: `${totalDuration} mins`, color: "text-orange-500" },
+          { label: "Total Logs",     value: totalLogs,                    color: "text-[#027e69]"  },
+          { label: "Unique Plants",  value: uniquePlants,                 color: "text-blue-600"   },
+          { label: "Total Duration", value: fmtDuration(totalDuration),   color: "text-orange-500" },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-xl border border-gray-100 px-4 py-3 shadow-sm">
             <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
@@ -115,7 +123,7 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
               </Td>
               <Td>
                 <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                  {r.duration} mins
+                  {fmtDuration(r.duration)}
                 </span>
               </Td>
               <Td>
@@ -136,5 +144,8 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
     </div>
   );
 }
+
+
+
 
 export default Watering_Logs;

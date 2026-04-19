@@ -5,13 +5,11 @@ import * as WateringLogModel from '../models/wateringLogsModels.js';
 ========================= */
 export const createWateringLog = async (req, res) => {
   try {
-    const { plant_name, duration } = req.body;
-
-    if (!plant_name || duration === undefined) {
-      return res.status(400).json({ message: "plant_name and duration are required." });
+    const { plant_name, started_at, ended_at, duration } = req.body;
+    if (!plant_name || !started_at || !ended_at || duration === undefined) {
+      return res.status(400).json({ message: "plant_name, started_at, ended_at, and duration are required." });
     }
-
-    const log = await WateringLogModel.createWateringLog(plant_name, duration);
+    const log = await WateringLogModel.createWateringLog(plant_name, started_at, ended_at, duration);
     res.status(201).json(log);
   } catch (err) {
     console.error("CONTROLLER: Error creating watering log", err);
@@ -39,9 +37,7 @@ export const getWateringLogById = async (req, res) => {
   try {
     const { id } = req.params;
     const log = await WateringLogModel.getWateringLogById(id);
-
     if (!log) return res.status(404).json({ message: "Watering log not found." });
-
     res.status(200).json(log);
   } catch (err) {
     console.error("CONTROLLER: Error fetching watering log by ID", err);
@@ -69,22 +65,19 @@ export const getWateringLogsByPlantName = async (req, res) => {
 export const updateWateringLog = async (req, res) => {
   try {
     const { id } = req.params;
-    const { plant_name, duration } = req.body;
-
-    if (!plant_name || duration === undefined) {
-      return res.status(400).json({ message: "plant_name and duration are required." });
+    const { plant_name, started_at, ended_at, duration } = req.body;
+    if (!plant_name || !started_at || !ended_at || duration === undefined) {
+      return res.status(400).json({ message: "plant_name, started_at, ended_at, and duration are required." });
     }
-
-    const updated = await WateringLogModel.updateWateringLog(id, plant_name, duration);
-
+    const updated = await WateringLogModel.updateWateringLog(id, plant_name, started_at, ended_at, duration);
     if (!updated) return res.status(404).json({ message: "Watering log not found." });
-
     res.status(200).json(updated);
   } catch (err) {
     console.error("CONTROLLER: Error updating watering log", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
 
 /* =========================
    DELETE WATERING LOG
@@ -93,9 +86,7 @@ export const deleteWateringLog = async (req, res) => {
   try {
     const { id } = req.params;
     const deleted = await WateringLogModel.deleteWateringLog(id);
-
     if (!deleted) return res.status(404).json({ message: "Watering log not found." });
-
     res.status(200).json({ message: "Watering log deleted.", data: deleted });
   } catch (err) {
     console.error("CONTROLLER: Error deleting watering log", err);
@@ -103,15 +94,16 @@ export const deleteWateringLog = async (req, res) => {
   }
 };
 
+/* =========================
+   DELETE ALL WATERING LOGS
+========================= */
 export const deleteAllWateringLogs = async (req, res) => {
   try {
-
-    const deleted = await WateringLogModel.deleteALlWateringLogs()
-    if (!deleted) return res.status(404).json({ message: "Watering log not found." });
-
-    res.status(200).json({ message: "All Watering logs deleted.", data: deleted });
+    const deleted = await WateringLogModel.deleteAllWateringLogs();
+    if (!deleted || deleted.length === 0) return res.status(404).json({ message: "No watering logs found." });
+    res.status(200).json({ message: "All watering logs deleted.", data: deleted });
   } catch (err) {
-    console.error("CONTROLLER: Error deleting Watering logs", err);
+    console.error("CONTROLLER: Error deleting all watering logs", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
