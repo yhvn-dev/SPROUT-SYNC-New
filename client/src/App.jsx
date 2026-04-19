@@ -1,5 +1,6 @@
 import {BrowserRouter, Routes, Route} from "react-router-dom";
 import {lazy, Suspense, useEffect} from "react";
+import api from './utils/api.js'
 
 const Login = lazy(() => import("./pages/Login/login.jsx"));
 const Home = lazy(() => import("./pages/Home/home.jsx"));
@@ -30,7 +31,19 @@ import './styles.css';
 
 function App() {
 
+   useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        await api.post('/auth/refresh-token', {}, { withCredentials: true })
+      } catch (err) {
+      }
+    }, 1000) 
 
+    return () => clearInterval(interval)
+  }, [])
+  
+
+  
     useEffect(() => {
     const unlock = () => {
       const audio = new Audio('/sounds/NORMAL_NOTIF.mp3');

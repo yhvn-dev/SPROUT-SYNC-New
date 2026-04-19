@@ -4,7 +4,7 @@ import { Load_Logo } from "../../components/logo";
 import { Link } from "react-router-dom";
 import { Header } from "../../components/header";
 
-const Dashboard_Mockup = lazy(() => import('./dashboard_mockup'));
+
 const FeatureSection = lazy(() => import('./features_section'));
 const BenefitSection = lazy(() => import('./benifits_section'));
 const Farm_Info_Section = lazy(() => import('./farm_info_section'));
@@ -15,7 +15,6 @@ import SproutImg from "../../assets/Images/SPROUT-SYNC LOGO.png";
 import Plant_Bg_1 from "../../assets/Images/PLANT BG -1.jpg";
 import {
   Features_Skeleton,
-  Dashboard_Mockup_Skeleton,
   Farm_Info_Skeleton,
   BenefitSection_Skeleton,
   Footer_Skeleton,
@@ -32,7 +31,6 @@ if (typeof window !== 'undefined') {
     console.log("✅ Install prompt saved globally");
   });
 }
-
 
 export function InstallButton() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -168,13 +166,7 @@ function Home() {
                     }`}>
                     Features
                   </a>
-              
-                  <a href="#dashboard_mockup"
-                    className={`header-button border-white border-1 px-4 lg:px-6 py-[1px] rounded-2xl font-medium whitespace-nowrap transition-colors ${
-                      isScrolled ? "text-black hover:text-[#027c68]" : "text-white hover:text-[#027c68]"
-                    }`}>
-                    Dashboard
-                  </a>     
+                
 
                   <a href="#farm"
                     className={`header-button border-white border-1 px-4 lg:px-6 py-[1px] rounded-2xl font-medium whitespace-nowrap transition-colors ${
@@ -205,6 +197,7 @@ function Home() {
                   </button>
                 </div>
 
+
                 {/* Mobile Navigation Menu */}
                 {mobileMenuOpen && (
                   <div className="md:hidden absolute top-0 left-0 right-0 bg-[var(--metal-dark1)] shadow-lg rounded-b-2xl mt-2 py-2 px-4 space-y-2 border-t border-gray-100">
@@ -221,12 +214,7 @@ function Home() {
                       onClick={() => setMobileMenuOpen(false)}>
                       Features
                     </a>
-                      <a 
-                      href="#dashboard_mockup"
-                      className="header-button block text-[var(--main-white--)] rounded-2xl px-4 py-2 hover:bg-[var(--metal-dark4)] transition-all font-medium"
-                      onClick={() => setMobileMenuOpen(false)}>
-                      Dashboard
-                    </a>
+                   
                       <a 
                       href="#farm"
                       className="header-button block text-[var(--main-white--)] rounded-2xl px-4 py-2 hover:bg-[var(--metal-dark4)] transition-all font-medium"
@@ -244,6 +232,9 @@ function Home() {
               </div>
             }
           />
+
+
+
 
           {/* Hero Section */}
           <section className="hero_section relative h-screen w-full overflow-hidden bg-white">
@@ -324,13 +315,6 @@ function Home() {
           <section id="features" className="w-full">
             <Suspense fallback={<div className="text-center py-8"><Features_Skeleton /></div>}>
               <FeatureSection />
-            </Suspense>
-          </section>
-
-          {/* Dashboard Section */}
-          <section id="dashboard_mockup" className="center w-full   h-full">
-            <Suspense fallback={<Dashboard_Mockup_Skeleton />}>
-              <Dashboard_Mockup />
             </Suspense>
           </section>
 
