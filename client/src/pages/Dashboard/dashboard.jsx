@@ -92,6 +92,7 @@ export function Dashboard() {
     return g ? Number(g.tray_count) : 0;
   };
 
+  // REMOVE Z
   // ─── BUILD BATCH EXCEL DATA (for the Batches panel download button) ────────
   const batchExcelData = useMemo(() => {
     return batches.map((batch) => {

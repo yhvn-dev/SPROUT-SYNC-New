@@ -87,32 +87,10 @@ export default function BenefitSection() {
           </div>
 
 
-
-
-          {/* Manual & Remote Control */}
-          <div className="benefits_grid hover:scale-102 hover:shadow-md
-            transition-transform transition-shadow
-            duration-500 ease-in-out bg-gradient-to-br from-[#A8C7B8] to-[#C4DED0] rounded-3xl p-6 shadow-sm ">
-  
-            <div className="icon_badges w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center shadow-sm mb-4">
-              <Gauge className="w-6 h-6 text-[#1a7431]" />
-            </div>
-            <h3 className="text-lg sm:text-xl font-bold text-[#003333] mb-2">
-              Manual & Remote Control
-            </h3>
-            <p className="text-sm text-[var(--metal-dark2)]">
-              Take full control of your valves anytime, anywhere
-            </p>
-          </div>
-
-
-
-
           {/* Data Logging */}
           <div className="benefits_grid
           hover:scale-102 
           transition-transform transition-shadow
-          
           md:col-span-2 bg-gradient-to-br from-[#b7efc5] to-[#7BA591] rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center gap-3 mb-3">
               <div className="icon_badges w-12 h-12 bg-white/80 rounded-xl flex items-center justify-center shadow-sm">
@@ -126,8 +104,6 @@ export default function BenefitSection() {
                Track your latest and average moisture levels, and monitor water levels over time
             </p>
           </div>
-
-
 
 
           {/* Stats */}

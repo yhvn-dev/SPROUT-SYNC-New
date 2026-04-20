@@ -39,6 +39,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
 // ===== CORS =====
 app.use(cors({
   origin: process.env.ORIGIN_URL || "http://localhost:3000",

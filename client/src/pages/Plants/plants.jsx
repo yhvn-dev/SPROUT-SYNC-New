@@ -10,13 +10,12 @@ import { Notif_Modal } from "../../components/notifModal.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
 import { DeleteNotifModal } from "../../components/deleteNotifModal";
 import { MessageContext } from "../../hooks/messageHooks.jsx";
-import RegisterDeviceModal from "../Dashboard/modals/registerDeviceModal";
 import { PlantModal } from "./modals/plantModal.jsx";
 import { Plant_Inventory } from "./plant_inventory.jsx";
 
 /* ─── MAIN PAGE ──────────────────────────────────────────── */
 export default function Plants() {
-  const { user, skippedRegister } = useUser();
+  const { user } = useUser();
   const { plants, loadPlants, loadNotifs } = usePlantData();
   const {
     openDeleteNotifModal,
@@ -31,7 +30,6 @@ export default function Plants() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
-  const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
   const [plantModal, setPlantModal] = useState({
     isOpen: false,
     mode: "insert",
@@ -42,13 +40,6 @@ export default function Plants() {
     setMessageContext("");
   }, []);
 
-  useEffect(() => {
-    if (user?.first_time_login && !skippedRegister) {
-      setRegisterModalVisible(true);
-    } else {
-      setRegisterModalVisible(false);
-    }
-  }, [user?.first_time_login, skippedRegister]);
 
   useEffect(() => {
     loadPlants();
@@ -91,7 +82,6 @@ export default function Plants() {
           user={user}
           setLogoutOpen={setLogoutOpen}
           setSidebarOpen={setSidebarOpen}
-          setRegisterModalVisible={setRegisterModalVisible}
         />
       </aside>
 
@@ -110,13 +100,7 @@ export default function Plants() {
         <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
       )}
 
-      {isRegisterModalVisible && (
-        <RegisterDeviceModal
-          userData={user}
-          onClose={() => setRegisterModalVisible(false)}
-        />
-      )}
-
+  
       <PlantModal
         isOpen={plantModal.isOpen}
         onClose={() => {
@@ -156,5 +140,8 @@ export default function Plants() {
         <FloatSuccessMsg txt={messageContext} clearMsg={clearMsg} />
       )}
     </section>
+
+
+
   );
 }

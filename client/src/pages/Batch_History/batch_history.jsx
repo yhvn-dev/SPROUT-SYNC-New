@@ -10,11 +10,13 @@ import { LogoutModal } from '../../components/logoutModal';
 import { useUser } from '../../hooks/userContext';
 import { usePlantData } from '../../hooks/plantContext';
 import InfosModal from '../../components/infosModal';
-import RegisterDeviceModal from '../Dashboard/modals/registerDeviceModal';
 import { DeleteNotifModal } from '../../components/deleteNotifModal';
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs";
 import { useDarkMode } from "../../hooks/useDarkmode.jsx";
+import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx";
+
+
 
 
 const StatsCard = ({ icon: Icon, title, value, subtitle, color }) => (
@@ -32,7 +34,6 @@ const StatsCard = ({ icon: Icon, title, value, subtitle, color }) => (
   </div>
 );
 
-
 // ===== SORT ICON HELPER =====
 const SortIcon = ({ field, sortConfig }) => {
   if (sortConfig.key !== field) return <ArrowUpDown size={12} className="text-gray-400 ml-1 inline" />;
@@ -43,7 +44,7 @@ const SortIcon = ({ field, sortConfig }) => {
 
 
 function Batch_History() {
-  const { user, skippedRegister } = useUser();
+  const { user} = useUser();
   const { openDeleteNotifModal, setOpenDeleteNotifModal, selectedNotif,
     deleteMode, messageContext, setMessageContext } = useContext(MessageContext);
   const isDark = useDarkMode();
@@ -60,7 +61,9 @@ function Batch_History() {
   const [isInfoModalOpen, setInfoModalOpen] = useState(false);
   const [infoModalPurpose, setInfoModalPurpose] = useState("");
   const [successMsg, setSuccessMsg] = useState(null);
-  const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
+
+
+  
 
   // ===== SORT STATE =====
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -73,13 +76,6 @@ function Batch_History() {
 
   useEffect(() => { loadBatchHistory(); }, []);
 
-  useEffect(() => {
-    if (user?.first_time_login && !skippedRegister) {
-      setRegisterModalVisible(true);
-    } else {
-      setRegisterModalVisible(false);
-    }
-  }, [user?.first_time_login, skippedRegister]);
 
   const stats = {
     totalRecords: batchHistory.length,
@@ -207,22 +203,20 @@ function Batch_History() {
   }, [searchValue, selectedStage, batchHistory, sortConfig, sortData]);
 
 
-  // // ===== EXCEL DATA — yung current filtered + sorted na data ang ie-export =====
-  // const batchHistoryExcelData = filteredData.map((record) => ({
-  //   "ID":                 record.display_id,
-  //   "Plant Name":         record.plant_name,
-  //   "Date Planted":       new Date(record.date_recorded).toLocaleDateString(),
-  //   "Total Seedlings":    record.total_seedlings,
-  //   "Fully Grown":        record.fully_grown_seedlings,
-  //   "Replanted":          record.replanted_seedlings,
-  //   "Dead":               record.dead_seedlings ?? 0,
-  //   "Growth Stage":       record.growth_stage,
-  //   "Harvest Status":     record.harvest_status,
-  //   "Harvest Day/s":      record.expected_harvest_days,
-  //   "Season":             record.season,
-  // }));
-  // ============================================================================
-
+  // ===== EXCEL DATA — yung current filtered + sorted na data ang ie-export =====
+  const batchHistoryExcelData = filteredData.map((record) => ({
+    "ID":                 record.display_id,
+    "Plant Name":         record.plant_name,
+    "Date Planted":       new Date(record.date_recorded).toLocaleDateString(),
+    "Total Seedlings":    record.total_seedlings,
+    "Fully Grown":        record.fully_grown_seedlings,
+    "Replanted":          record.replanted_seedlings,
+    "Dead":               record.dead_seedlings ?? 0,
+    "Growth Stage":       record.growth_stage,
+    "Harvest Status":     record.harvest_status,
+    "Harvest Day/s":      record.expected_harvest_days,
+    "Season":             record.season,
+  }));
 
   const handleDelete = (historyData) => {
     setSelectedBatch(historyData);
@@ -264,7 +258,7 @@ function Batch_History() {
       )}
 
       <aside className={`${sidebarOpen ? "fixed inset-y-0 left-0 w-64 z-50" : "hidden"} md:static md:block`}>
-        <Sidebar user={user} setLogoutOpen={setLogoutOpen} setSidebarOpen={setSidebarOpen} setRegisterModalVisible={setRegisterModalVisible} />
+        <Sidebar user={user} setLogoutOpen={setLogoutOpen} setSidebarOpen={setSidebarOpen}  />
       </aside>
 
       <div className='col-start-1 col-span-full md:col-start-2'>
@@ -346,12 +340,12 @@ function Batch_History() {
                 </select>
               </div>
 
-              {/* ── DOWNLOAD BUTTON ──
+              {/* ── DOWNLOAD BUTTON ── */}
               <ExcelDownloadBtn
                 data={batchHistoryExcelData}
                 filename={`batch-history-${new Date().toISOString().slice(0, 10)}`}
                 sheetName="Batch History"
-              /> */}
+              />
 
             </div>
           </nav>
@@ -559,9 +553,8 @@ function Batch_History() {
       {isInfoModalOpen && (
         <InfosModal isInfosModalOpen={isInfoModalOpen} onClose={() => setInfoModalOpen(false)} purpose={infoModalPurpose} />
       )}
-      {isRegisterModalVisible && (
-        <RegisterDeviceModal userData={user} onClose={() => setRegisterModalVisible(false)} />
-      )}
+   
+      
       {successMsg && <FloatSuccessMsg txt={successMsg} clearMsg={clearMsg} />}
       {openDeleteNotifModal && (
         <DeleteNotifModal

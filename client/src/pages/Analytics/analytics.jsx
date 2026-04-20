@@ -13,13 +13,13 @@ import { FloatSuccessMsg } from "../../components/sucessMsgs";
 
 import InfosModal from "../../components/infosModal";
 import AnalyticsModal from "./modal/analyticsModal";
-import RegisterDeviceModal from "../Dashboard/modals/registerDeviceModal";
+
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { DeleteNotifModal } from "../../components/deleteNotifModal.jsx";
 
 
 export default function Analytics() {
-  const { user, skippedRegister} = useUser()
+  const { user} = useUser()
   const {
     batchTotal,
     loadBatchTotal,
@@ -47,7 +47,7 @@ export default function Analytics() {
   const [deleteModalMode,setDeleteModalMode] = useState("");
   const [errMsg,setErrMsg] = useState("");
   const [scsMsg,setScsMsg] = useState("");
-  const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
+
     
   const clearMsg = useCallback(() => {
     setErrMsg("");
@@ -55,15 +55,6 @@ export default function Analytics() {
     setMessageContext("")
 }, []);
 
-
-  useEffect(() => {
-    if (user?.first_time_login && !skippedRegister) {
-      setRegisterModalVisible(true);
-    } else {
-      setRegisterModalVisible(false);
-    }
-  }, [user?.first_time_login, skippedRegister]);
-  
 
   useEffect(() => {
     loadBatchTotal();
@@ -125,7 +116,7 @@ export default function Analytics() {
               user={user}
               setLogoutOpen={setLogoutOpen}
               setSidebarOpen={setSidebarOpen}
-              setRegisterModalVisible={setRegisterModalVisible}
+        
             />
         </div>
         
@@ -135,7 +126,7 @@ export default function Analytics() {
               user={user}
               setLogoutOpen={setLogoutOpen}
               setSidebarOpen={setSidebarOpen}
-              setRegisterModalVisible={setRegisterModalVisible}
+           
             />
         </div>
         
@@ -271,12 +262,7 @@ export default function Analytics() {
         />
       )}
     
-    {isRegisterModalVisible && (
-      <RegisterDeviceModal
-        userData={user}
-        onClose={() => setRegisterModalVisible(false)} // close modal locally
-      />
-    )}
+
     
     </section>
     

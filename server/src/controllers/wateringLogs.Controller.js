@@ -1,21 +1,43 @@
 import * as WateringLogModel from '../models/wateringLogsModels.js';
+import * as notificationModels from "../models/notificationModels.js"
 
 /* =========================
    CREATE WATERING LOG
 ========================= */
-export const createWateringLog = async (req, res) => {
+ export const createWateringLog = async (req, res) => {
   try {
     const { plant_name, started_at, ended_at, duration } = req.body;
     if (!plant_name || !started_at || !ended_at || duration === undefined) {
       return res.status(400).json({ message: "plant_name, started_at, ended_at, and duration are required." });
     }
+
     const log = await WateringLogModel.createWateringLog(plant_name, started_at, ended_at, duration);
+
+    // ✅ Create notification after watering log is saved
+    const notifPayload = {
+      type: "watering",
+      status: "info",
+      message: `${plant_name} has been watered for ${duration} seconds.`
+    };
+
+    await notificationModels.createNotif({
+      related_sensor: null,
+      type: notifPayload.type,
+      status: notifPayload.status,
+      message: notifPayload.message
+    });
+
+
     res.status(201).json(log);
+
   } catch (err) {
     console.error("CONTROLLER: Error creating watering log", err);
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+
 
 /* =========================
    GET ALL WATERING LOGS
