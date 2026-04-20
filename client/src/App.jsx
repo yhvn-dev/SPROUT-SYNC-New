@@ -201,11 +201,13 @@ function App() {
 
 
           <Route path='/user_guide' element={  
+             <MessagesProvider>
             <PlantDataProvider>    
                 <ProtectedRoute allowedRoles={['admin', 'farmer']}>
                   <UserGuide/>                  
                 </ProtectedRoute>
               </PlantDataProvider>
+            </MessagesProvider> 
           }/>
         
 

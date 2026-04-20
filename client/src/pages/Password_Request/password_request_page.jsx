@@ -12,6 +12,7 @@ import RegisterDeviceModal from "../../pages/Dashboard/modals/registerDeviceModa
 import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import Action_Confirmation_Modal from "./action_confirmation_modal.jsx";
+import { DeleteNotifModal } from "../../components/deleteNotifModal.jsx";
 
 
 /* ── REUSABLE TEXT COLOR HELPER ─────────────────────────────── */
@@ -47,6 +48,8 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark 
     return matchSearch && matchStatus;
   });
 
+
+  
   return (
     <>
       {/* ── DESKTOP ───────────────────────────────────────── */}
@@ -237,8 +240,14 @@ function PasswordRequestTable({ requests, onApprove, onReject, onDelete, isDark 
 
 /* ── MAIN PAGE ──────────────────────────────────────────────── */
 export default function Password_Requests() {
-  const { user, passwordRequests, loadPasswordRequests,skippedRegister} = useUser();
-  const { messageContext, setMessageContext } = useContext(MessageContext);
+const { user, passwordRequests, loadPasswordRequests, skippedRegister } = useUser();
+  const { 
+    openDeleteNotifModal, setOpenDeleteNotifModal, 
+    selectedNotif, deleteMode, 
+    messageContext, setMessageContext,
+    loadNotifs
+  } = useContext(MessageContext);
+
   const isDark = useDarkMode();
 
   const [logoutOpen, setLogoutOpen]   = useState(false);
@@ -254,7 +263,7 @@ export default function Password_Requests() {
 
 
 
-  const clearMsg = useCallback(() => setMessageContext(""), []);
+  const clearMsg = useCallback(() => setMessageContext(""), [setMessageContext]);
   useEffect(() => {
     loadPasswordRequests();
   }, []);
@@ -347,6 +356,17 @@ export default function Password_Requests() {
         request={actionModal.request}
         onRefresh={() => handleRefresh(actionModal.mode)}
       />
+
+      {/* MODALS */}
+      {openDeleteNotifModal && (
+        <DeleteNotifModal
+          isOpen={openDeleteNotifModal}
+          selectedNotif={selectedNotif}
+          deleteMode={deleteMode}
+          onClose={() => setOpenDeleteNotifModal(false)}
+          loadNotifs={loadNotifs}
+        />
+      )}
 
 
       {isRegisterModalVisible && (

@@ -1,7 +1,8 @@
 import { Droplets, CircleQuestionMark, Trash2 } from "lucide-react";
 import InfosModal from "../../components/infosModal";
-import { useState} from "react";
+import { useState } from "react";
 import { useUser } from "../../hooks/userContext";
+import ExcelDownloadBtn from "../../components/ExcelDownloadBtn"; // ← adjust path
 
 // =====================
 // STAT CARD
@@ -50,8 +51,6 @@ const MoistureProgressBar = ({ average, isDark }) => {
           style={{ width: `${value}%` }}
         />
       </div>
-
-      {/* Status */}
       <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
         Status: <strong>{status}</strong>
       </p>
@@ -73,26 +72,35 @@ export const Overview = ({
   const [infoModalPurpose, setInfoModalPurpose] = useState("");
   const { user } = useUser();
 
-
-  // =====================
-  // DARK MODE DETECTION
-  // =====================
   const isDark =
     typeof window !== "undefined" &&
     document.documentElement.classList.contains("dark");
 
-
-  const avgMoisture =
-    averageReadingsBySensor?.moisture?.average ?? 0;
-  const waterLevel = readings
-    .filter(r => r.sensor_id === 8)
-    .at(-1)?.value;
-
+  const avgMoisture = averageReadingsBySensor?.moisture?.average ?? 0;
+  const waterLevel = readings.filter(r => r.sensor_id === 8).at(-1)?.value;
   const formattedWaterLevel = waterLevel ? Number(waterLevel).toFixed(1) : null;
 
-  // =====================
-  // HANDLERS
-  // =====================
+  // ── EXCEL DATA — active seedlings summary ──────────────────────────────
+  const seedlingExcelData = [
+    {
+      "Label":  "Active Total Seedlings",
+      "Value":  batchTotal?.total_seedlings ?? 0,
+    },
+    {
+      "Label":  "Active Grown",
+      "Value":  batchTotal?.total_grown ?? 0,
+    },
+    {
+      "Label":  "Active Dead",
+      "Value":  batchTotal?.total_dead ?? 0,
+    },
+    {
+      "Label":  "Active Replanted",
+      "Value":  batchTotal?.total_replanted ?? 0,
+    },
+  ];
+  // ──────────────────────────────────────────────────────────────────────
+
   const handleOpenInfosModalWaterLevel = () => {
     setInfoModalPurpose("water_level");
     setInfoModalOpen(true);
@@ -106,42 +114,55 @@ export const Overview = ({
     setDeleteModalMode("water_level");
   };
 
-
-  
   return (
-     <div className="h-full w-full grid grid-cols-4 md:grid-cols-12 md:gap-4">
+    <div className="h-full w-full grid grid-cols-4 md:grid-cols-12 md:gap-4">
 
-       <div className="w-[100%]  col-span-full grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4 md:mb-0">
-        <StatCard
-          label="Active Total Seedlings"
-          value={batchTotal?.total_seedlings}
-          gradient="from-white via-green-100 to-blue-50"
-          color="#25a244"
-        />
-        <StatCard
-          label="Active Grown"
-          value={batchTotal?.total_grown}
-          gradient="from-white to-green-50"
-          color="var(--color-success-a)"
-        />
-        <StatCard
-          label="Active Dead"
-          value={batchTotal?.total_dead}
-          gradient="from-white to-red-50"
-          color="var(--color-danger-a)"
-        />
-        <StatCard
-          label="Active Replanted"
-          value={batchTotal?.total_replanted}
-          gradient="from-white to-orange-50"
-          color="var(--color-warning)"
-        />
+      {/* ── STAT CARDS + DOWNLOAD BUTTON ── */}
+      <div className="w-[100%] col-span-full mb-4 md:mb-0">
+
+        {/* header row — label + download btn */}
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm font-medium text-gray-500">Active Batch Summary</p>
+          <ExcelDownloadBtn
+            data={seedlingExcelData}
+            filename={`active-seedlings-${new Date().toISOString().slice(0, 10)}`}
+            sheetName="Active Seedlings"
+          />
+        </div>
+
+        {/* stat cards grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <StatCard
+            label="Active Total Seedlings"
+            value={batchTotal?.total_seedlings}
+            gradient="from-white via-green-100 to-blue-50"
+            color="#25a244"
+          />
+          <StatCard
+            label="Active Grown"
+            value={batchTotal?.total_grown}
+            gradient="from-white to-green-50"
+            color="var(--color-success-a)"
+          />
+          <StatCard
+            label="Active Dead"
+            value={batchTotal?.total_dead}
+            gradient="from-white to-red-50"
+            color="var(--color-danger-a)"
+          />
+          <StatCard
+            label="Active Replanted"
+            value={batchTotal?.total_replanted}
+            gradient="from-white to-orange-50"
+            color="var(--color-warning)"
+          />
+        </div>
       </div>
 
       {/* =====================
           MOISTURE PROGRESS BAR
       ====================== */}
-      <div className="conb col-span-7 bg-white py-2 row-span-9 dark:bg-gray-900 rounded-xl 
+      <div className="conb col-span-7 bg-white py-2 row-span-9 dark:bg-gray-900 rounded-xl
       shadow-lg px-6 flex flex-col items-start justify-start gap-4 mb-4 md:mb-0">
         <div className="flex my-4 items-center justify-between w-full">
           <p className="font-semibold my-2">Average Moisture (%)</p>
@@ -173,32 +194,24 @@ export const Overview = ({
           {user.role === "admin" && (
             <button
               onClick={handleOpenDeleteWaterLevelModal}
-              className="flex text-xs cursor-pointer bg-[var(--sancga)] rounded-2xl shadow-lg px-4 py-2 text-[var(--main-white)] hover:bg-[var(--sancgb)]"
-            >
+              className="flex text-xs cursor-pointer bg-[var(--sancga)] rounded-2xl shadow-lg px-4 py-2 text-[var(--main-white)] hover:bg-[var(--sancgb)]">
               <Trash2 className="trash_logo w-3 h-3 mr-2 my-[1px]" />
               Clear Readings
             </button>
           )}
-
-
-          
         </div>
 
         <div className="flex flex-col justify-center items-center h-full">
           <div className="relative w-40 h-40">
             <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
               <circle
-                cx="50"
-                cy="50"
-                r="45"
+                cx="50" cy="50" r="45"
                 fill="none"
                 stroke={isDark ? "#3d56a4" : "#E8F3ED"}
                 strokeWidth="8"
               />
               <circle
-                cx="50"
-                cy="50"
-                r="45"
+                cx="50" cy="50" r="45"
                 fill="none"
                 stroke="#3d56a4"
                 strokeWidth="8"
@@ -221,8 +234,6 @@ export const Overview = ({
           </p>
         </div>
       </div>
-
-
 
       {/* =====================
           INFO MODAL

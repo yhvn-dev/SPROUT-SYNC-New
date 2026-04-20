@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { TableWrap, Tr, Td, Pager, Th, EmptyRow, SearchInput } from "./components/irrigation_monitoring_components";
 import ExcelDownloadBtn from "../../components/excelDownloadBtn";
+import { useUser } from "../../hooks/userContext.jsx";
 
 const PAGE_SIZE = 5;
 
@@ -19,13 +20,13 @@ function fmtDuration(secs) {
 }
 
 function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
+  const { user } = useUser();
+  const isAdmin = user?.role === "admin";
+
   const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const [page, setPage]     = useState(1);
 
-  useEffect(() => {
-    console.log("Watering Logs sa component", wateringLogs);
-  }, []);
-
+  
   const filtered = useMemo(() => {
     return wateringLogs.filter(r => {
       if (search && !r.plant_name.toLowerCase().includes(search.toLowerCase())) return false;
@@ -33,8 +34,8 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
     });
   }, [wateringLogs, search]);
 
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const onSearch = (v) => { setSearch(v); setPage(1); };
+  const paged     = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const onSearch  = (v) => { setSearch(v); setPage(1); };
 
   const totalLogs     = wateringLogs.length;
   const totalDuration = wateringLogs.reduce((sum, r) => sum + (r.duration || 0), 0);
@@ -46,7 +47,7 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
       Timestamp: fmtTs(r.ts),
       "Plant Name": r.plant_name,
       "Started At": r.started_at ? fmtTs(r.started_at) : "—",
-      "Ended At": r.ended_at ? fmtTs(r.ended_at) : "—",
+      "Ended At":   r.ended_at   ? fmtTs(r.ended_at)   : "—",
       "Duration (secs)": r.duration ?? "—",
     }));
   }, [filtered]);
@@ -87,13 +88,15 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
       {/* Search + Delete All */}
       <div className="flex flex-row-reverse flex-wrap items-center justify-start gap-2 mb-4">
         <SearchInput value={search} onChange={onSearch} placeholder="Search plant name..." />
-        <button
-          onClick={onDeleteAll}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-          style={{ backgroundColor: "var(--color-danger-b)", color: "#a30012" }}
-        >
-          Delete All
-        </button>
+        {isAdmin && (
+          <button
+            onClick={onDeleteAll}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
+            style={{ backgroundColor: "var(--color-danger-b)", color: "#a30012" }}
+          >
+            Delete All
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -106,45 +109,51 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
             <Th>Started At</Th>
             <Th>Ended At</Th>
             <Th>Duration</Th>
-            <Th>Action</Th>
+            {isAdmin && <Th>Action</Th>}
           </tr>
         </thead>
         <tbody>
-          {!paged.length ? <EmptyRow cols={7} /> : paged.map((r, index) => (
-            <Tr key={r.watering_log_id}>
-              <Td className="text-xs text-gray-400 tabular-nums">
-                {(page - 1) * PAGE_SIZE + index + 1}
-              </Td>
-              <Td className="text-xs text-gray-400 tabular-nums">
-                {fmtTs(r.ts)}
-              </Td>
-              <Td>
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                  🌿 {r.plant_name}
-                </span>
-              </Td>
-              <Td className="text-xs text-gray-400 tabular-nums">
-                {r.started_at ? fmtTs(r.started_at) : "—"}
-              </Td>
-              <Td className="text-xs text-gray-400 tabular-nums">
-                {r.ended_at ? fmtTs(r.ended_at) : "—"}
-              </Td>
-              <Td>
-                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                  {fmtDuration(r.duration)}
-                </span>
-              </Td>
-              <Td>
-                <button
-                  onClick={() => onDeleteOne(r)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-                  style={{ backgroundColor: "var(--color-danger-b)", color: "#a30012" }}
-                >
-                  🗑 Delete
-                </button>
-              </Td>
-            </Tr>
-          ))}
+          {!paged.length ? (
+            <EmptyRow cols={isAdmin ? 7 : 6} />
+          ) : (
+            paged.map((r, index) => (
+              <Tr key={r.watering_log_id}>
+                <Td className="text-xs text-gray-400 tabular-nums">
+                  {(page - 1) * PAGE_SIZE + index + 1}
+                </Td>
+                <Td className="text-xs text-gray-400 tabular-nums">
+                  {fmtTs(r.ts)}
+                </Td>
+                <Td>
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                    🌿 {r.plant_name}
+                  </span>
+                </Td>
+                <Td className="text-xs text-gray-400 tabular-nums">
+                  {r.started_at ? fmtTs(r.started_at) : "—"}
+                </Td>
+                <Td className="text-xs text-gray-400 tabular-nums">
+                  {r.ended_at ? fmtTs(r.ended_at) : "—"}
+                </Td>
+                <Td>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                    {fmtDuration(r.duration)}
+                  </span>
+                </Td>
+                {isAdmin && (
+                  <Td>
+                    <button
+                      onClick={() => onDeleteOne(r)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
+                      style={{ backgroundColor: "var(--color-danger-b)", color: "#a30012" }}
+                    >
+                      🗑 Delete
+                    </button>
+                  </Td>
+                )}
+              </Tr>
+            ))
+          )}
         </tbody>
       </TableWrap>
 

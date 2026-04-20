@@ -1,9 +1,17 @@
+// ExcelDownloadBtn.jsx
 import { Download } from "lucide-react";
-import { exportToExcel } from "../utils/exportToExcel";
+import { exportMultiSheetToExcel, exportToExcel } from "../utils/exportToExcel";
 
-function ExcelDownloadBtn({ data, filename = "export", sheetName = "Sheet1" }) {
+
+
+function ExcelDownloadBtn({ data, sheets, filename = "export", sheetName = "Sheet1", multi = false }) {
+
   const handleDownload = () => {
-    exportToExcel(data, filename, sheetName);
+    if (multi && sheets) {
+      exportMultiSheetToExcel(sheets, filename);
+    } else {
+      exportToExcel(data, filename, sheetName);
+    }
   };
 
   return (
@@ -16,6 +24,5 @@ function ExcelDownloadBtn({ data, filename = "export", sheetName = "Sheet1" }) {
     </button>
   );
 }
-
 
 export default ExcelDownloadBtn;

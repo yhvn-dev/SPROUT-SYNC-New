@@ -3,7 +3,8 @@ import { useUser } from "../../hooks/userContext";
 import {
   Wifi, WifiOff, Droplet, Sprout, Users, BarChart2, Bell,
   Lock, Leaf, BookOpen, HardDrive, AlertTriangle, CheckCircle,
-  Clock, Wrench, LogOut, ShieldCheck, Eye, ChevronDown, ChevronUp
+  Clock, Wrench, LogOut, ShieldCheck, Eye, ChevronDown, ChevronUp,
+  Droplets, FlaskConical, Waves
 } from "lucide-react";
 import { useDarkMode } from "../../hooks/useDarkmode";
 
@@ -52,6 +53,38 @@ const SECTIONS = [
     subsections: [
       { title: "Overview Section", body: "Shows: Total Active Seedlings, Active Grown, Active Dead, Active Replanted, average moisture from 3 representative plants, and latest water drum level.", visual: "stats" },
       { title: "Seedling Stats & History", body: "Displays data from harvested (deleted) batches. Monitor weekly growth progress and status percentage distribution charts." },
+    ],
+  },
+  {
+    id: "irrigation",
+    icon: <Droplets size={18}/>,
+    label: "Irrigation Monitoring",
+    color: "#0284c7",
+    description: "View real-time and historical data for soil moisture per plant, water drum level, and all watering events triggered by the system.",
+    subsections: [
+      {
+        title: "Plant Moisture Monitoring",
+        body: "Displays all soil moisture sensor readings per plant (Bokchoy, Pechay, Mustasa). Shows average moisture per plant, color-coded status badges (High / Medium / Low), and a progress bar per reading. You can filter by plant type, search by timestamp, and download the filtered data as Excel.",
+        visual: "irrigation_moisture",
+        steps: ["Open Irrigation Monitoring","Select 'Moisture' tab","Filter by plant type (Bokchoy / Pechay / Mustasa)","Search by timestamp if needed","Click Download to export as Excel"],
+      },
+      {
+        title: "Water Level Monitoring",
+        body: "Shows historical readings from the ultrasonic sensor mounted on the water drum. Displays average, minimum, and maximum levels. Filter by status (Normal / Low / Critical). Each row shows a visual progress bar and color-coded status badge.",
+        visual: "irrigation_water",
+        steps: ["Select 'Water Level' tab","Filter by status: Normal, Low, or Critical","Review min/max/average stat cards","Download filtered logs as Excel"],
+      },
+      {
+        title: "Watering Logs",
+        body: "Records every irrigation event — when watering started, ended, duration, and which plant was watered. Search by plant name to narrow results. Useful for auditing automatic watering cycles.",
+        visual: "irrigation_logs",
+        steps: ["Select 'Watering Logs' tab","Search by plant name if needed","Review start time, end time, and duration per event","Download logs as Excel"],
+      },
+      {
+        title: "Deleting Records (Admin Only)",
+        body: "Admins can delete individual readings via the Delete button per row, or clear all readings at once using the Delete All button. A confirmation popup will appear before bulk deletion.",
+        steps: ["Locate the record to delete","Click Delete on that row","Or click Delete All to clear all records","Confirm the popup"],
+      },
     ],
   },
   {
@@ -130,7 +163,7 @@ const SECTIONS = [
   },
 ];
 
-const FARMER_SECTION_IDS = ["dashboard", "analytics", "alerts", "hardware", "troubleshoot", "logout"];
+const FARMER_SECTION_IDS = ["dashboard", "analytics", "irrigation", "alerts", "hardware", "troubleshoot", "logout"];
 
 /* ─── MOCK SENSOR DATA ─── */
 const MOCK_SENSORS = [
@@ -303,6 +336,129 @@ function MiniVisual({ type, isDark }) {
             <p className="text-xs font-semibold" style={{ color }}>{title}</p>
             <p className="text-xs" style={{ color: dm.textMuted }}>{sub}</p>
           </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ── IRRIGATION MOISTURE VISUAL ──
+  if (type === "irrigation_moisture") return (
+    <div className="mt-3 space-y-2">
+      {/* Stat cards */}
+      <div className="grid grid-cols-3 gap-1.5 mb-2">
+        {[
+          ["Bokchoy avg", "62.4%", isDark ? "#34d399" : "#027e69"],
+          ["Pechay avg",  "48.1%", isDark ? "#38bdf8" : "#0284c7"],
+          ["Mustasa avg", "71.0%", isDark ? "#a3e635" : "#4d7c0f"],
+        ].map(([l, v, c]) => (
+          <div key={l} className="rounded-lg p-2 text-center" style={{ background: dm.cardBg, border: `1px solid ${dm.border}` }}>
+            <p className="text-sm font-bold" style={{ color: c }}>{v}</p>
+            <p className="text-[9px] uppercase tracking-wide" style={{ color: dm.textMuted }}>{l}</p>
+          </div>
+        ))}
+      </div>
+      {/* Table rows */}
+      {[
+        { plant: "Bokchoy", val: 62, status: "High",   sc: isDark ? "bg-emerald-900 text-emerald-300" : "bg-emerald-100 text-emerald-800", dot: isDark ? "bg-emerald-400" : "bg-emerald-500" },
+        { plant: "Pechay",  val: 48, status: "Medium", sc: isDark ? "bg-amber-900 text-amber-300"    : "bg-amber-100 text-amber-800",    dot: isDark ? "bg-amber-400"   : "bg-amber-400"   },
+        { plant: "Mustasa", val: 21, status: "Low",    sc: isDark ? "bg-red-900 text-red-300"        : "bg-red-100 text-red-800",        dot: isDark ? "bg-red-400"     : "bg-red-500"     },
+      ].map(r => (
+        <div key={r.plant} className="flex items-center gap-3 rounded-lg px-3 py-2"
+          style={{ background: dm.cardBg, border: `1px solid ${dm.border}` }}>
+          <span className="text-xs font-semibold w-14" style={{ color: isDark ? "#34d399" : "#085041" }}>{r.plant}</span>
+          <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: isDark ? "#374151" : "#e5e7eb" }}>
+            <div className="h-full rounded-full" style={{
+              width: `${r.val}%`,
+              background: r.val >= 60 ? "#34d399" : r.val >= 35 ? "#fbbf24" : "#f87171"
+            }} />
+          </div>
+          <span className="text-xs font-bold w-10 text-right" style={{ color: dm.textPrimary }}>{r.val}%</span>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${r.sc}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${r.dot}`} />
+            {r.status}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ── IRRIGATION WATER LEVEL VISUAL ──
+  if (type === "irrigation_water") return (
+    <div className="mt-3 space-y-2">
+      {/* Stat cards */}
+      <div className="grid grid-cols-3 gap-1.5 mb-2">
+        {[
+          ["Average", "54%", isDark ? "#34d399" : "#027e69"],
+          ["Minimum", "22%", isDark ? "#f87171" : "#dc2626"],
+          ["Maximum", "89%", isDark ? "#38bdf8" : "#0284c7"],
+        ].map(([l, v, c]) => (
+          <div key={l} className="rounded-lg p-2 text-center" style={{ background: dm.cardBg, border: `1px solid ${dm.border}` }}>
+            <p className="text-sm font-bold" style={{ color: c }}>{v}</p>
+            <p className="text-[9px] uppercase tracking-wide" style={{ color: dm.textMuted }}>{l}</p>
+          </div>
+        ))}
+      </div>
+      {/* Rows */}
+      {[
+        { ts: "Apr 20, 2026  08:12 AM", val: 89, status: "Normal",   sc: isDark ? "bg-emerald-900 text-emerald-300" : "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" },
+        { ts: "Apr 19, 2026  03:45 PM", val: 42, status: "Low",      sc: isDark ? "bg-amber-900 text-amber-300"    : "bg-amber-100 text-amber-700",    dot: "bg-amber-500"   },
+        { ts: "Apr 18, 2026  11:00 AM", val: 22, status: "Critical", sc: isDark ? "bg-red-900 text-red-300"        : "bg-red-100 text-red-700",        dot: "bg-red-500"     },
+      ].map(r => (
+        <div key={r.ts} className="flex items-center gap-3 rounded-lg px-3 py-2"
+          style={{ background: dm.cardBg, border: `1px solid ${dm.border}` }}>
+          <span className="text-[10px] tabular-nums w-32 shrink-0" style={{ color: dm.textMuted }}>{r.ts}</span>
+          <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: isDark ? "#374151" : "#e5e7eb" }}>
+            <div className="h-full rounded-full" style={{
+              width: `${r.val}%`,
+              background: r.val >= 60 ? "#34d399" : r.val >= 30 ? "#fbbf24" : "#f87171"
+            }} />
+          </div>
+          <span className="text-xs font-bold w-10 text-right" style={{ color: dm.textPrimary }}>{r.val}%</span>
+          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${r.sc}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${r.dot}`} />
+            {r.status}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ── WATERING LOGS VISUAL ──
+  if (type === "irrigation_logs") return (
+    <div className="mt-3 space-y-2">
+      {/* Stat cards */}
+      <div className="grid grid-cols-3 gap-1.5 mb-2">
+        {[
+          ["Total Logs",     "24",    isDark ? "#34d399" : "#027e69"],
+          ["Unique Plants",  "3",     isDark ? "#38bdf8" : "#2563eb"],
+          ["Total Duration", "18m 4s",isDark ? "#fb923c" : "#ea580c"],
+        ].map(([l, v, c]) => (
+          <div key={l} className="rounded-lg p-2 text-center" style={{ background: dm.cardBg, border: `1px solid ${dm.border}` }}>
+            <p className="text-sm font-bold" style={{ color: c }}>{v}</p>
+            <p className="text-[9px] uppercase tracking-wide" style={{ color: dm.textMuted }}>{l}</p>
+          </div>
+        ))}
+      </div>
+      {/* Log rows */}
+      {[
+        { plant: "Bokchoy", started: "08:10 AM", ended: "08:12 AM", dur: "2m 0s" },
+        { plant: "Pechay",  started: "03:42 PM", ended: "03:45 PM", dur: "3m 0s" },
+        { plant: "Mustasa", started: "10:58 AM", ended: "11:01 AM", dur: "3m 2s" },
+      ].map(r => (
+        <div key={r.plant} className="rounded-lg px-3 py-2 flex items-center gap-3"
+          style={{ background: dm.cardBg, border: `1px solid ${dm.border}` }}>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full"
+            style={{ background: isDark ? "#064e3b" : "#d1fae5", color: isDark ? "#34d399" : "#065f46" }}>
+            🌿 {r.plant}
+          </span>
+          <div className="flex flex-col text-[10px]" style={{ color: dm.textMuted }}>
+            <span>▶ {r.started}</span>
+            <span>⏹ {r.ended}</span>
+          </div>
+          <span className="ml-auto px-2 py-0.5 rounded-full text-xs font-semibold"
+            style={{ background: isDark ? "#1e3a5f" : "#dbeafe", color: isDark ? "#93c5fd" : "#1d4ed8" }}>
+            {r.dur}
+          </span>
         </div>
       ))}
     </div>

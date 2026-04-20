@@ -2,8 +2,8 @@ import { useState } from "react";
 import {
   ChevronDown, ChevronUp, Wifi, WifiOff, Droplet,
   BarChart2, Bell, HardDrive, AlertTriangle, CheckCircle,
-  Clock, LogOut, BookOpen, Eye
-} from "lucide-react";
+  Clock, LogOut, BookOpen, Eye, Droplets
+} from "lucide-react"; // ← add Droplets
 
 const MOISTURE_COLORS = {
   dry:     { bg: "hsl(355,100%,95%)", text: "hsl(355,100%,45%)", border: "hsl(355,100%,80%)" },
@@ -52,6 +52,49 @@ const SECTIONS = [
       {
         title: "Seedling Stats & History",
         body: "Displays data from harvested (deleted) batches. Monitor weekly growth progress and status percentage distribution charts.",
+      },
+    ],
+  },
+  {
+    id: "irrigation",
+    icon: <Droplets size={16} />,
+    label: "Irrigation Monitoring",
+    color: "#0284c7",
+    description: "View real-time and historical data for soil moisture per plant, water drum level, and all watering events triggered by the system.",
+    subsections: [
+      {
+        title: "Plant Moisture Monitoring",
+        body: "Displays all soil moisture sensor readings per plant (Bokchoy, Pechay, Mustasa). Shows average moisture per plant, color-coded status badges (High / Medium / Low), and a progress bar per reading. You can filter by plant type, search by timestamp, and download the filtered data as Excel.",
+        visual: "irrigation_moisture",
+        steps: [
+          "Open Irrigation Monitoring",
+          "Select 'Moisture' tab",
+          "Filter by plant type (Bokchoy / Pechay / Mustasa)",
+          "Search by timestamp if needed",
+          "Click Download to export as Excel",
+        ],
+      },
+      {
+        title: "Water Level Monitoring",
+        body: "Shows historical readings from the ultrasonic sensor mounted on the water drum. Displays average, minimum, and maximum levels. Filter by status (Normal / Low / Critical). Each row shows a visual progress bar and color-coded status badge.",
+        visual: "irrigation_water",
+        steps: [
+          "Select 'Water Level' tab",
+          "Filter by status: Normal, Low, or Critical",
+          "Review min/max/average stat cards",
+          "Download filtered logs as Excel",
+        ],
+      },
+      {
+        title: "Watering Logs",
+        body: "Records every irrigation event — when watering started, ended, duration, and which plant was watered. Search by plant name to narrow results. Useful for monitoring automatic watering cycles.",
+        visual: "irrigation_logs",
+        steps: [
+          "Select 'Watering Logs' tab",
+          "Search by plant name if needed",
+          "Review start time, end time, and duration per event",
+          "Download logs as Excel",
+        ],
       },
     ],
   },
@@ -163,12 +206,8 @@ function MiniVisual({ type }) {
       <div className="flex items-center gap-3 bg-white rounded-xl p-3 border border-[#c4ded0] mt-3">
         <Wifi size={20} className="text-[#027e69]" />
         <div>
-          <p className="text-xs font-semibold text-gray-800 leading-none">
-            Watering System Online
-          </p>
-          <p className="text-[10px] text-gray-400 mt-0.5">
-            Last updated: Just now
-          </p>
+          <p className="text-xs font-semibold text-gray-800 leading-none">Watering System Online</p>
+          <p className="text-[10px] text-gray-400 mt-0.5">Last updated: Just now</p>
         </div>
         <span className="ml-auto w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
       </div>
@@ -182,31 +221,11 @@ function MiniVisual({ type }) {
           ["Optimal", "optimal", 62],
           ["Wet", "wet", 91],
         ].map(([label, key, val]) => (
-          <div
-            key={key}
-            className="rounded-xl p-2 text-center"
-            style={{
-              background: MOISTURE_COLORS[key].bg,
-              border: `1px solid ${MOISTURE_COLORS[key].border}`,
-            }}
-          >
-            <Droplet
-              size={14}
-              style={{ color: MOISTURE_COLORS[key].text }}
-              className="mx-auto mb-1"
-            />
-            <p
-              className="text-[10px] font-bold"
-              style={{ color: MOISTURE_COLORS[key].text }}
-            >
-              {val}%
-            </p>
-            <p
-              className="text-[9px]"
-              style={{ color: MOISTURE_COLORS[key].text }}
-            >
-              {label}
-            </p>
+          <div key={key} className="rounded-xl p-2 text-center"
+            style={{ background: MOISTURE_COLORS[key].bg, border: `1px solid ${MOISTURE_COLORS[key].border}` }}>
+            <Droplet size={14} style={{ color: MOISTURE_COLORS[key].text }} className="mx-auto mb-1" />
+            <p className="text-[10px] font-bold" style={{ color: MOISTURE_COLORS[key].text }}>{val}%</p>
+            <p className="text-[9px]" style={{ color: MOISTURE_COLORS[key].text }}>{label}</p>
           </div>
         ))}
       </div>
@@ -217,33 +236,21 @@ function MiniVisual({ type }) {
       <div className="mt-3 bg-white rounded-xl p-3 border border-[#c4ded0] space-y-2">
         <div className="flex items-center gap-2">
           <span className="text-[11px] text-gray-500">Growth Stage:</span>
-          <span
-            className="text-[10px] px-2 py-0.5 rounded-full font-medium"
-            style={{
-              background: STAGE_PILL.bg,
-              color: STAGE_PILL.text,
-              border: `1px solid ${STAGE_PILL.border}`,
-            }}
-          >
+          <span className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+            style={{ background: STAGE_PILL.bg, color: STAGE_PILL.text, border: `1px solid ${STAGE_PILL.border}` }}>
             Seedling
           </span>
         </div>
         {[
           ["Due Tomorrow", "hsl(35,100%,50%)"],
-          ["Due Now", "hsl(220,74%,62%)"],
-          ["Past Due", "hsl(353,70%,60%)"],
+          ["Due Now",      "hsl(220,74%,62%)"],
+          ["Past Due",     "hsl(353,70%,60%)"],
         ].map(([s, c]) => (
           <div key={s} className="flex items-center gap-2">
             <Clock size={11} className="text-gray-400" />
             <span className="text-[11px] text-gray-500">Harvest:</span>
-            <span
-              className="flex items-center gap-1 text-[10px] font-medium"
-              style={{ color: c }}
-            >
-              <span
-                className="w-2 h-2 rounded-full inline-block"
-                style={{ background: c }}
-              />
+            <span className="flex items-center gap-1 text-[10px] font-medium" style={{ color: c }}>
+              <span className="w-2 h-2 rounded-full inline-block" style={{ background: c }} />
               {s}
             </span>
           </div>
@@ -256,17 +263,12 @@ function MiniVisual({ type }) {
       <div className="mt-3 grid grid-cols-4 gap-1.5">
         {[
           ["Seedlings", "248", "#25a244"],
-          ["Grown", "182", "#208b3a"],
-          ["Dead", "14", "hsl(355,100%,45%)"],
-          ["Replants", "12", "hsl(35,80%,40%)"],
+          ["Grown",     "182", "#208b3a"],
+          ["Dead",      "14",  "hsl(355,100%,45%)"],
+          ["Replants",  "12",  "hsl(35,80%,40%)"],
         ].map(([l, v, c]) => (
-          <div
-            key={l}
-            className="rounded-lg p-2 text-center bg-white border border-[#c4ded0]"
-          >
-            <p className="text-sm font-bold" style={{ color: c }}>
-              {v}
-            </p>
+          <div key={l} className="rounded-lg p-2 text-center bg-white border border-[#c4ded0]">
+            <p className="text-sm font-bold" style={{ color: c }}>{v}</p>
             <p className="text-[9px] text-gray-500">{l}</p>
           </div>
         ))}
@@ -277,23 +279,132 @@ function MiniVisual({ type }) {
     return (
       <div className="mt-3 space-y-1.5">
         {[
-          [AlertTriangle, "Low Moisture", "Auto-watering triggered", "hsl(355,100%,45%)", "hsl(355,100%,95%)"],
-          [AlertTriangle, "Low Water Level", "Refill drum soon", "hsl(35,80%,40%)", "hsl(35,100%,94%)"],
-          [WifiOff, "System Offline", "Check power & Wi-Fi", "hsl(220,2%,43%)", "hsl(0,0%,94%)"],
-          [CheckCircle, "Harvest Ready", "Batch due today", "hsl(125,60%,28%)", "hsl(125,60%,94%)"],
+          [AlertTriangle, "Low Moisture",    "Auto-watering triggered", "hsl(355,100%,45%)", "hsl(355,100%,95%)"],
+          [AlertTriangle, "Low Water Level", "Refill drum soon",        "hsl(35,80%,40%)",  "hsl(35,100%,94%)"],
+          [WifiOff,       "System Offline",  "Check power & Wi-Fi",     "hsl(220,2%,43%)",  "hsl(0,0%,94%)"],
+          [CheckCircle,   "Harvest Ready",   "Batch due today",         "hsl(125,60%,28%)", "hsl(125,60%,94%)"],
         ].map(([Icon, title, sub, color, bg]) => (
-          <div
-            key={title}
-            className="flex items-start gap-2 rounded-lg px-3 py-2"
-            style={{ background: bg }}
-          >
+          <div key={title} className="flex items-start gap-2 rounded-lg px-3 py-2" style={{ background: bg }}>
             <Icon size={13} style={{ color, marginTop: 1 }} />
             <div>
-              <p className="text-[10px] font-semibold" style={{ color }}>
-                {title}
-              </p>
+              <p className="text-[10px] font-semibold" style={{ color }}>{title}</p>
               <p className="text-[9px] text-gray-500">{sub}</p>
             </div>
+          </div>
+        ))}
+      </div>
+    );
+
+  // ── IRRIGATION MOISTURE ──
+  if (type === "irrigation_moisture")
+    return (
+      <div className="mt-3 space-y-2">
+        <div className="grid grid-cols-3 gap-1.5 mb-2">
+          {[
+            ["Bokchoy avg", "62.4%", "#027e69"],
+            ["Pechay avg",  "48.1%", "#0284c7"],
+            ["Mustasa avg", "71.0%", "#4d7c0f"],
+          ].map(([l, v, c]) => (
+            <div key={l} className="rounded-lg p-2 text-center bg-white border border-[#c4ded0]">
+              <p className="text-sm font-bold" style={{ color: c }}>{v}</p>
+              <p className="text-[9px] text-gray-500">{l}</p>
+            </div>
+          ))}
+        </div>
+        {[
+          { plant: "Bokchoy", val: 62, status: "High",   sc: "bg-emerald-100 text-emerald-800", dot: "bg-emerald-500" },
+          { plant: "Pechay",  val: 48, status: "Medium", sc: "bg-amber-100 text-amber-800",     dot: "bg-amber-400"   },
+          { plant: "Mustasa", val: 21, status: "Low",    sc: "bg-red-100 text-red-800",         dot: "bg-red-500"     },
+        ].map(r => (
+          <div key={r.plant} className="flex items-center gap-3 rounded-lg px-3 py-2 bg-white border border-[#c4ded0]">
+            <span className="text-[10px] font-semibold w-14 text-[#085041]">{r.plant}</span>
+            <div className="flex-1 h-2 rounded-full overflow-hidden bg-gray-100">
+              <div className="h-full rounded-full" style={{
+                width: `${r.val}%`,
+                background: r.val >= 60 ? "#34d399" : r.val >= 35 ? "#fbbf24" : "#f87171"
+              }} />
+            </div>
+            <span className="text-[10px] font-bold w-8 text-right text-gray-700">{r.val}%</span>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold ${r.sc}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${r.dot}`} />
+              {r.status}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+
+  // ── IRRIGATION WATER LEVEL ──
+  if (type === "irrigation_water")
+    return (
+      <div className="mt-3 space-y-2">
+        <div className="grid grid-cols-3 gap-1.5 mb-2">
+          {[
+            ["Average", "54%", "#027e69"],
+            ["Minimum", "22%", "#dc2626"],
+            ["Maximum", "89%", "#0284c7"],
+          ].map(([l, v, c]) => (
+            <div key={l} className="rounded-lg p-2 text-center bg-white border border-[#c4ded0]">
+              <p className="text-sm font-bold" style={{ color: c }}>{v}</p>
+              <p className="text-[9px] text-gray-500">{l}</p>
+            </div>
+          ))}
+        </div>
+        {[
+          { ts: "Apr 20  08:12 AM", val: 89, status: "Normal",   sc: "bg-emerald-100 text-emerald-700", dot: "bg-emerald-500" },
+          { ts: "Apr 19  03:45 PM", val: 42, status: "Low",      sc: "bg-amber-100 text-amber-700",     dot: "bg-amber-500"   },
+          { ts: "Apr 18  11:00 AM", val: 22, status: "Critical", sc: "bg-red-100 text-red-700",         dot: "bg-red-500"     },
+        ].map(r => (
+          <div key={r.ts} className="flex items-center gap-2 rounded-lg px-3 py-2 bg-white border border-[#c4ded0]">
+            <span className="text-[9px] tabular-nums w-28 shrink-0 text-gray-400">{r.ts}</span>
+            <div className="flex-1 h-2 rounded-full overflow-hidden bg-gray-100">
+              <div className="h-full rounded-full" style={{
+                width: `${r.val}%`,
+                background: r.val >= 60 ? "#34d399" : r.val >= 30 ? "#fbbf24" : "#f87171"
+              }} />
+            </div>
+            <span className="text-[10px] font-bold w-8 text-right text-gray-700">{r.val}%</span>
+            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-semibold ${r.sc}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${r.dot}`} />
+              {r.status}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+
+  // ── WATERING LOGS ──
+  if (type === "irrigation_logs")
+    return (
+      <div className="mt-3 space-y-2">
+        <div className="grid grid-cols-3 gap-1.5 mb-2">
+          {[
+            ["Total Logs",     "24",     "#027e69"],
+            ["Unique Plants",  "3",      "#2563eb"],
+            ["Total Duration", "18m 4s", "#ea580c"],
+          ].map(([l, v, c]) => (
+            <div key={l} className="rounded-lg p-2 text-center bg-white border border-[#c4ded0]">
+              <p className="text-sm font-bold" style={{ color: c }}>{v}</p>
+              <p className="text-[9px] text-gray-500">{l}</p>
+            </div>
+          ))}
+        </div>
+        {[
+          { plant: "Bokchoy", started: "08:10 AM", ended: "08:12 AM", dur: "2m 0s" },
+          { plant: "Pechay",  started: "03:42 PM", ended: "03:45 PM", dur: "3m 0s" },
+          { plant: "Mustasa", started: "10:58 AM", ended: "11:01 AM", dur: "3m 2s" },
+        ].map(r => (
+          <div key={r.plant} className="rounded-lg px-3 py-2 flex items-center gap-3 bg-white border border-[#c4ded0]">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+              🌿 {r.plant}
+            </span>
+            <div className="flex flex-col text-[9px] text-gray-400">
+              <span>▶ {r.started}</span>
+              <span>⏹ {r.ended}</span>
+            </div>
+            <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700">
+              {r.dur}
+            </span>
           </div>
         ))}
       </div>
@@ -323,24 +434,14 @@ function SectionCard({ section }) {
   const [openIdx, setOpenIdx] = useState(null);
   return (
     <div className="rounded-2xl overflow-hidden border border-[#c4ded0] bg-white shadow-sm">
-      <div
-        className="px-4 py-3 flex items-center gap-2.5"
-        style={{
-          background: `${section.color}12`,
-          borderBottom: "1px solid #c4ded030",
-        }}
-      >
-        <div
-          className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: section.color }}
-        >
+      <div className="px-4 py-3 flex items-center gap-2.5"
+        style={{ background: `${section.color}12`, borderBottom: "1px solid #c4ded030" }}>
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: section.color }}>
           <span style={{ color: "#fff" }}>{section.icon}</span>
         </div>
         <div>
           <p className="text-sm font-semibold text-gray-800">{section.label}</p>
-          <p className="text-[10px] text-gray-500 leading-tight">
-            {section.description}
-          </p>
+          <p className="text-[10px] text-gray-500 leading-tight">{section.description}</p>
         </div>
       </div>
 
@@ -351,23 +452,15 @@ function SectionCard({ section }) {
               className="w-full flex items-center justify-between px-4 py-2.5 text-left hover:bg-[#f5faf7] transition-colors"
               onClick={() => setOpenIdx(openIdx === i ? null : i)}
             >
-              <span className="text-xs font-medium text-gray-700">
-                {sub.title}
-              </span>
-              {openIdx === i ? (
-                <ChevronUp size={13} className="text-gray-400 flex-shrink-0" />
-              ) : (
-                <ChevronDown
-                  size={13}
-                  className="text-gray-400 flex-shrink-0"
-                />
-              )}
+              <span className="text-xs font-medium text-gray-700">{sub.title}</span>
+              {openIdx === i
+                ? <ChevronUp size={13} className="text-gray-400 flex-shrink-0" />
+                : <ChevronDown size={13} className="text-gray-400 flex-shrink-0" />
+              }
             </button>
             {openIdx === i && (
               <div className="px-4 pb-3">
-                <p className="text-[11px] text-gray-600 leading-relaxed">
-                  {sub.body}
-                </p>
+                <p className="text-[11px] text-gray-600 leading-relaxed">{sub.body}</p>
                 {sub.steps && <StepList steps={sub.steps} />}
                 {sub.visual && <MiniVisual type={sub.visual} />}
               </div>
@@ -381,35 +474,22 @@ function SectionCard({ section }) {
 
 /* ─── MAIN ─── */
 function Farmer_guide({ activeSection }) {
-  const currentSection =
-    SECTIONS.find((s) => s.id === activeSection) || SECTIONS[0];
+  const currentSection = SECTIONS.find((s) => s.id === activeSection) || SECTIONS[0];
 
   return (
     <section className="w-full min-h-full bg-gradient-to-br from-[#E8F3ED] to-[#C4DED0] p-4 md:p-6">
 
       {/* Page Title */}
       <div className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 shadow-sm border border-[#c4ded0] mb-4">
-        <div
-          className="w-9 h-9 rounded-xl flex items-center justify-center"
-          style={{ background: "#027e69" }}
-        >
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "#027e69" }}>
           <BookOpen size={16} className="text-white" />
         </div>
         <div>
-          <h1 className="text-base font-semibold text-gray-900 leading-none">
-            Farmer Guide — SproutSync
-          </h1>
-          <p className="text-[11px] text-gray-400 mt-0.5">
-            Reference for monitoring and hardware features
-          </p>
+          <h1 className="text-base font-semibold text-gray-900 leading-none">Farmer Guide — SproutSync</h1>
+          <p className="text-[11px] text-gray-400 mt-0.5">Reference for monitoring and hardware features</p>
         </div>
-        <span
-          className="ml-auto flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full"
-          style={{
-            background: "hsl(180,2%,90%)",
-            color: "hsl(180,3%,29%)",
-          }}
-        >
+        <span className="ml-auto flex items-center gap-1 text-[10px] font-semibold px-2.5 py-1 rounded-full"
+          style={{ background: "hsl(180,2%,90%)", color: "hsl(180,3%,29%)" }}>
           <Eye size={11} />
           Farmer
         </span>
@@ -422,19 +502,12 @@ function Farmer_guide({ activeSection }) {
 
       {/* Footer */}
       <div className="mt-4 rounded-xl border border-[#c4ded0] bg-white px-4 py-3 flex items-start gap-2">
-        <CheckCircle
-          size={13}
-          className="text-[#027e69] mt-0.5 flex-shrink-0"
-        />
+        <CheckCircle size={13} className="text-[#027e69] mt-0.5 flex-shrink-0" />
         <p className="text-[10px] text-gray-500 leading-relaxed">
           For additional support, contact the SproutSync team at{" "}
-          <span className="text-[#027e69] font-medium">
-            sproutsync031@gmail.com
-          </span>{" "}
+          <span className="text-[#027e69] font-medium">sproutsync031@gmail.com</span>{" "}
           or visit{" "}
-          <span className="text-[#027e69] font-medium">
-            sprout-sync-phi.vercel.app
-          </span>
+          <span className="text-[#027e69] font-medium">sprout-sync-phi.vercel.app</span>
         </p>
       </div>
     </section>

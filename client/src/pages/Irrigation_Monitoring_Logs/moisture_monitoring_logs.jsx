@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { FilterBtn, TableWrap, Tr, Td, Pager, Th, EmptyRow, SearchInput } from "./components/irrigation_monitoring_components";
 import { Trash2 } from "lucide-react";
 import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx";
+import { useUser } from "../../hooks/userContext.jsx";
 
 const PLANT_MAP = { 5: "Bokchoy", 6: "Pechay", 7: "Mustasa" };
 const PAGE_SIZE = 8;
@@ -20,6 +21,9 @@ function getMoistureMeta(v) {
 }
 
 function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll }) {
+  const { user } = useUser();
+  const isAdmin = user?.role === "admin";
+
   const [plantFilter, setPlantFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [page, setPage]     = useState(1);
@@ -62,7 +66,6 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
           <h2 className="text-xl font-bold text-gray-800">Plant Moisture Monitoring</h2>
           <p className="text-xs text-gray-400 mt-0.5">Soil sensor readings — real-time moisture data per plant</p>
         </div>
-
         <ExcelDownloadBtn
           data={exportData}
           filename={exportFilename}
@@ -95,14 +98,16 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
         <div className="flex items-center gap-2">
           <SearchInput value={search} onChange={onSearch} placeholder="Search timestamp..." />
 
-          <button
-            onClick={onDeleteAll}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-            style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
-          >
-            <Trash2 size={13} />
-            Delete All
-          </button>
+          {isAdmin && (
+            <button
+              onClick={onDeleteAll}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
+              style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
+            >
+              <Trash2 size={13} />
+              Delete All
+            </button>
+          )}
         </div>
       </div>
 
@@ -115,11 +120,11 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
             <Th>Plant Type</Th>
             <Th>Moisture</Th>
             <Th>Status</Th>
-            <Th>Action</Th>
+            {isAdmin && <Th>Action</Th>}
           </tr>
         </thead>
         <tbody>
-          {!paged.length ? <EmptyRow cols={6} /> : paged.map((r, index) => {
+          {!paged.length ? <EmptyRow cols={isAdmin ? 6 : 5} /> : paged.map((r, index) => {
             const plant = PLANT_MAP[r.sensor_id] || "Unknown";
             const m     = getMoistureMeta(r.value);
             const val   = parseFloat(r.value);
@@ -153,16 +158,18 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
                     {m.label}
                   </span>
                 </Td>
-                <Td>
-                  <button
-                    onClick={() => onDeleteOne(r)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-                    style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
-                  >
-                    <Trash2 size={12} />
-                    Delete
-                  </button>
-                </Td>
+                {isAdmin && (
+                  <Td>
+                    <button
+                      onClick={() => onDeleteOne(r)}
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
+                      style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
+                    >
+                      <Trash2 size={12} />
+                      Delete
+                    </button>
+                  </Td>
+                )}
               </Tr>
             );
           })}
@@ -173,7 +180,5 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
     </div>
   );
 }
-
-
 
 export default MoistureMonitoring;

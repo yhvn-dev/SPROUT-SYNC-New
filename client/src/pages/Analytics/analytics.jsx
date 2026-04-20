@@ -18,7 +18,6 @@ import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { DeleteNotifModal } from "../../components/deleteNotifModal.jsx";
 
 
-
 export default function Analytics() {
   const { user, skippedRegister} = useUser()
   const {

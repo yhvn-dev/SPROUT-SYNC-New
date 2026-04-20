@@ -22,8 +22,6 @@ import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
 import * as readingsService from "../../data/readingsServices.jsx";
 import { Menu } from "lucide-react";
 
-
-
 export default function Irrigation_Monitoring_Logs() {
   const { user } = useUser();
   const {
@@ -40,7 +38,6 @@ export default function Irrigation_Monitoring_Logs() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // ── Delete Modal State ────────────────────────────────────────────────
   const [deleteModal, setDeleteModal] = useState({
     open: false,
     mode: null,
@@ -57,57 +54,60 @@ export default function Irrigation_Monitoring_Logs() {
   const closeDeleteModal = () =>
     setDeleteModal({ open: false, mode: null, logType: null, log: null });
 
-  // ── Data ──────────────────────────────────────────────────────────────
-  const { readings = [], setReadings } = usePlantData();
+  // ── loadNotifs galing na sa usePlantData tulad ng Dashboard ──
+  const { readings = [], loadReadings, loadNotifs } = usePlantData();
   const { wateringLogs, removeWateringLog, removeAllWateringLogs } = useWateringLog();
 
   const moistureReadings = readings.filter(r => [5, 6, 7].includes(r.sensor_id));
   const waterLevelReadings = readings.filter(r => r.sensor_id === 8);
 
-  // ── Confirm Delete Handler ────────────────────────────────────────────
   const handleDeleteConfirm = async () => {
     const { mode, logType, log } = deleteModal;
 
     try {
-      // ── WATERING LOGS ──
       if (logType === "watering") {
         if (mode === "delete-all") {
           await removeAllWateringLogs();
+          setMessageContext("All watering logs deleted.");
         } else {
           await removeWateringLog(log.watering_log_id);
+          setMessageContext("Watering log deleted.");
         }
       }
 
-      // ── WATER LEVEL ──
       if (logType === "water-level") {
         if (mode === "delete-all") {
           await readingsService.deleteAllReadingsByType("ultra_sonic");
-          setReadings(prev => prev.filter(r => r.sensor_id !== 8));
+          await loadReadings();
+          setMessageContext("All water level logs deleted.");
         } else {
           await readingsService.deleteReading(log.reading_id);
-          setReadings(prev => prev.filter(r => r.reading_id !== log.reading_id));
+          await loadReadings();
+          setMessageContext("Water level data deleted.");
         }
       }
 
-      // ── MOISTURE ──
       if (logType === "moisture") {
         if (mode === "delete-all") {
           await readingsService.deleteAllReadingsByType("moisture");
-          setReadings(prev => prev.filter(r => ![5, 6, 7].includes(r.sensor_id)));
+          await loadReadings();
+          setMessageContext("All moisture logs deleted.");
         } else {
           await readingsService.deleteReading(log.reading_id);
-          setReadings(prev => prev.filter(r => r.reading_id !== log.reading_id));
+          await loadReadings();
+          setMessageContext("Soil Moisture log deleted.");
         }
       }
 
+
     } catch (err) {
       console.error("Delete failed:", err?.message || err);
+      setMessageContext("Something went wrong. Please try again.");
     } finally {
       closeDeleteModal();
     }
   };
 
-  // ── Pages ─────────────────────────────────────────────────────────────
   const PAGES = [
     {
       id: "watering",
@@ -143,7 +143,7 @@ export default function Irrigation_Monitoring_Logs() {
     },
     {
       id: "moisture",
-      label: "Plant Moisture",
+      label: "Soil Moisture",
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
@@ -162,12 +162,8 @@ export default function Irrigation_Monitoring_Logs() {
   const current = PAGES.find(p => p.id === activePage);
   if (!user) return <div>Loading...</div>;
 
-
-
-
-  
   return (
-    <section className="con_main w-full min-h-screen bg-gradient-to-br overflow-hidden  from-[#E8F3ED] to-[#C4DED0] flex flex-col md:grid md:grid-cols-[15fr_85fr] md:grid-rows-[auto_1fr] gap-4 relative">
+    <section className="con_main w-full min-h-screen bg-gradient-to-br overflow-hidden from-[#E8F3ED] to-[#C4DED0] flex flex-col md:grid md:grid-cols-[15fr_85fr] md:grid-rows-[auto_1fr] gap-4 relative">
       <button onClick={() => setSidebarOpen(true)}
         className="menu_button md:hidden fixed top-4 left-4 z-40 bg-white p-2.5 rounded-lg shadow-lg">
         <Menu size={22} />
@@ -199,7 +195,6 @@ export default function Irrigation_Monitoring_Logs() {
             </nav>
           </div>
 
-          {/* ── CONTENT CARD with internal scroll ── */}
           <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 overflow-hidden">
             {current?.component}
           </div>
@@ -207,7 +202,6 @@ export default function Irrigation_Monitoring_Logs() {
         </div>
       </div>
 
-      {/* ── MODALS ── */}
       {deleteModal.open && (
         <DeleteLogsModal
           mode={deleteModal.mode}
@@ -219,13 +213,21 @@ export default function Irrigation_Monitoring_Logs() {
       )}
 
       {openDeleteNotifModal && (
-        <DeleteNotifModal isOpen={openDeleteNotifModal} selectedNotif={selectedNotif}
-          deleteMode={deleteMode} onClose={() => setOpenDeleteNotifModal(false)} />
+        <DeleteNotifModal
+          isOpen={openDeleteNotifModal}
+          selectedNotif={selectedNotif}
+          deleteMode={deleteMode}
+          onClose={() => setOpenDeleteNotifModal(false)}
+          loadNotifs={loadNotifs}
+        />
       )}
 
       {isNotifOpen && <Notif_Modal isOpen={isNotifOpen} onClose={() => setNotifOpen(false)} />}
       {logoutOpen && <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />}
-      {messageContext && <FloatSuccessMsg txt={messageContext} clearMsg={() => setMessageContext("")} />}
+
+      {messageContext && (
+        <FloatSuccessMsg txt={messageContext} clearMsg={() => setMessageContext("")} />
+      )}
 
     </section>
   );

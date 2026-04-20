@@ -15,6 +15,7 @@ import { DeleteNotifModal } from '../../components/deleteNotifModal';
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs";
 import { useDarkMode } from "../../hooks/useDarkmode.jsx";
+import ExcelDownloadBtn from "../../components/ExcelDownloadBtn"; // ← adjust path
 
 
 const StatsCard = ({ icon: Icon, title, value, subtitle, color }) => (
@@ -141,7 +142,6 @@ function Batch_History() {
           aVal = (a.season || "").toLowerCase();
           bVal = (b.season || "").toLowerCase();
           break;
-      
         default:
           return 0;
       }
@@ -169,8 +169,6 @@ function Batch_History() {
       setSortConfig({ key: null, direction: "asc" });
       return;
     }
-    const [key, direction] = value.split("_");
-    // edge case: plant_name has underscore in it
     if (value.startsWith("plant_name")) {
       setSortConfig({ key: "plant_name", direction: value.endsWith("asc") ? "asc" : "desc" });
     } else if (value.startsWith("date_recorded")) {
@@ -208,6 +206,23 @@ function Batch_History() {
     setFilteredData(sorted);
 
   }, [searchValue, selectedStage, batchHistory, sortConfig, sortData]);
+
+
+  // ===== EXCEL DATA — yung current filtered + sorted na data ang ie-export =====
+  const batchHistoryExcelData = filteredData.map((record) => ({
+    "ID":                 record.display_id,
+    "Plant Name":         record.plant_name,
+    "Date Planted":       new Date(record.date_recorded).toLocaleDateString(),
+    "Total Seedlings":    record.total_seedlings,
+    "Fully Grown":        record.fully_grown_seedlings,
+    "Replanted":          record.replanted_seedlings,
+    "Dead":               record.dead_seedlings ?? 0,
+    "Growth Stage":       record.growth_stage,
+    "Harvest Status":     record.harvest_status,
+    "Harvest Day/s":      record.expected_harvest_days,
+    "Season":             record.season,
+  }));
+  // ============================================================================
 
 
   const handleDelete = (historyData) => {
@@ -281,6 +296,8 @@ function Batch_History() {
 
         <main className='conb bg-white rounded-tr-2xl rounded-tl-2xl'>
           <nav className='center w-full py-4'>
+
+            {/* LEFT — title + ? */}
             <div className='flex items-center justify-start w-1/2'>
               <FileText className='ml-4' size={20} />
               <p className='text-xl mx-4'>Batch History</p>
@@ -288,6 +305,8 @@ function Batch_History() {
                 <CircleQuestionMark onClick={handleOpenInfosModalBatchHistory} className='mr-4 w-4 h-4 cursor-pointer' />
               </button>
             </div>
+
+            {/* RIGHT — filters + download btn */}
             <div className='flex items-center justify-end flex-wrap gap-2 w-1/2 pr-4'>
 
               {/* STAGE FILTER */}
@@ -303,7 +322,7 @@ function Batch_History() {
                 </select>
               </div>
 
-              {/* MOBILE SORT DROPDOWN — visible on mobile only */}
+              {/* MOBILE SORT DROPDOWN */}
               <div className="flex items-center gap-2 md:hidden">
                 <label className="text-sm font-medium text-[#027c68] whitespace-nowrap">Sort:</label>
                 <select
@@ -325,10 +344,15 @@ function Batch_History() {
                   <option value="replanted_desc">Replanted (High-Low)</option>
                   <option value="harvest_days_asc">Harvest Days (Low-High)</option>
                   <option value="harvest_days_desc">Harvest Days (High-Low)</option>
-                    <option value="harvest_days_asc">Season (Low-High)</option>
-                  <option value="harvest_days_desc">Season Days (High-Low)</option>
                 </select>
               </div>
+
+              {/* ── DOWNLOAD BUTTON ── */}
+              <ExcelDownloadBtn
+                data={batchHistoryExcelData}
+                filename={`batch-history-${new Date().toISOString().slice(0, 10)}`}
+                sheetName="Batch History"
+              />
 
             </div>
           </nav>
@@ -425,7 +449,6 @@ function Batch_History() {
                         <td className="px-4 py-3 text-sm text-center font-medium text-[#027c68]">
                           {record.season}
                         </td>
-
 
                         <td className="px-4 py-3 text-sm text-center">
                           <button

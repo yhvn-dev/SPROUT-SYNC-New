@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import { User, LayoutPanelTop, ChartNoAxesCombined, LogOut, FileText, Settings, Plug,BookOpen,Flower2, Sprout,Lock,SquareActivity} from "lucide-react";
 import * as Logo from "../components/logo";
 
-export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen}) {
+export function Sidebar({ user, setLogoutOpen}) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -15,10 +15,9 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen}) 
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  const handleRegisterModal = () => {
-    setRegisterModalVisible(true);
-  };
 
+
+  
   return (
     <aside className={`sidebar h-[100vh] bg-white flex flex-col col-start-1 col-end-2 row-start-1 row-span-full p-4 rounded-[10px] shadow-lg ${isMobile ? 'w-[50%]' : 'w-auto'}`}>
 
@@ -174,21 +173,7 @@ export function Sidebar({ user, setRegisterModalVisible = null, setLogoutOpen}) 
             {!isMobile && <p className="text-sm mr-2 whitespace-nowrap">Password Requests</p>}
           </NavLink>        
           }
-      
-        {/* Device - First time login */}
-        {user?.first_time_login && (
-          <div className="flex justify-start w-full">
-            <button
-              onClick={handleRegisterModal}
-              className={`cursor-pointer text-sm hover:bg-[var(--sage-light)] hover:text-[var(--acc-darkb)]
-                flex items-center w-full transition-all duration-300 rounded-[10px] my-2
-                ${isMobile ? 'h-12 justify-center' : 'gap-2 py-1 px-2'}
-              `}>
-              <Settings strokeWidth={1.5} size={isMobile ? 18 : 18} />
-              {!isMobile && 'Device'}
-            </button>
-          </div>
-        )}
+
   
 
        <div className="flex items-center flex-col justify-start py-12 my-12 border-t-1 border-[var(--metal-dark4)] w-full">

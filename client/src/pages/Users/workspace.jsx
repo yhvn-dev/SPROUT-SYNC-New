@@ -1,22 +1,22 @@
-
 import { UserTable } from "./userTable"
-import { useEffect, useState,useContext} from "react"
+import { useEffect, useState, useContext } from "react"
 import { Modal } from "./modal"
-import { User} from "react-feather"
-import { SucessMsgs} from "../../components/sucessMsgs"
+import { User } from "react-feather"
+import { SucessMsgs } from "../../components/sucessMsgs"
 import * as userService from "../../data/userService"
 import { useUser } from "../../hooks/userContext"
+import ExcelDownloadBtn from "../../components/ExcelDownloadBtn"; // ← adjust path
 
 
-
-export function StatusChartLegend({statusCount,colors}){
-  return(
+export function StatusChartLegend({ statusCount, colors }) {
+  return (
     <>
       <div className="mt-4 space-y-1">
         {statusCount.map((sc, index) => (
           <div key={sc.role} className="flex items-center gap-2">
             <div
-              className="w-3 h-3 rounded-full" style={{ backgroundColor: colors[index % colors.length] }}
+              className="w-3 h-3 rounded-full"
+              style={{ backgroundColor: colors[index % colors.length] }}
             ></div>
             <span>
               {sc.status}: {sc.total_users}
@@ -24,118 +24,99 @@ export function StatusChartLegend({statusCount,colors}){
           </div>
         ))}
       </div>
-
     </>
-
   )
 }
 
-export function Workspace({refreshChart,searchValue,userCount,statusData,refreshStatus,chartData}) {
-  const [open,setOpen] = useState(false)
-  const [mode,setMode] = useState("")
-  const [sucessMsg,setSucessMsg] = useState("");
-  const [backendError,setBackendError] = useState("");
-  const [selectedUser,setSelectedUser] = useState(null)
-  const {allUsers,setAllUsers} = useUser();
-  const [filtered,setFiltered] = useState([]) 
- 
+export function Workspace({ refreshChart, searchValue, userCount, statusData, refreshStatus, chartData }) {
+  const [open, setOpen]               = useState(false)
+  const [mode, setMode]               = useState("")
+  const [sucessMsg, setSucessMsg]     = useState("");
+  const [backendError, setBackendError] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null)
+  const { allUsers, setAllUsers }     = useUser();
+  const [filtered, setFiltered]       = useState([])
 
   const clearMsg = () => setSucessMsg("");
 
-  useEffect(() =>{
+  useEffect(() => {
     renderUsers();
-  },[])
-  
-  const renderUsers = async () =>{
-    try{
-        const users = await userService.fetchAllUsers();
-        setAllUsers(users)
-        return users; 
-    }catch(err){
-      console.error("Error Rendering Users",err)
+  }, [])
+
+  const renderUsers = async () => {
+    try {
+      const users = await userService.fetchAllUsers();
+      setAllUsers(users)
+      return users;
+    } catch (err) {
+      console.error("Error Rendering Users", err)
     }
   }
 
   // SEARCH USER
-  useEffect(() =>{
-
-    if (!searchValue || searchValue.trim() === ""){
+  useEffect(() => {
+    if (!searchValue || searchValue.trim() === "") {
       setFiltered([]);
       return;
     }
 
     const handler = setTimeout(() => {
       const lower = searchValue.toLowerCase();
-      const filteredData = allUsers.filter((u) =>  
-        (u.username?.toLowerCase() || "").includes(lower) ||
-        (u.fullname?.toLowerCase() || "").includes(lower) ||
-        (u.email?.toLowerCase() || "").includes(lower) ||
+      const filteredData = allUsers.filter((u) =>
+        (u.username?.toLowerCase()     || "").includes(lower) ||
+        (u.fullname?.toLowerCase()     || "").includes(lower) ||
+        (u.email?.toLowerCase()        || "").includes(lower) ||
         (u.phone_number?.toLowerCase() || "").includes(lower) ||
-        (u.role?.toLowerCase() || "").includes(lower) 
+        (u.role?.toLowerCase()         || "").includes(lower)
       )
       setFiltered(filteredData)
-    },1000)
+    }, 1000)
 
     return () => clearTimeout(handler)
+  }, [searchValue, allUsers])
 
-  },[searchValue,allUsers])
-
-  const handleInsert = async (data) =>  {
+  const handleInsert = async (data) => {
     try {
-        const newUser = await userService.insertUsers(data);
-        await renderUsers()
-        await refreshChart()
-        await refreshStatus()
-
-        console.log("NEW USER:",newUser)
-        setOpen(false)
-        setSucessMsg(`${newUser.fullname} is added`)
-      
-
+      const newUser = await userService.insertUsers(data);
+      await renderUsers()
+      await refreshChart()
+      await refreshStatus()
+      console.log("NEW USER:", newUser)
+      setOpen(false)
+      setSucessMsg(`${newUser.fullname} is added`)
     } catch (err) {
-      console.error("Error Inserting Users",err)
+      console.error("Error Inserting Users", err)
       setBackendError(err.response?.data?.message || err.message || "Error Inserting Users");
       throw err
     }
   }
-  
 
-  const handleUpdate = async (data) =>{
+  const handleUpdate = async (data) => {
     try {
-      if(!selectedUser?.user_id) return;
-      const updatedUser = await userService.updateUsers(selectedUser.user_id,data,setAllUsers)
+      if (!selectedUser?.user_id) return;
+      const updatedUser = await userService.updateUsers(selectedUser.user_id, data, setAllUsers)
       await renderUsers();
       await refreshChart()
       await refreshStatus()
       setOpen(false)
-
       setSucessMsg(`${selectedUser.fullname} is now updated`)
-      console.log("UPDATED USER:",updatedUser)
-
+      console.log("UPDATED USER:", updatedUser)
     } catch (err) {
-      console.error("Error Updating Users",err)
+      console.error("Error Updating Users", err)
       setBackendError(err.response?.data?.message || err.message || "Error Updating Users");
       throw err
     }
   }
 
-
-
-
-
   const handleDelete = async () => {
     try {
       if (!selectedUser?.user_id) return;
-      
       await userService.deleteUsers(selectedUser.user_id);
-      const updatedUsers = await userService.fetchAllUsers(); // <-- refetch latest users
-
-      setAllUsers(updatedUsers); 
-      setFiltered([]); 
-
+      const updatedUsers = await userService.fetchAllUsers();
+      setAllUsers(updatedUsers);
+      setFiltered([]);
       await refreshChart();
       await refreshStatus();
-
       setOpen(false);
       setSucessMsg(`${selectedUser.fullname} was deleted successfully`);
       console.log("Deleted:", selectedUser);
@@ -145,90 +126,112 @@ export function Workspace({refreshChart,searchValue,userCount,statusData,refresh
     }
   };
 
-
-  
-  const handleFilter = async (e) =>{
+  const handleFilter = async (e) => {
     try {
-        const target = e.target.value
-      
-        if (target === "all") {
-            console.log("Target",target)
-            setFiltered([]);
-            await renderUsers();
-            return;
-        }
-        const filteredData = await userService.filterUsers({filterBy:target})
-        setFiltered(filteredData)
-
-        console.log("Target:",target)
-        console.log("Filtered Data:",filteredData)
+      const target = e.target.value
+      if (target === "all") {
+        console.log("Target", target)
+        setFiltered([]);
+        await renderUsers();
+        return;
+      }
+      const filteredData = await userService.filterUsers({ filterBy: target })
+      setFiltered(filteredData)
+      console.log("Target:", target)
+      console.log("Filtered Data:", filteredData)
     } catch (err) {
-      console.error("Error Filtering Users",err)
+      console.error("Error Filtering Users", err)
       throw err
     }
   }
 
-  
-    // ================================================================================
-    return (
-        <main className="flex flex-col h-full w-full gap-4">  
-        
-          {/* USER TABLE ======== ==== ==== ==== ==== ==== ==== ==== ==== ==== ==== ====  */}
-          <div className="conb bg-white workspace flex flex-col w-full flex-1 row-start-4 row-span-full
-          col-start-2 col-end-4 overflow-y-auto  rounded-[10px] ">    
-            <div className="wp_header flex w-full h-[10%] md:h-[10%] ">
-                <ol className='h_part left flex items-center justify-start w-1/2 '>
-                    <User className="mx-4" size={24}/>
-                    <h1 className='text-2xl'>Users</h1>
-                </ol>
-                <ol className='h_part right flex flex-row-reverse items-center w-1/2'>
-                    <button className="btn-p mx-4 text-[0.9rem] " 
-                  onClick={() => 
-                    {setMode("insert");
-                    setSelectedUser(null);
-                    setOpen(true)}}>ADD USER</button>
-                    <select onChange={(e) => {handleFilter(e)}} className=" px-[1px] py-[2px] border-1 border-[var(--acc-darkc)] rounded-[10px] p-h-0-6 text-sm shadow-xl">
-                        <option value="all" className="options">Filter</option>
-                        <option value="username" className="options">Username</option>
-                        <option value="fullname" className="options">Fullname</option>
-                        <option value="email" className="options">Email</option>
-                        <option value="role" className="options">Role</option>
-                        <option value="status" className="options">Status</option>  
-                        <option value="created_at" className="options">Date</option>  
-                    </select>
-                </ol>
-          </div>
+  // ─── BUILD EXCEL DATA ─────────────────────────────────────────────────────
+  const displayedUsers = filtered.length > 0 ? filtered : allUsers;
 
+  const userExcelData = displayedUsers.map((u) => ({
+    "Username":     u.username,
+    "Full Name":    u.fullname,
+    "Email":        u.email,
+    "Phone Number": u.phone_number,
+    "Role":         u.role,
+  }));
+  // ──────────────────────────────────────────────────────────────────────────
 
+  return (
+    <main className="flex flex-col h-full w-full gap-4">
 
-          <SucessMsgs txt={sucessMsg} clearMsg={clearMsg}/>
-            
-            <div className="user_table_div table_holder flex flex-col items-center justify-start flex-1 w-full  overflow-y-auto shadow-[5px_5px_20px_1px_rgba(53,53,53,0.2)] rounded-[10px]">
-                <UserTable
-                  users={filtered.length > 0 ? filtered : allUsers}
-                  setOpen={() => setOpen(true)}
-                  setMode={setMode}
-                  setSelectedUser={setSelectedUser}
-                />
-            </div>
+      {/* USER TABLE */}
+      <div className="conb bg-white workspace flex flex-col w-full flex-1 row-start-4 row-span-full
+        col-start-2 col-end-4 overflow-y-auto rounded-[10px]">
 
-            {open && ( <Modal 
-                isOpen={open}
-                onClose={() => setOpen(false)}
-                mode={mode}
-                handleSubmit={mode === "insert" ? handleInsert :
-                              mode === "update" ? handleUpdate :
-                                                  handleDelete}
-                userData={selectedUser}
-                backendError={backendError}
-                setBackendError={setBackendError}
-            />)}       
-          </div>
+        <div className="wp_header flex w-full h-[10%] md:h-[10%]">
+
+          {/* LEFT — title */}
+          <ol className="h_part left flex items-center justify-start w-1/2">
+            <User className="mx-4" size={24} />
+            <h1 className="text-2xl">Users</h1>
+          </ol>
+
+          {/* RIGHT — actions */}
+          <ol className="h_part right flex flex-row-reverse items-center gap-2 w-1/2">
+            <button
+              className="btn-p mx-4 text-[0.9rem]"
+              onClick={() => {
+                setMode("insert");
+                setSelectedUser(null);
+                setOpen(true);
+              }}>
+              ADD USER
+            </button>
+
+            <select
+              onChange={(e) => { handleFilter(e) }}
+              className="px-[1px] py-[2px] border-1 border-[var(--acc-darkc)] rounded-[10px] p-h-0-6 text-sm shadow-xl">
+              <option value="all"        className="options">Filter</option>
+              <option value="username"   className="options">Username</option>
+              <option value="fullname"   className="options">Fullname</option>
+              <option value="email"      className="options">Email</option>
+              <option value="role"       className="options">Role</option>
+              <option value="status"     className="options">Status</option>
+              <option value="created_at" className="options">Date</option>
+            </select>
+
+            {/* ── Excel Download ── */}
+            <ExcelDownloadBtn
+              data={userExcelData}
+              filename={`users-${new Date().toISOString().slice(0, 10)}`}
+              sheetName="Users"
+            />
+          </ol>
+        </div>
+
+        <SucessMsgs txt={sucessMsg} clearMsg={clearMsg} />
+
+        <div className="user_table_div table_holder flex flex-col items-center justify-start flex-1 w-full overflow-y-auto shadow-[5px_5px_20px_1px_rgba(53,53,53,0.2)] rounded-[10px]">
+          <UserTable
+            users={displayedUsers}
+            setOpen={() => setOpen(true)}
+            setMode={setMode}
+            setSelectedUser={setSelectedUser}
+          />
+        </div>
+
+        {open && (
+          <Modal
+            isOpen={open}
+            onClose={() => setOpen(false)}
+            mode={mode}
+            handleSubmit={
+              mode === "insert" ? handleInsert :
+              mode === "update" ? handleUpdate :
+                                  handleDelete
+            }
+            userData={selectedUser}
+            backendError={backendError}
+            setBackendError={setBackendError}
+          />
+        )}
+      </div>
     </main>
-
-
-
-
-    )
-
-  }
+  )
+}

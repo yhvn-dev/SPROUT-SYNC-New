@@ -3,6 +3,7 @@ import { Droplets, TrendingUp, Sprout, X, CircleQuestionMark } from "lucide-reac
 import { useState } from "react";
 
 import InfosModal from "../../components/infosModal";
+import ExcelDownloadBtn from "../../components/ExcelDownloadBtn"; // ← adjust path
 
 export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) => {
   const [isInfoModalOpen, setInfoModalOpen] = useState(false);
@@ -15,7 +16,6 @@ export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) 
   const total_dead = Number(totals?.total_dead ?? 0);
   const total_replanted = Number(totals?.total_replanted ?? 0);
 
-  // Calculate percentages based on totalSeedlings
   const grownPercent = totalSeedlings ? +((total_grown / totalSeedlings) * 100).toFixed(1) : 0;
   const deadPercent = totalSeedlings ? +((total_dead / totalSeedlings) * 100).toFixed(1) : 0;
   const replantedPercent = totalSeedlings ? +((total_replanted / totalSeedlings) * 100).toFixed(1) : 0;
@@ -25,6 +25,22 @@ export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) 
     { name: "Dead", value: deadPercent, color: "#ff6673" },
     { name: "Replanted", value: replantedPercent, color: "#f0bd75" },
   ];
+
+  // ================= EXCEL DATA =================
+  const weeklyGrowthExcelData = (growthOvertime ?? []).map((row) => ({
+    "Week":      row.week,
+    "Grown":     row.grown,
+    "Dead":      row.dead,
+    "Replanted": row.replanted,
+  }));
+
+  const statusDistributionExcelData = [
+    { "Status": "Grown",     "Percent (%)": grownPercent,     "Count": total_grown },
+    { "Status": "Dead",      "Percent (%)": deadPercent,      "Count": total_dead },
+    { "Status": "Replanted", "Percent (%)": replantedPercent, "Count": total_replanted },
+    { "Status": "Total",     "Percent (%)": 100,              "Count": totalSeedlings },
+  ];
+  // ================================================
 
   const handleOpenInfosModalseedlingGrowthOvertime = () => {
     setInfoModalPurpose("seedling_growth_overtime");
@@ -36,23 +52,31 @@ export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) 
     setInfoModalOpen(true);
   };
 
-
-  // ================= DARK MODE =================
   const isDark = typeof window !== "undefined" && document.documentElement.classList.contains("dark");
   const axisColor = isDark ? "#e5e7eb" : "#374151";
   const gridColor = isDark ? "#374151" : "#e5e7eb";
 
-  
   return (
     <div className="w-full h-full grid gap-4 grid-rows-[1fr_1fr_1fr] md:grid-cols-[6fr_4fr] md:grid-rows-[2fr_1fr] overflow-x-hidden">
+
       {/* ================= GROWTH OVER TIME ================= */}
       <div className="conb col-span-full md:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col h-[360px] sm:h-auto md:h-full">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-2 flex items-center">
-          Weekly Growth Progress
-          <button className="ml-2">
-            <CircleQuestionMark onClick={handleOpenInfosModalseedlingGrowthOvertime} className="w-4 h-4 cursor-pointer text-gray-400 dark:text-gray-300"/>
-          </button>
-        </h3>
+        
+        {/* header row — label + ? + download btn */}
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center">
+            Weekly Growth Progress
+            <button className="ml-2">
+              <CircleQuestionMark onClick={handleOpenInfosModalseedlingGrowthOvertime} className="w-4 h-4 cursor-pointer text-gray-400 dark:text-gray-300" />
+            </button>
+          </h3>
+          <ExcelDownloadBtn
+            data={weeklyGrowthExcelData}
+            filename={`weekly-growth-${new Date().toISOString().slice(0, 10)}`}
+            sheetName="Weekly Growth"
+          />
+        </div>
+
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={growthOvertime} margin={{ top: 10, right: 10, left: -10, bottom: 0 }} barSize={14}>
@@ -69,17 +93,25 @@ export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) 
       </div>
 
       {/* ================= STATUS DISTRIBUTION ================= */}
-      <div className="conb  col-span-full md:col-span-1 bg-white  dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col h-auto sm:h-auto">
-        <h3 className="flex text-sm font-semibold text-gray-800 dark:text-gray-100  items-center">
-          Status Distribution
-          <button className="ml-2">
-            <CircleQuestionMark onClick={handleOpenInfosModalStatusDistribution} className="w-4 h-4 cursor-pointer text-gray-400 dark:text-gray-300"/>
-          </button>
-        </h3>
+      <div className="conb col-span-full md:col-span-1 bg-white dark:bg-gray-900 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col h-auto sm:h-auto">
+        
+        {/* header row — label + ? + download btn */}
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 flex items-center">
+            Status Distribution
+            <button className="ml-2">
+              <CircleQuestionMark onClick={handleOpenInfosModalStatusDistribution} className="w-4 h-4 cursor-pointer text-gray-400 dark:text-gray-300" />
+            </button>
+          </h3>
+          <ExcelDownloadBtn
+            data={statusDistributionExcelData}
+            filename={`status-distribution-${new Date().toISOString().slice(0, 10)}`}
+            sheetName="Status Distribution"
+          />
+        </div>
 
-
-        <div className="flex-1 flex flex-col items-center justify-center gap-4 ">
-          <div className="relative w-full sm:w-1/2 h-[180px] ">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <div className="relative w-full sm:w-1/2 h-[180px]">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={statusData} cx="50%" cy="50%" innerRadius={45} outerRadius={70} paddingAngle={5} dataKey="value">
@@ -89,14 +121,12 @@ export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) 
               </PieChart>
             </ResponsiveContainer>
 
-            {/* CENTER TOTAL */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
               <p className="text-xs text-gray-500 dark:text-gray-400">Total</p>
               <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">{totalSeedlings}</p>
             </div>
           </div>
 
-          {/* LEGENDS */}
           <div className="w-full sm:w-1/2 flex flex-col gap-2 text-xs">
             {statusData.map((item, index) => (
               <div key={index} className="flex items-center justify-between">
@@ -118,19 +148,16 @@ export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) 
           <span className="text-3xl font-bold text-gray-800 dark:text-gray-200">{totalSeedlings}</span>
           <span className="text-sm text-gray-600 mt-1 dark:text-gray-400">Total Seedlings</span>
         </div>
-
         <div className="stat_card total_grown_div bg-gradient-to-br from-white to-green-50 dark:from-gray-800 dark:to-green-700 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col items-center justify-center">
           <TrendingUp className="total_growth_icon w-12 h-12 mb-2 text-green-500 dark:text-green-300" />
           <span className="text-3xl font-bold text-gray-800 dark:text-gray-200">{total_grown}</span>
           <span className="text-sm text-gray-600 mt-1 dark:text-gray-400">Total Grown</span>
         </div>
-
         <div className="stat_card dead_seedlings_div bg-gradient-to-br from-white to-red-50 dark:from-gray-800 dark:to-red-700 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col items-center justify-center">
           <X className="dead_seedlings_icon w-12 h-12 mb-2 text-red-500 dark:text-red-300" />
           <span className="text-3xl font-bold text-gray-800 dark:text-gray-200">{total_dead}</span>
           <span className="text-sm text-gray-600 mt-1 dark:text-gray-400">Dead Seedlings</span>
         </div>
-
         <div className="stat_card replanted_seedlings_div bg-gradient-to-br from-white to-orange-50 dark:from-gray-800 dark:to-orange-700 rounded-xl shadow-sm hover:shadow-md transition-shadow p-4 flex flex-col items-center justify-center">
           <Droplets className="stat_card_icon replanted_icon w-12 h-12 mb-2 text-amber-500 dark:text-amber-300" />
           <span className="text-3xl font-bold text-gray-800 dark:text-gray-200">{total_replanted}</span>
@@ -138,12 +165,12 @@ export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) 
         </div>
       </div>
 
-      {/* MODAL */}
+
       {isInfoModalOpen && (
         <InfosModal isInfosModalOpen={isInfoModalOpen} onClose={() => setInfoModalOpen(false)} purpose={infoModalPurpose} />
       )}
     </div>
-
+    
 
 
   );

@@ -1,30 +1,38 @@
-import { useState } from "react";
+"use client";
+import { useState, useContext, useCallback } from "react";
 import { Sidebar } from "../../components/sidebar";
 import { Db_Header } from "../../components/db_header";
 import { LogoutModal } from "../../components/logoutModal.jsx";
 import RegisterDeviceModal from "../Dashboard/modals/registerDeviceModal.jsx";
-import { Menu, X, BookOpen, ChevronRight, BarChart2, Sprout, Users, Bell, Wrench, AlertTriangle, LogOut, Leaf, Lock, HardDrive, Eye, ShieldCheck } from "lucide-react";
+import { Menu, X, BookOpen, ChevronRight, BarChart2, Sprout, Users, Bell, Wrench, AlertTriangle, LogOut, Leaf, Lock, HardDrive, Eye, ShieldCheck, Droplets } from "lucide-react"; // ← add Droplets
 import { useUser } from "../../hooks/userContext";
 import Admin_guide from "./admin_guide.jsx";
 import Farmer_guide from "./farmer_guide.jsx";
+import { Notif_Modal } from "../../components/notifModal.jsx";
+import { DeleteNotifModal } from "../../components/deleteNotifModal.jsx";
+import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
+import { MessageContext } from "../../hooks/messageHooks.jsx";
+import { usePlantData } from "../../hooks/plantContext.jsx";
 
-// ─── Section definitions (mirrors admin_guide SECTIONS ids) ──────────────────
+// ─── Section definitions ──────────────────────────────────────────────────────
 const ADMIN_NAV = [
-  { id: "dashboard",   label: "Dashboard",        icon: <BarChart2 size={14}/>,    color: "#027e69" },
-  { id: "plants",      label: "Plant Management", icon: <Sprout size={14}/>,       color: "#2d6a4f" },
-  { id: "users",       label: "User Management",  icon: <Users size={14}/>,        color: "#027e69" },
-  { id: "analytics",   label: "Analytics",        icon: <BarChart2 size={14}/>,    color: "#009983" },
-  { id: "archive",     label: "Batch History",    icon: <HardDrive size={14}/>,    color: "#2d6a4f" },
-  { id: "inventory",   label: "Plants Inventory", icon: <Leaf size={14}/>,         color: "#027e69" },
-  { id: "passwords",   label: "Password Resets",  icon: <Lock size={14}/>,         color: "#009983" },
-  { id: "alerts",      label: "Alerts",           icon: <Bell size={14}/>,         color: "#2d6a4f" },
-  { id: "hardware",    label: "Hardware & Setup", icon: <Wrench size={14}/>,       color: "#027e69" },
-  { id: "troubleshoot",label: "Troubleshooting",  icon: <AlertTriangle size={14}/>,color: "#009983" },
-  { id: "logout",      label: "Logout",           icon: <LogOut size={14}/>,       color: "#2d6a4f" },
+  { id: "dashboard",    label: "Dashboard",              icon: <BarChart2 size={14}/>,     color: "#027e69" },
+  { id: "plants",       label: "Plant Management",       icon: <Sprout size={14}/>,        color: "#2d6a4f" },
+  { id: "users",        label: "User Management",        icon: <Users size={14}/>,         color: "#027e69" },
+  { id: "analytics",    label: "Analytics",              icon: <BarChart2 size={14}/>,     color: "#009983" },
+  { id: "irrigation",   label: "Irrigation Monitoring",  icon: <Droplets size={14}/>,      color: "#0284c7" }, // ← NEW
+  { id: "archive",      label: "Batch History",          icon: <HardDrive size={14}/>,     color: "#2d6a4f" },
+  { id: "inventory",    label: "Plants Inventory",       icon: <Leaf size={14}/>,          color: "#027e69" },
+  { id: "passwords",    label: "Password Resets",        icon: <Lock size={14}/>,          color: "#009983" },
+  { id: "alerts",       label: "Alerts",                 icon: <Bell size={14}/>,          color: "#2d6a4f" },
+  { id: "hardware",     label: "Hardware & Setup",       icon: <Wrench size={14}/>,        color: "#027e69" },
+  { id: "troubleshoot", label: "Troubleshooting",        icon: <AlertTriangle size={14}/>, color: "#009983" },
+  { id: "logout",       label: "Logout",                 icon: <LogOut size={14}/>,        color: "#2d6a4f" },
 ];
 
-const FARMER_NAV_IDS = ["dashboard", "analytics","archive","alerts", "hardware", "troubleshoot", "logout"];
+const FARMER_NAV_IDS = ["dashboard", "analytics", "irrigation", "alerts", "hardware", "troubleshoot", "logout"]; // ← add "irrigation"
 
+// ─── ManualSidebar ────────────────────────────────────────────────────────────
 function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose }) {
   const isAdmin = role === "admin";
   const sections = isAdmin
@@ -34,26 +42,22 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
 
   return (
     <>
-      {/* Mobile overlay */}
       {isOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/40 z-40"
-          onClick={onClose}
-        />
+        <div className="lg:hidden fixed inset-0 bg-black/40 z-40" onClick={onClose} />
       )}
 
-      <aside
-        className={`
-          fixed top-0 right-0 h-full w-56 bg-white shadow-xl z-50
-          transform transition-transform duration-300 ease-in-out
-          flex flex-col
-          lg:static lg:translate-x-0 lg:shadow-none lg:border-l lg:border-[#c4ded0] lg:z-auto
-          ${isOpen ? "translate-x-0" : "translate-x-full"}
-        `}
-      >
+      <aside className={`
+        fixed top-0 right-0 h-full w-56 bg-white shadow-xl z-50
+        transform transition-transform duration-300 ease-in-out
+        flex flex-col
+        lg:static lg:translate-x-0 lg:shadow-none lg:border-l lg:border-[#c4ded0] lg:z-auto
+        ${isOpen ? "translate-x-0" : "translate-x-full"}
+      `}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-[#c4ded0]"
-          style={{ background: "#027e6910" }}>
+        <div
+          className="flex items-center justify-between px-4 py-3.5 border-b border-[#c4ded0]"
+          style={{ background: "#027e6910" }}
+        >
           <div className="flex items-center gap-2">
             <BookOpen size={14} className="text-[#027e69]" />
             <span className="text-sm font-bold text-[#027e69] tracking-wide uppercase">
@@ -70,16 +74,17 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
 
         {/* Role badge */}
         <div className="px-3 pt-3 pb-1">
-          <span className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-full w-fit"
+          <span
+            className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-full w-fit"
             style={{
               background: isAdmin ? "hsl(35,80%,93%)" : "hsl(180,2%,90%)",
-              color: isAdmin ? "hsl(35,80%,38%)" : "hsl(180,3%,29%)"
-            }}>
+              color:      isAdmin ? "hsl(35,80%,38%)" : "hsl(180,3%,29%)",
+            }}
+          >
             {isAdmin ? <ShieldCheck size={10}/> : <Eye size={10}/>}
             {isAdmin ? "Admin" : "Farmer"}
           </span>
         </div>
-        
 
         {/* Nav links */}
         <nav className="flex-1 overflow-y-auto py-2 px-2">
@@ -103,7 +108,7 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
                 </span>
                 {s.label}
               </div>
-              {activeSection === s.id && <ChevronRight size={12} className="flex-shrink-0"/>}
+              {activeSection === s.id && <ChevronRight size={12} className="flex-shrink-0" />}
             </button>
           ))}
         </nav>
@@ -119,31 +124,36 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
   );
 }
 
-
-
-
-
+// ─── Main Page ────────────────────────────────────────────────────────────────
 function User_guide() {
-  const { user } = useUser();
-  const [sidebarOpen,            setSidebarOpen]            = useState(false);
-  const [manualSidebarOpen,      setManualSidebarOpen]      = useState(false);
-  const [logoutOpen,             setLogoutOpen]             = useState(false);
-  const [isRegisterModalVisible, setRegisterModalVisible]   = useState(false);
-  const [isNotifOpen,            setNotifOpen]              = useState(false);
-  const [activeSection,          setActiveSection]          = useState("dashboard");
+  const { user, skippedRegister } = useUser();
+  const { loadNotifs } = usePlantData();
+  const {
+    openDeleteNotifModal, setOpenDeleteNotifModal,
+    selectedNotif, deleteMode,
+    messageContext, setMessageContext,
+  } = useContext(MessageContext);
+
+  const [sidebarOpen,            setSidebarOpen]          = useState(false);
+  const [manualSidebarOpen,      setManualSidebarOpen]    = useState(false);
+  const [logoutOpen,             setLogoutOpen]           = useState(false);
+  const [isRegisterModalVisible, setRegisterModalVisible] = useState(false);
+  const [notifOpen,              setNotifOpen]            = useState(false);
+  const [activeSection,          setActiveSection]        = useState("dashboard");
+
+  const clearMsg = useCallback(() => setMessageContext(""), [setMessageContext]);
 
   const renderGuide = () => {
     if (user?.role === "admin")  return <Admin_guide  activeSection={activeSection} />;
     if (user?.role === "farmer") return <Farmer_guide activeSection={activeSection} />;
     return null;
   };
+
   const showManual = user?.role === "admin" || user?.role === "farmer";
 
-
   return (
-
-    
     <section className="flex h-screen gap-4 overflow-hidden bg-[#eaf4ef]">
+
       {sidebarOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/50 z-40"
@@ -151,13 +161,11 @@ function User_guide() {
         />
       )}
 
-      {/* ── LEFT: System sidebar ── */}
-      <aside
-        className={`
-          ${sidebarOpen ? "fixed inset-y-0 left-0 w-64 z-50" : "hidden"}
-          md:static md:flex md:flex-shrink-0
-        `}
-      >
+      {/* LEFT: System sidebar */}
+      <aside className={`
+        ${sidebarOpen ? "fixed inset-y-0 left-0 w-64 z-50" : "hidden"}
+        md:static md:flex md:flex-shrink-0
+      `}>
         <Sidebar
           user={user}
           setLogoutOpen={setLogoutOpen}
@@ -166,12 +174,11 @@ function User_guide() {
         />
       </aside>
 
-      {/* ── CENTER: Main content ── */}
+      {/* CENTER: Main content */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
 
         {/* Top bar */}
         <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Mobile: open system sidebar */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden flex-shrink-0 ml-4 mt-3 bg-white p-2.5 rounded-lg shadow"
@@ -180,11 +187,9 @@ function User_guide() {
           </button>
 
           <div className="flex-1">
-            <Db_Header setNotifOpen={setNotifOpen} />
+            <Db_Header notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
           </div>
 
-
-          {/* Mobile: open manual sidebar */}
           {showManual && (
             <button
               onClick={() => setManualSidebarOpen(true)}
@@ -202,20 +207,7 @@ function User_guide() {
         </main>
       </div>
 
-
-
-     {isRegisterModalVisible && (
-        <RegisterDeviceModal
-          userData={user}
-          onClose={() => setRegisterModalVisible(false)}
-        />
-      )}
-
-      {logoutOpen && (
-        <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
-      )}
-    
-    
+      {/* RIGHT: Manual sidebar */}
       {showManual && (
         <ManualSidebar
           role={user?.role}
@@ -224,6 +216,32 @@ function User_guide() {
           isOpen={manualSidebarOpen}
           onClose={() => setManualSidebarOpen(false)}
         />
+      )}
+
+      {/* ── MODALS ── */}
+      {logoutOpen && (
+        <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
+      )}
+      {notifOpen && (
+        <Notif_Modal isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
+      )}
+      {openDeleteNotifModal && (
+        <DeleteNotifModal
+          isOpen={openDeleteNotifModal}
+          selectedNotif={selectedNotif}
+          deleteMode={deleteMode}
+          onClose={() => setOpenDeleteNotifModal(false)}
+          loadNotifs={loadNotifs}
+        />
+      )}
+      {isRegisterModalVisible && (
+        <RegisterDeviceModal
+          userData={user}
+          onClose={() => setRegisterModalVisible(false)}
+        />
+      )}
+      {messageContext && (
+        <FloatSuccessMsg txt={messageContext} clearMsg={clearMsg} />
       )}
     </section>
   );

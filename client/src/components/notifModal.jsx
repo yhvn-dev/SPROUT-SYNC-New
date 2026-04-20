@@ -7,6 +7,7 @@ import { useUser } from "../hooks/userContext";
 import { MessageContext } from "../hooks/messageHooks";
 import { getColorByStatus, getIconByType } from "../utils/colors";
 
+
 export function Notif_Modal({ isOpen, onClose }) {
   const { notifs, markNotifsAsRead } = usePlantData();
   const { setOpenDeleteNotifModal, setSelectedNotif, setDeleteMode } = useContext(MessageContext);
