@@ -15,7 +15,7 @@ import { DeleteNotifModal } from '../../components/deleteNotifModal';
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs";
 import { useDarkMode } from "../../hooks/useDarkmode.jsx";
-import ExcelDownloadBtn from "../../components/ExcelDownloadBtn.jsx"; // ← adjust path
+import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx"; // ← adjust path
 
 
 const StatsCard = ({ icon: Icon, title, value, subtitle, color }) => (

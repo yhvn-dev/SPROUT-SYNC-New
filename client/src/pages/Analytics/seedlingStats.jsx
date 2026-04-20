@@ -3,7 +3,7 @@ import { Droplets, TrendingUp, Sprout, X, CircleQuestionMark } from "lucide-reac
 import { useState } from "react";
 
 import InfosModal from "../../components/infosModal";
-import ExcelDownloadBtn from "../../components/ExcelDownloadBtn.jsx"; // ← adjust path
+import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx"; // ← adjust path
 
 export const SeedlingStats = ({ activeTab, growthOvertime, batchHistoryTotal }) => {
   const [isInfoModalOpen, setInfoModalOpen] = useState(false);

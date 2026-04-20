@@ -5,8 +5,7 @@ import { User } from "react-feather"
 import { SucessMsgs } from "../../components/sucessMsgs"
 import * as userService from "../../data/userService"
 import { useUser } from "../../hooks/userContext"
-import ExcelDownloadBtn from "../../components/ExcelDownloadBtn.jsx"; // ← adjust path
-
+import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx"; 
 
 export function StatusChartLegend({ statusCount, colors }) {
   return (
