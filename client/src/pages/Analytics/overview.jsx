@@ -2,7 +2,7 @@ import { Droplets, CircleQuestionMark, Trash2 } from "lucide-react";
 import InfosModal from "../../components/infosModal";
 import { useState } from "react";
 import { useUser } from "../../hooks/userContext";
-import ExcelDownloadBtn from "../../components/ExcelDownloadBtn"; // ← adjust path
+import ExcelDownloadBtn from "../../components/ExcelDownloadBtn.jsx"; // ← adjust path
 
 // =====================
 // STAT CARD
