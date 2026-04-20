@@ -15,7 +15,6 @@ import { DeleteNotifModal } from '../../components/deleteNotifModal';
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs";
 import { useDarkMode } from "../../hooks/useDarkmode.jsx";
-import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx"; // ← adjust path
 
 
 const StatsCard = ({ icon: Icon, title, value, subtitle, color }) => (
@@ -208,20 +207,20 @@ function Batch_History() {
   }, [searchValue, selectedStage, batchHistory, sortConfig, sortData]);
 
 
-  // ===== EXCEL DATA — yung current filtered + sorted na data ang ie-export =====
-  const batchHistoryExcelData = filteredData.map((record) => ({
-    "ID":                 record.display_id,
-    "Plant Name":         record.plant_name,
-    "Date Planted":       new Date(record.date_recorded).toLocaleDateString(),
-    "Total Seedlings":    record.total_seedlings,
-    "Fully Grown":        record.fully_grown_seedlings,
-    "Replanted":          record.replanted_seedlings,
-    "Dead":               record.dead_seedlings ?? 0,
-    "Growth Stage":       record.growth_stage,
-    "Harvest Status":     record.harvest_status,
-    "Harvest Day/s":      record.expected_harvest_days,
-    "Season":             record.season,
-  }));
+  // // ===== EXCEL DATA — yung current filtered + sorted na data ang ie-export =====
+  // const batchHistoryExcelData = filteredData.map((record) => ({
+  //   "ID":                 record.display_id,
+  //   "Plant Name":         record.plant_name,
+  //   "Date Planted":       new Date(record.date_recorded).toLocaleDateString(),
+  //   "Total Seedlings":    record.total_seedlings,
+  //   "Fully Grown":        record.fully_grown_seedlings,
+  //   "Replanted":          record.replanted_seedlings,
+  //   "Dead":               record.dead_seedlings ?? 0,
+  //   "Growth Stage":       record.growth_stage,
+  //   "Harvest Status":     record.harvest_status,
+  //   "Harvest Day/s":      record.expected_harvest_days,
+  //   "Season":             record.season,
+  // }));
   // ============================================================================
 
 
@@ -347,12 +346,12 @@ function Batch_History() {
                 </select>
               </div>
 
-              {/* ── DOWNLOAD BUTTON ── */}
+              {/* ── DOWNLOAD BUTTON ──
               <ExcelDownloadBtn
                 data={batchHistoryExcelData}
                 filename={`batch-history-${new Date().toISOString().slice(0, 10)}`}
                 sheetName="Batch History"
-              />
+              /> */}
 
             </div>
           </nav>
