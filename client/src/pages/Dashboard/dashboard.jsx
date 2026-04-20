@@ -19,7 +19,7 @@ import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
 import { usePlantData } from "../../hooks/plantContext.jsx";
 import { ESP32Context } from "../../hooks/esp32Hooks.jsx";
 import InfosModal from '../../components/infosModal';
-import ExcelDownloadBtn from "../../components/ExcelDownloadBtn";
+import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx";
 
 
 export function Dashboard() {
