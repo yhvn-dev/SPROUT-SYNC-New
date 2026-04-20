@@ -56,7 +56,7 @@ export function Dashboard() {
   useEffect(() => {
     loadTrayGroups();
     loadTrays();
-    loadTrayGroupsWithCount();Z
+    loadTrayGroupsWithCount();
     loadBatches();
     loadSensors();
   }, [loadTrayGroups, loadTrays, loadTrayGroupsWithCount, loadBatches, loadSensors]);
