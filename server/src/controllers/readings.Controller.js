@@ -173,7 +173,7 @@ export const handleMoistureNotifications = async (existingSensor, value) => {
   );
   if (!selectedTrayGroup) return null;
 
-  const { min_moisture, max_moisture, tray_group_name, group_number } = selectedTrayGroup;
+  const { min_moisture, max_moisture, tray_group_name } = selectedTrayGroup;
 
   const moisture = Number(value);
   const min = Number(min_moisture);

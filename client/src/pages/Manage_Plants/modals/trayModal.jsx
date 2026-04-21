@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { X, Sprout, TrendingUp, Trash2, Grid3x3} from "lucide-react";
+import { X, Sprout, TrendingUp, Trash2, Grid3x3 } from "lucide-react";
 import * as trayModels from "../../../data/traysServices";
 
 export function TrayModal({
@@ -12,13 +12,20 @@ export function TrayModal({
   setSuccessMsg,
   reloadTray,
   reloadBatches,
-  trayGroups, 
+  trayGroups,
+  plants,
 }) {
+
+
   const [formData, setFormData] = useState({ tray_group_id: 0, plant: "", status: "Available" });
   const [formErrors, setFormErrors] = useState({});
-
   
-  // ✅ FIX: for insert, use selectedTrayGroup. For update/delete,
+  const plantOptions = (plants || []).map((p) => ({
+    name: p.name,
+    min: p.moisture_min,
+    max: p.moisture_max,
+  }));
+
   const resolvedGroup =
     trayModalMode === "insert"
       ? selectedTrayGroup
@@ -40,7 +47,7 @@ export function TrayModal({
     } else if (trayModalMode === "insert") {
       setFormData({
         tray_group_id: resolvedGroupId || 0,
-        plant: resolvedGroupName !== "Unknown" ? resolvedGroupName : "",
+        plant: "",
         status: "Available",
       });
     } else if (trayModalMode === "delete" && selectedTray) {
@@ -161,18 +168,28 @@ export function TrayModal({
             <input type="hidden" name="tray_group_id" value={formData.tray_group_id} />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-              {/* PLANT (auto-filled) */}
+              {/* PLANT DROPDOWN */}
               <div className="md:col-span-2 border-2 border-[#C4DED0] text-[#5A8F73] rounded-xl p-4">
                 <label className="flex items-center gap-2 text-sm text-[var(--sancgb)] font-semibold mb-2">
                   <Sprout className="w-4 h-4" /> Plant *
                 </label>
-                <input
-                  type="text"
+                <select
                   name="plant"
                   value={formData.plant}
-                  disabled
-                  className="w-full px-3 py-2 border-2 border-[#C4DED0] text-[#5A8F73] rounded-lg bg-gray-100 cursor-not-allowed"
-                />
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border-2 border-[#C4DED0] text-[#5A8F73] rounded-lg bg-white">
+                  <option value="">Select a Plant</option>
+                  {plantOptions.map((p) => (
+                    <option key={p.name} value={p.name}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+                {formErrors.plant && (
+                  <p className="text-sm text-[var(--color-danger-a)] mt-1">
+                    {formErrors.plant}
+                  </p>
+                )}
               </div>
 
               {/* STATUS */}

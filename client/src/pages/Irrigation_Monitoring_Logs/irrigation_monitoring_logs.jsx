@@ -33,6 +33,8 @@ export default function Irrigation_Monitoring_Logs() {
     setMessageContext,
   } = useContext(MessageContext);
 
+  const isDark = useDarkMode();
+
   const [activePage, setActivePage] = useState("watering");
   const [isNotifOpen, setNotifOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
@@ -45,6 +47,8 @@ export default function Irrigation_Monitoring_Logs() {
     log: null,
   });
 
+
+  
   const openDeleteOne = (logType, log) =>
     setDeleteModal({ open: true, mode: "delete-one", logType, log });
 
@@ -54,7 +58,6 @@ export default function Irrigation_Monitoring_Logs() {
   const closeDeleteModal = () =>
     setDeleteModal({ open: false, mode: null, logType: null, log: null });
 
-  // ── loadNotifs galing na sa usePlantData tulad ng Dashboard ──
   const { readings = [], loadReadings, loadNotifs } = usePlantData();
   const { wateringLogs, removeWateringLog, removeAllWateringLogs } = useWateringLog();
 
@@ -99,7 +102,6 @@ export default function Irrigation_Monitoring_Logs() {
         }
       }
 
-
     } catch (err) {
       console.error("Delete failed:", err?.message || err);
       setMessageContext("Something went wrong. Please try again.");
@@ -122,6 +124,7 @@ export default function Irrigation_Monitoring_Logs() {
           wateringLogs={wateringLogs}
           onDeleteOne={(log) => openDeleteOne("watering", log)}
           onDeleteAll={() => openDeleteAll("watering")}
+          isDark={isDark} 
         />
       ),
     },
@@ -138,6 +141,7 @@ export default function Irrigation_Monitoring_Logs() {
           waterLevelReadings={waterLevelReadings}
           onDeleteOne={(log) => openDeleteOne("water-level", log)}
           onDeleteAll={() => openDeleteAll("water-level")}
+          isDark={isDark} 
         />
       ),
     },
@@ -150,10 +154,11 @@ export default function Irrigation_Monitoring_Logs() {
         </svg>
       ),
       component: (
-        <MoistureMonitoring
+       <MoistureMonitoring
           moistureReadings={moistureReadings}
           onDeleteOne={(log) => openDeleteOne("moisture", log)}
           onDeleteAll={() => openDeleteAll("moisture")}
+            isDark={isDark} 
         />
       ),
     },
@@ -163,45 +168,73 @@ export default function Irrigation_Monitoring_Logs() {
   if (!user) return <div>Loading...</div>;
 
   return (
-    <section className="con_main w-full min-h-screen bg-gradient-to-br overflow-hidden from-[#E8F3ED] to-[#C4DED0] flex flex-col md:grid md:grid-cols-[15fr_85fr] md:grid-rows-[auto_1fr] gap-4 relative">
-      <button onClick={() => setSidebarOpen(true)}
-        className="menu_button md:hidden fixed top-4 left-4 z-40 bg-white p-2.5 rounded-lg shadow-lg">
+    <section className={`con_main w-full min-h-screen overflow-hidden flex flex-col md:grid md:grid-cols-[15fr_85fr] md:grid-rows-[auto_1fr] gap-4 relative transition-colors duration-300
+      ${isDark
+        ? "bg-[var(--metal-dark1)]"
+        : "bg-gradient-to-br from-[#E8F3ED] to-[#C4DED0]"
+      }`}>
+
+      {/* Mobile menu button */}
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className={`menu_button md:hidden fixed top-4 left-4 z-40 p-2.5 rounded-lg shadow-lg transition-colors duration-300
+          ${isDark ? "bg-[var(--metal-dark1)] text-white" : "bg-white text-gray-800"}`}>
         <Menu size={22} />
       </button>
 
+      {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setSidebarOpen(false)} />
       )}
 
+      {/* Sidebar */}
       <aside className={`${sidebarOpen ? "fixed inset-y-0 left-0 w-64 z-50" : "hidden"} md:static md:block md:row-span-full`}>
         <Sidebar user={user} setLogoutOpen={setLogoutOpen} setSidebarOpen={setSidebarOpen} />
       </aside>
 
+      {/* Main content */}
       <div className="md:col-start-2 flex flex-col gap-4 pb-4">
         <Db_Header setNotifOpen={setNotifOpen} />
 
         <div className="w-full max-w-full sm:max-w-7xl mx-auto space-y-4 px-4 sm:px-0">
 
-          <div className="bg-white rounded-3xl p-4 shadow-sm w-full">
+          {/* Tab Nav */}
+          <div className={`rounded-3xl p-4 shadow-sm w-full transition-colors duration-300
+            ${isDark ? "bg-[var(--metal-dark1)] border border-white/10" : "bg-white"}`}>
             <nav className="flex items-center gap-2 w-full">
               {PAGES.map(p => (
-                <button key={p.id} onClick={() => setActivePage(p.id)}
+                <button
+                  key={p.id}
+                  onClick={() => setActivePage(p.id)}
                   className={`flex-1 flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-                    ${activePage === p.id ? "bg-[#027e69] text-white shadow-sm" : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"}`}>
-                  <span className={activePage === p.id ? "text-white" : "text-gray-400"}>{p.icon}</span>
+                    ${activePage === p.id
+                      ? "bg-[#027e69] text-white shadow-sm"
+                      : isDark
+                        ? "text-gray-400 hover:bg-white/10 hover:text-gray-200"
+                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-800"
+                    }`}>
+                  <span className={activePage === p.id ? "text-white" : isDark ? "text-gray-500" : "text-gray-400"}>
+                    {p.icon}
+                  </span>
                   {p.label}
                 </button>
               ))}
             </nav>
           </div>
 
-          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 overflow-hidden">
+          {/* Content Card */}
+          <div className={`rounded-3xl shadow-sm p-6 overflow-hidden transition-colors duration-300
+            ${isDark
+              ? "bg-[var(--metal-dark1)] border border-white/10"
+              : "bg-white border border-gray-100"
+            }`}>
             {current?.component}
           </div>
 
         </div>
       </div>
 
+      {/* Modals */}
       {deleteModal.open && (
         <DeleteLogsModal
           mode={deleteModal.mode}
@@ -230,5 +263,7 @@ export default function Irrigation_Monitoring_Logs() {
       )}
 
     </section>
+
+
   );
 }

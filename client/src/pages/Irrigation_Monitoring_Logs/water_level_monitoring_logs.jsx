@@ -18,7 +18,7 @@ const getWaterMeta = (level) => {
   return             { label: "Critical", color: "bg-red-100 text-red-700",           dot: "bg-red-500"     };
 };
 
-function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAll }) {
+function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAll, isDark }) {
   const { user } = useUser();
   const isAdmin = user?.role === "admin";
 
@@ -57,8 +57,10 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
       {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">Water Level Monitoring</h2>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <h2 className={`text-xl font-bold ${isDark ? "text-gray-100" : "text-gray-800"}`}>
+            Water Level Monitoring
+          </h2>
+          <p className={`text-xs mt-0.5 ${isDark ? "text-gray-500" : "text-gray-400"}`}>
             Ultrasonic sensor (sensor_id = 8) — tank level and status
           </p>
         </div>
@@ -76,8 +78,15 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
           { label: "Minimum Level", value: `${min}%`, color: "text-red-500"     },
           { label: "Maximum Level", value: `${max}%`, color: "text-emerald-600" },
         ].map((s) => (
-          <div key={s.label} className="bg-white rounded-xl border border-gray-100 px-4 py-3 shadow-sm">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+          <div
+            key={s.label}
+            className={`rounded-xl border px-4 py-3 shadow-sm ${
+              isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
+            }`}
+          >
+            <p className={`text-[11px] uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-400"}`}>
+              {s.label}
+            </p>
             <p className={`text-2xl font-bold mt-0.5 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -87,7 +96,7 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex gap-1.5">
           {["All", "Normal", "Low", "Critical"].map((f) => (
-            <FilterBtn key={f} label={f} active={statusFilter === f} onClick={() => onFilter(f)} />
+            <FilterBtn key={f} label={f} active={statusFilter === f} onClick={() => onFilter(f)} isDark={isDark} />
           ))}
         </div>
 
@@ -105,34 +114,34 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
 
       {/* Table */}
       <div className="overflow-y-auto">
-        <TableWrap>
+        <TableWrap isDark={isDark}>
           <thead>
             <tr>
-              <Th>#</Th>
-              <Th>Timestamp</Th>
-              <Th>Water Level</Th>
-              <Th>Status</Th>
-              {isAdmin && <Th>Action</Th>}
+              <Th isDark={isDark}>#</Th>
+              <Th isDark={isDark}>Timestamp</Th>
+              <Th isDark={isDark}>Water Level</Th>
+              <Th isDark={isDark}>Status</Th>
+              {isAdmin && <Th isDark={isDark}>Action</Th>}
             </tr>
           </thead>
           <tbody>
             {!paged.length ? (
-              <EmptyRow cols={isAdmin ? 5 : 4} />
+              <EmptyRow cols={isAdmin ? 5 : 4} isDark={isDark} />
             ) : (
               paged.map((r, index) => {
                 const level = parseFloat(r.value);
                 const m = getWaterMeta(level);
                 return (
-                  <Tr key={r.reading_id}>
-                    <Td className="text-xs text-gray-400 tabular-nums">
+                  <Tr key={r.reading_id} isDark={isDark}>
+                    <Td isDark={isDark} className="text-xs tabular-nums">
                       {(page - 1) * PAGE_SIZE + index + 1}
                     </Td>
-                    <Td className="text-xs text-gray-400 tabular-nums">
+                    <Td isDark={isDark} className="text-xs tabular-nums">
                       {fmtTs(r.recorded_at)}
                     </Td>
-                    <Td>
+                    <Td isDark={isDark}>
                       <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 rounded-full bg-gray-100 overflow-hidden">
+                        <div className={`w-24 h-2 rounded-full overflow-hidden ${isDark ? "bg-gray-700" : "bg-gray-100"}`}>
                           <div
                             className={`h-full rounded-full ${
                               level >= 60 ? "bg-emerald-400" : level >= 30 ? "bg-amber-400" : "bg-red-400"
@@ -140,17 +149,19 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
                             style={{ width: `${Math.min(level, 100)}%` }}
                           />
                         </div>
-                        <span className="text-sm font-bold text-gray-700">{level.toFixed(1)}%</span>
+                        <span className={`text-sm font-bold ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+                          {level.toFixed(1)}%
+                        </span>
                       </div>
                     </Td>
-                    <Td>
+                    <Td isDark={isDark}>
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${m.color}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${m.dot}`} />
                         {m.label}
                       </span>
                     </Td>
                     {isAdmin && (
-                      <Td>
+                      <Td isDark={isDark}>
                         <button
                           onClick={() => onDeleteOne(r)}
                           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
@@ -169,7 +180,7 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
         </TableWrap>
       </div>
 
-      <Pager page={page} total={filtered.length} onPage={setPage} />
+      <Pager page={page} total={filtered.length} onPage={setPage} isDark={isDark} />
     </div>
   );
 }

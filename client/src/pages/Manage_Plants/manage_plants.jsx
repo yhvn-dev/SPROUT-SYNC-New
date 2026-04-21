@@ -500,6 +500,7 @@ export function Manage_Plants() {
           reloadTray={loadTrays}
           reloadBatches={loadBatches}
           trayGroups={trayGroups}
+          plants={plants}
         />
       )}
 

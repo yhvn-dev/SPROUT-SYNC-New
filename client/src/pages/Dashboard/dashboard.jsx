@@ -92,7 +92,7 @@ export function Dashboard() {
     return g ? Number(g.tray_count) : 0;
   };
 
-  // REMOVE Z
+
   // ─── BUILD BATCH EXCEL DATA (for the Batches panel download button) ────────
   const batchExcelData = useMemo(() => {
     return batches.map((batch) => {
@@ -275,7 +275,7 @@ export function Dashboard() {
                           <div>
                             <div className='flex'>
                               <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-                                [{group.group_number}] {group.tray_group_name} Group
+                                {group.group_number} {group.tray_group_name} 
                               </h2>
                               <button onClick={(e) => { e.stopPropagation(); handleOpenInfosModalTrayGroups(); }} className='mx-2'>
                                 <CircleQuestionMark className='w-4 h-4 cursor-pointer' />

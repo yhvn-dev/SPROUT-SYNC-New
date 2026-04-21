@@ -50,7 +50,8 @@ function TrayGroups_View({
         return (
           <div key={group.tray_group_id} className="conb bg-white rounded-3xl shadow-lg overflow-hidden w-full">
 
-            {/* TG Header */}
+    
+    
             <div
               className="tg_data_main p-4 sm:p-5 cursor-pointer hover:bg-gray-50 transition-colors"
               onClick={() => toggleZone(group.tray_group_id)}>          
@@ -61,8 +62,8 @@ function TrayGroups_View({
                   </div>
                   <div>
                     <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-                      [{group.group_number}] {group.tray_group_name} Group
                     </h2>
+                      {group.group_number} {group.tray_group_name} 
                     <div className="flex gap-3 flex-wrap">
                       <span className="text-xs text-gray-500">{group.location}</span>
                       <span className="text-xs text-gray-500">Trays: {groupTrays.length}</span>
@@ -71,6 +72,7 @@ function TrayGroups_View({
                   </div>
                 </div>
 
+                
                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
                   <button
                     onClick={(e) => handleAddTray(e, group)}
@@ -128,7 +130,7 @@ function TrayGroups_View({
                           <div className="flex items-start justify-between mb-3">
                             <div>
                               <h3 className="text-base font-semibold text-gray-900">
-                                Tray {index + 1} - [{tray.tray_number}] {tray.plant}
+                                Tray {index + 1}. {tray.plant}
                               </h3>
                               <p className="text-xs text-gray-600">{tray.status}</p>
                               {/* 👇 changed this part */}
@@ -139,7 +141,8 @@ function TrayGroups_View({
                               </p>
                             </div>
                             <div className="flex items-center gap-1.5 ml-2 flex-shrink-0">
-                              {/* 👇 hide button if may active batch */}
+                          
+                          
                               {!hasActiveBatch && (
                                 <button
                                   onClick={() => handleAddBatch(tray)}

@@ -3,6 +3,7 @@ import { FilterBtn, TableWrap, Tr, Td, Pager, Th, EmptyRow, SearchInput } from "
 import { Trash2 } from "lucide-react";
 import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx";
 import { useUser } from "../../hooks/userContext.jsx";
+import { useDarkMode } from "../../hooks/useDarkMode.jsx"; 
 
 const PLANT_MAP = { 5: "Bokchoy", 6: "Pechay", 7: "Mustasa" };
 const PAGE_SIZE = 8;
@@ -20,7 +21,7 @@ function getMoistureMeta(v) {
   return             { label: "Low",    color: "bg-red-100 text-red-800",           dot: "bg-red-500"     };
 }
 
-function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll }) {
+function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll,isDark}) {
   const { user } = useUser();
   const isAdmin = user?.role === "admin";
 
@@ -59,12 +60,16 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
   const exportFilename = `moisture-logs-${(plantFilter === "All" ? "all-plants" : plantFilter).toLowerCase()}`;
 
   return (
-    <div>
+    <div className={isDark ? "dark" : ""}>
       {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-800">Plant Moisture Monitoring</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Soil sensor readings — real-time moisture data per plant</p>
+          <h2 className={`text-xl font-bold ${isDark ? "text-gray-100" : "text-gray-800"}`}>
+            Plant Moisture Monitoring
+          </h2>
+          <p className={`text-xs mt-0.5 ${isDark ? "text-gray-400" : "text-gray-400"}`}>
+            Soil sensor readings — real-time moisture data per plant
+          </p>
         </div>
         <ExcelDownloadBtn
           data={exportData}
@@ -80,8 +85,17 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
           { label: "Pechay avg",  value: `${avg(pc)}%`, color: "text-[#009983]" },
           { label: "Mustasa avg", value: `${avg(mt)}%`, color: "text-teal-600"  },
         ].map(s => (
-          <div key={s.label} className="bg-white rounded-xl border border-gray-100 px-4 py-3 shadow-sm">
-            <p className="text-[11px] text-gray-400 uppercase tracking-wider">{s.label}</p>
+          <div
+            key={s.label}
+            className={`rounded-xl border px-4 py-3 shadow-sm ${
+              isDark
+                ? "bg-gray-800 border-gray-700"
+                : "bg-white border-gray-100"
+            }`}
+          >
+            <p className={`text-[11px] uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-400"}`}>
+              {s.label}
+            </p>
             <p className={`text-2xl font-bold mt-0.5 ${s.color}`}>{s.value}</p>
           </div>
         ))}
@@ -115,12 +129,12 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
       <TableWrap>
         <thead>
           <tr>
-            <Th>#</Th>
-            <Th>Timestamp</Th>
-            <Th>Plant Type</Th>
-            <Th>Moisture</Th>
-            <Th>Status</Th>
-            {isAdmin && <Th>Action</Th>}
+            <Th isDark={isDark}>#</Th>
+            <Th isDark={isDark}>Timestamp</Th>
+            <Th isDark={isDark}>Plant Type</Th>
+            <Th isDark={isDark}>Moisture</Th>
+            <Th isDark={isDark}>Status</Th>
+            {isAdmin && <Th isDark={isDark}>Action</Th>}
           </tr>
         </thead>
         <tbody>
@@ -129,27 +143,33 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
             const m     = getMoistureMeta(r.value);
             const val   = parseFloat(r.value);
             return (
-              <Tr key={r.reading_id}>
-                <Td className="text-xs text-gray-400 tabular-nums">
+              <Tr key={r.reading_id} isDark={isDark}>
+                <Td className={`text-xs tabular-nums ${isDark ? "text-gray-400" : "text-gray-400"}`}>
                   {(page - 1) * PAGE_SIZE + index + 1}
                 </Td>
-                <Td className="text-xs text-gray-400 tabular-nums">
+                <Td className={`text-xs tabular-nums ${isDark ? "text-gray-400" : "text-gray-400"}`}>
                   {fmtTs(r.recorded_at)}
                 </Td>
                 <Td>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#e1f5ee] text-[#085041]">
+                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                    isDark
+                      ? "bg-[#0a3d30] text-[#4ecdb4]"
+                      : "bg-[#e1f5ee] text-[#085041]"
+                  }`}>
                     {plant}
                   </span>
                 </Td>
                 <Td>
                   <div className="flex items-center gap-2">
-                    <div className="w-20 h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div className={`w-20 h-2 rounded-full overflow-hidden ${isDark ? "bg-gray-700" : "bg-gray-100"}`}>
                       <div
                         className={`h-full rounded-full ${val >= 60 ? "bg-emerald-400" : val >= 35 ? "bg-amber-400" : "bg-red-400"}`}
                         style={{ width: `${Math.min(val, 100)}%` }}
                       />
                     </div>
-                    <span className="text-sm font-bold text-gray-700">{val.toFixed(1)}%</span>
+                    <span className={`text-sm font-bold ${isDark ? "text-gray-200" : "text-gray-700"}`}>
+                      {val.toFixed(1)}%
+                    </span>
                   </div>
                 </Td>
                 <Td>
