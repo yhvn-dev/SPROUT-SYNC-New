@@ -24,8 +24,6 @@ import TrayGroups_View from "./trayGroups_view.jsx";
 import RegisterDeviceModal from "./modals/registerDeviceModal.jsx";
 
 
-
-
 export function Manage_Plants() {
   const { user, skippedRegister } = useUser();
   const { openDeleteNotifModal, setOpenDeleteNotifModal, selectedNotif, deleteMode, messageContext, setMessageContext } = useContext(MessageContext);

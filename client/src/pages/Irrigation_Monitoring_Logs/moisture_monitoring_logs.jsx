@@ -50,7 +50,7 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
     return filtered.map((r, i) => ({
       "#": i + 1,
       Timestamp: fmtTs(r.recorded_at),
-      "Plant Type": PLANT_MAP[r.sensor_id] || "Unknown",
+      "Plant Groups": PLANT_MAP[r.sensor_id] || "Unknown",
       "Moisture (%)": parseFloat(r.value).toFixed(1),
       Status: getMoistureMeta(r.value).label,
     }));
@@ -59,7 +59,7 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
   const exportFilename = `moisture-logs-${(plantFilter === "All" ? "all-plants" : plantFilter).toLowerCase()}`;
 
   return (
-    <div>
+    <div className="w-full">
       {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>
@@ -102,79 +102,82 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll })
             <button
               onClick={onDeleteAll}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-              style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
-            >
-              <Trash2 size={13} />
+              style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}>
+           
               Delete All
             </button>
           )}
         </div>
       </div>
 
-      {/* Table */}
-      <TableWrap>
-        <thead>
-          <tr>
-            <Th>#</Th>
-            <Th>Timestamp</Th>
-            <Th>Plant Type</Th>
-            <Th>Moisture</Th>
-            <Th>Status</Th>
-            {isAdmin && <Th>Action</Th>}
-          </tr>
-        </thead>
-        <tbody>
-          {!paged.length ? <EmptyRow cols={isAdmin ? 6 : 5} /> : paged.map((r, index) => {
-            const plant = PLANT_MAP[r.sensor_id] || "Unknown";
-            const m     = getMoistureMeta(r.value);
-            const val   = parseFloat(r.value);
-            return (
-              <Tr key={r.reading_id}>
-                <Td className="text-xs text-gray-400 tabular-nums">
-                  {(page - 1) * PAGE_SIZE + index + 1}
-                </Td>
-                <Td className="text-xs text-gray-400 tabular-nums">
-                  {fmtTs(r.recorded_at)}
-                </Td>
-                <Td>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#e1f5ee] text-[#085041]">
-                    {plant}
-                  </span>
-                </Td>
-                <Td>
-                  <div className="flex items-center gap-2">
-                    <div className="w-20 h-2 rounded-full bg-gray-100 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${val >= 60 ? "bg-emerald-400" : val >= 35 ? "bg-amber-400" : "bg-red-400"}`}
-                        style={{ width: `${Math.min(val, 100)}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-bold text-gray-700">{val.toFixed(1)}%</span>
-                  </div>
-                </Td>
-                <Td>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${m.color}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${m.dot}`} />
-                    {m.label}
-                  </span>
-                </Td>
-                {isAdmin && (
-                  <Td>
-                    <button
-                      onClick={() => onDeleteOne(r)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-                      style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
-                    >
-                      <Trash2 size={12} />
-                      Delete
-                    </button>
-                  </Td>
-                )}
-              </Tr>
-            );
-          })}
-        </tbody>
-      </TableWrap>
+      {/* Table with overflow-x for mobile */}
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", width: "100%" }}>
+        <div style={{ minWidth: "600px" }}>
+          <TableWrap>
+            <thead>
+              <tr>
+                <Th>#</Th>
+                <Th>Timestamp</Th>
+                <Th>Plant Group</Th>
+                <Th>Moisture</Th>
+                <Th>Status</Th>
+                {isAdmin && <Th>Action</Th>}
+              </tr>
+            </thead>
+            <tbody>
+              {!paged.length ? <EmptyRow cols={isAdmin ? 6 : 5} /> : paged.map((r, index) => {
+                const plant = PLANT_MAP[r.sensor_id] || "Unknown";
+                const m     = getMoistureMeta(r.value);
+                const val   = parseFloat(r.value);
+                return (
+                  <Tr key={r.reading_id}>
+                    <Td className="text-xs text-gray-400 tabular-nums">
+                      {(page - 1) * PAGE_SIZE + index + 1}
+                    </Td>
+                    <Td className="text-xs text-gray-400 tabular-nums">
+                      {fmtTs(r.recorded_at)}
+                    </Td>
+                    <Td>
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-[#e1f5ee] text-[#085041]">
+                        {plant}
+                      </span>
+                    </Td>
+                    <Td>
+                      <div className="flex items-center gap-2">
+                        <div className="w-20 h-2 rounded-full bg-gray-100 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full ${val >= 60 ? "bg-emerald-400" : val >= 35 ? "bg-amber-400" : "bg-red-400"}`}
+                            style={{ width: `${Math.min(val, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-sm font-bold text-gray-700">{val.toFixed(1)}%</span>
+                      </div>
+                    </Td>
+                    <Td>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${m.color}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${m.dot}`} />
+                        {m.label}
+                      </span>
+                    </Td>
+                    {isAdmin && (
+                      <Td>
+                        <button
+                          onClick={() => onDeleteOne(r)}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
+                          style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
+                        >
+                    
+                          Delete
+                        </button>
+                      </Td>
+                    )}
+                  </Tr>
+                );
+              })}
+            </tbody>
+          </TableWrap>
+        </div>
+      </div>
 
       <Pager page={page} total={filtered.length} onPage={setPage} />
     </div>

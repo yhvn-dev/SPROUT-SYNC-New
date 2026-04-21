@@ -26,7 +26,6 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
   const [search, setSearch] = useState("");
   const [page, setPage]     = useState(1);
 
-  
   const filtered = useMemo(() => {
     return wateringLogs.filter(r => {
       if (search && !r.plant_name.toLowerCase().includes(search.toLowerCase())) return false;
@@ -45,7 +44,7 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
     return filtered.map((r, i) => ({
       "#": i + 1,
       Timestamp: fmtTs(r.ts),
-      "Plant Name": r.plant_name,
+      "Plant Group": r.plant_name,
       "Started At": r.started_at ? fmtTs(r.started_at) : "—",
       "Ended At":   r.ended_at   ? fmtTs(r.ended_at)   : "—",
       "Duration (secs)": r.duration ?? "—",
@@ -57,7 +56,7 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
     : "watering-logs-all";
 
   return (
-    <div>
+    <div className="w-full">
       {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>
@@ -92,70 +91,72 @@ function Watering_Logs({ wateringLogs = [], onDeleteOne, onDeleteAll }) {
           <button
             onClick={onDeleteAll}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-            style={{ backgroundColor: "var(--color-danger-b)", color: "#a30012" }}
-          >
+            style={{ backgroundColor: "var(--color-danger-b)", color: "#a30012" }}>
             Delete All
           </button>
         )}
       </div>
 
-      {/* Table */}
-      <TableWrap>
-        <thead>
-          <tr>
-            <Th>#</Th>
-            <Th>Timestamp</Th>
-            <Th>Plant Name</Th>
-            <Th>Started At</Th>
-            <Th>Ended At</Th>
-            <Th>Duration</Th>
-            {isAdmin && <Th>Action</Th>}
-          </tr>
-        </thead>
-        <tbody>
-          {!paged.length ? (
-            <EmptyRow cols={isAdmin ? 7 : 6} />
-          ) : (
-            paged.map((r, index) => (
-              <Tr key={r.watering_log_id}>
-                <Td className="text-xs text-gray-400 tabular-nums">
-                  {(page - 1) * PAGE_SIZE + index + 1}
-                </Td>
-                <Td className="text-xs text-gray-400 tabular-nums">
-                  {fmtTs(r.ts)}
-                </Td>
-                <Td>
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                    🌿 {r.plant_name}
-                  </span>
-                </Td>
-                <Td className="text-xs text-gray-400 tabular-nums">
-                  {r.started_at ? fmtTs(r.started_at) : "—"}
-                </Td>
-                <Td className="text-xs text-gray-400 tabular-nums">
-                  {r.ended_at ? fmtTs(r.ended_at) : "—"}
-                </Td>
-                <Td>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
-                    {fmtDuration(r.duration)}
-                  </span>
-                </Td>
-                {isAdmin && (
-                  <Td>
-                    <button
-                      onClick={() => onDeleteOne(r)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-                      style={{ backgroundColor: "var(--color-danger-b)", color: "#a30012" }}
-                    >
-                      🗑 Delete
-                    </button>
-                  </Td>
-                )}
-              </Tr>
-            ))
-          )}
-        </tbody>
-      </TableWrap>
+      {/* Table with overflow-x for mobile */}
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", width: "100%" }}>
+        <div style={{ minWidth: "600px" }}>
+          <TableWrap>
+            <thead>
+              <tr>
+                <Th>#</Th>
+                <Th>Timestamp</Th>
+                <Th>Plant Groups</Th>
+                <Th>Started At</Th>
+                <Th>Ended At</Th>
+                <Th>Duration</Th>
+                {isAdmin && <Th>Action</Th>}
+              </tr>
+            </thead>
+            <tbody>
+              {!paged.length ? (
+                <EmptyRow cols={isAdmin ? 7 : 6} />
+              ) : (
+                paged.map((r, index) => (
+                  <Tr key={r.watering_log_id}>
+                    <Td className="text-xs text-gray-400 tabular-nums">
+                      {(page - 1) * PAGE_SIZE + index + 1}
+                    </Td>
+                    <Td className="text-xs text-gray-400 tabular-nums">
+                      {fmtTs(r.ts)}
+                    </Td>
+                    <Td>
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        🌿 {r.plant_name}
+                      </span>
+                    </Td>
+                    <Td className="text-xs text-gray-400 tabular-nums">
+                      {r.started_at ? fmtTs(r.started_at) : "—"}
+                    </Td>
+                    <Td className="text-xs text-gray-400 tabular-nums">
+                      {r.ended_at ? fmtTs(r.ended_at) : "—"}
+                    </Td>
+                    <Td>
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                        {fmtDuration(r.duration)}
+                      </span>
+                    </Td>
+                    {isAdmin && (
+                      <Td>
+                        <button
+                          onClick={() => onDeleteOne(r)}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
+                          style={{ backgroundColor: "var(--color-danger-b)", color: "#a30012" }}>
+                            Delete
+                        </button>
+                      </Td>
+                    )}
+                  </Tr>
+                ))
+              )}
+            </tbody>
+          </TableWrap>
+        </div>
+      </div>
 
       <Pager page={page} total={filtered.length} onPage={setPage} />
     </div>

@@ -42,7 +42,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ===== CORS =====
 app.use(cors({
-  origin: process.env.ORIGIN_URL || "http://localhost:3000",
+  origin: process.env.DEV_URL || "http://localhost:3000",
   credentials: true
 }))
 
@@ -58,7 +58,7 @@ app.use("/streams", express.static(path.resolve(__dirname, "../streams"), {
   }
 }));
 
-// REDEPLOY APRIL 19
+
 
 // ===== ROUTES =====
 app.use('', userRoutes);
@@ -94,7 +94,7 @@ const server = http.createServer(app);
 // =====================================================
 export const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.ORIGIN_URL  || "http://localhost:3000",
+    origin: process.env.DEV_URL  || "http://localhost:3000",
     credentials: true}
 });
 

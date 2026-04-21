@@ -103,9 +103,6 @@ export function TrayModal({
     }
   };
 
-
-
-  
   return (
     <motion.div
       className="tray_modal fixed inset-0 bg-transparent backdrop-blur-2xl flex items-center justify-center p-4 z-50">

@@ -316,7 +316,7 @@ export function Dashboard() {
                                 <div className="flex items-start justify-between mb-3">
                                   <div className="flex items-center justify-between w-full">
                                     <h3 className="text-lg font-semibold text-gray-900">
-                                      Tray {index + 1} [{tray.tray_number}] {tray.plant}
+                                      Tray {index + 1} 
                                     </h3>
                                     <span
                                       className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
