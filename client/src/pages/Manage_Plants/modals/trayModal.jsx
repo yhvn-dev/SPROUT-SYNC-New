@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { X, Sprout, TrendingUp, Trash2, Grid3x3} from "lucide-react";
+import { X, TrendingUp, Trash2, Grid3x3} from "lucide-react";
 import * as trayModels from "../../../data/traysServices";
 
 export function TrayModal({
@@ -17,8 +17,6 @@ export function TrayModal({
   const [formData, setFormData] = useState({ tray_group_id: 0, plant: "", status: "Available" });
   const [formErrors, setFormErrors] = useState({});
 
-  
-  // ✅ FIX: for insert, use selectedTrayGroup. For update/delete,
   const resolvedGroup =
     trayModalMode === "insert"
       ? selectedTrayGroup
@@ -69,7 +67,7 @@ export function TrayModal({
           status: formData.status,
         });
         setFormErrors({});
-        setSuccessMsg(`${newTray.plant} Tray Added`);
+        setSuccessMsg(`Tray Added`);
       }
       if (trayModalMode === "update") {
         const updatedTray = await trayModels.updateTray(
@@ -81,12 +79,12 @@ export function TrayModal({
           selectedTray.tray_id
         );
         setFormErrors({});
-        setSuccessMsg(`${updatedTray.plant} Tray Updated`);
+        setSuccessMsg(`Tray Updated`);
       }
       if (trayModalMode === "delete") {
         await trayModels.deleteTray(selectedTray.tray_id);
         setFormErrors({});
-        setSuccessMsg(`${selectedTray.plant} Tray Deleted`);
+        setSuccessMsg(`Tray Deleted`);
       }
       reloadTray();
       reloadBatches();
@@ -105,11 +103,14 @@ export function TrayModal({
     }
   };
 
+
+
+  
   return (
     <motion.div
       className="tray_modal fixed inset-0 bg-transparent backdrop-blur-2xl flex items-center justify-center p-4 z-50">
       <motion.div
-        className={`conb bg-white rounded-2xl shadow-2xl ${trayModalMode === "delete" ? "w-[450px] h-[250px]" : "w-[750px]"} overflow-hidden flex flex-col`}
+        className={`conb bg-white rounded-2xl shadow-2xl ${trayModalMode === "delete" ? "w-[450px] h-[250px]" : "w-[500px]"} overflow-hidden flex flex-col`}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
@@ -134,7 +135,7 @@ export function TrayModal({
               </h2>
               <p className="text-sm text-[var(--acc-darkc)]">
                 {trayModalMode === "delete"
-                  ? `Are you sure you want to delete ${selectedTray?.plant}?`
+                  ? `Are you sure you want to delete this tray?`
                   : `Tray group: ${resolvedGroupName}`}
               </p>
             </div>
@@ -149,7 +150,7 @@ export function TrayModal({
         {trayModalMode === "delete" ? (
           <>
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-gray-600">Delete <b>{selectedTray?.plant}</b> tray?</p>
+              <p className="text-gray-600">Delete this tray from <b>{resolvedGroupName}</b>?</p>
             </div>
             <form onSubmit={handleSubmit} className="flex justify-end gap-3 p-6">
               <button type="button" onClick={onClose} className="cursor-pointer px-4 py-2 border rounded-lg">Cancel</button>
@@ -159,43 +160,28 @@ export function TrayModal({
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-5">
             <input type="hidden" name="tray_group_id" value={formData.tray_group_id} />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <input type="hidden" name="plant" value={formData.plant} />
 
-              {/* PLANT (auto-filled) */}
-              <div className="md:col-span-2 border-2 border-[#C4DED0] text-[#5A8F73] rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm text-[var(--sancgb)] font-semibold mb-2">
-                  <Sprout className="w-4 h-4" /> Plant *
-                </label>
-                <input
-                  type="text"
-                  name="plant"
-                  value={formData.plant}
-                  disabled
-                  className="w-full px-3 py-2 border-2 border-[#C4DED0] text-[#5A8F73] rounded-lg bg-gray-100 cursor-not-allowed"
-                />
-              </div>
-
-              {/* STATUS */}
-              <div className="border-2 border-[#C4DED0] text-[#5A8F73] rounded-xl p-4">
-                <label className="flex items-center gap-2 text-sm text-[var(--sancgb)] font-semibold mb-2">
-                  <TrendingUp className="w-4 h-4" /> Status *
-                </label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border-2 border-[#C4DED0] text-[#5A8F73] rounded-lg bg-white">
-                  <option value="">Select Status</option>
-                  <option value="Available">Available</option>
-                  <option value="Occupied">Occupied</option>
-                  <option value="Maintenance">Maintenance</option>
-                </select>
-                {formErrors.status && (
-                  <p className="text-sm text-[var(--color-danger-a)] mt-1">
-                    {formErrors.status}
-                  </p>
-                )}
-              </div>
+            {/* STATUS ONLY */}
+            <div className="border-2 border-[#C4DED0] text-[#5A8F73] rounded-xl p-4">
+              <label className="flex items-center gap-2 text-sm text-[var(--sancgb)] font-semibold mb-2">
+                <TrendingUp className="w-4 h-4" /> Status *
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border-2 border-[#C4DED0] text-[#5A8F73] rounded-lg bg-white">
+                <option value="">Select Status</option>
+                <option value="Available">Available</option>
+                <option value="Occupied">Occupied</option>
+                <option value="Maintenance">Maintenance</option>
+              </select>
+              {formErrors.status && (
+                <p className="text-sm text-[var(--color-danger-a)] mt-1">
+                  {formErrors.status}
+                </p>
+              )}
             </div>
 
             {/* FOOTER */}

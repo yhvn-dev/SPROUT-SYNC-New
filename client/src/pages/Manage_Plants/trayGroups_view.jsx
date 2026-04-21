@@ -103,6 +103,9 @@ function TrayGroups_View({
               </div>
             </div>
 
+
+
+
             {/* Trays List */}
             {isExpanded && (
               <div className="px-4 sm:px-6 pb-5 pt-1">
@@ -121,14 +124,14 @@ function TrayGroups_View({
                     {groupTrays.map((tray, index) => {
                       const trayBatches = batches.filter(b => b.tray_id === tray.tray_id);
                       const traySensors = getTraySensors(tray.tray_id);
-                      const hasActiveBatch = trayBatches.length > 0; // 👈 key check
+                      const hasActiveBatch = trayBatches.length > 0;
 
                       return (
                         <div key={tray.tray_id} className="con_c tray_list_div bg-gradient-to-br from-[#E8F3ED] to-[#C4DED0] rounded-2xl p-4 shadow-sm">
                           <div className="flex items-start justify-between mb-3">
                             <div>
                               <h3 className="text-base font-semibold text-gray-900">
-                                Tray {index + 1} - [{tray.tray_number}] {tray.plant}
+                                Tray {index + 1} 
                               </h3>
                               <p className="text-xs text-gray-600">{tray.status}</p>
                               {/* 👇 changed this part */}
@@ -165,6 +168,10 @@ function TrayGroups_View({
                               )}
                             </div>
                           </div>
+
+
+
+
 
                           {traySensors.length > 0 && (
                             <div className="mt-3 space-y-2">
