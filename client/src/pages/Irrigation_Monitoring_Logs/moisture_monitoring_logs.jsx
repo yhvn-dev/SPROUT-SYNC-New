@@ -5,7 +5,7 @@ import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx";
 import { useUser } from "../../hooks/userContext.jsx";
 import { useDarkMode } from "../../hooks/useDarkMode.jsx"; 
 
-const PLANT_MAP = { 5: "Bokchoy", 6: "Pechay", 7: "Mustasa" };
+const PLANT_MAP = { 5: "Tray Group 1", 6: "Tray Group 2", 7: "Tray Group 3" };
 const PAGE_SIZE = 8;
 
 function fmtTs(ts) {
@@ -14,6 +14,8 @@ function fmtTs(ts) {
     " " + d.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
+
+
 function getMoistureMeta(v) {
   const n = parseFloat(v);
   if (n >= 60) return { label: "High",   color: "bg-emerald-100 text-emerald-800", dot: "bg-emerald-500" };
@@ -21,43 +23,46 @@ function getMoistureMeta(v) {
   return             { label: "Low",    color: "bg-red-100 text-red-800",           dot: "bg-red-500"     };
 }
 
-function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll,isDark}) {
+
+
+
+function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll, isDark }) {
   const { user } = useUser();
   const isAdmin = user?.role === "admin";
 
-  const [plantFilter, setPlantFilter] = useState("All");
+  const [trayFilter, setTrayFilter] = useState("All");
   const [search, setSearch] = useState("");
   const [page, setPage]     = useState(1);
 
   const filtered = useMemo(() => {
     return moistureReadings.filter(r => {
-      const plant = PLANT_MAP[r.sensor_id] || "";
-      if (plantFilter !== "All" && plant !== plantFilter) return false;
+      const tray = PLANT_MAP[r.sensor_id] || "";
+      if (trayFilter !== "All" && tray !== trayFilter) return false;
       if (search && !fmtTs(r.recorded_at).toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [moistureReadings, plantFilter, search]);
+  }, [moistureReadings, trayFilter, search]);
 
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const onFilter = (f) => { setPlantFilter(f); setPage(1); };
+  const onFilter = (f) => { setTrayFilter(f); setPage(1); };
   const onSearch = (v) => { setSearch(v); setPage(1); };
 
   const avg = (arr) => arr.length ? (arr.reduce((s, v) => s + parseFloat(v), 0) / arr.length).toFixed(1) : "—";
-  const bk  = moistureReadings.filter(r => r.sensor_id === 5).map(r => r.value);
-  const pc  = moistureReadings.filter(r => r.sensor_id === 6).map(r => r.value);
-  const mt  = moistureReadings.filter(r => r.sensor_id === 7).map(r => r.value);
+  const tg1 = moistureReadings.filter(r => r.sensor_id === 5).map(r => r.value);
+  const tg2 = moistureReadings.filter(r => r.sensor_id === 6).map(r => r.value);
+  const tg3 = moistureReadings.filter(r => r.sensor_id === 7).map(r => r.value);
 
   const exportData = useMemo(() => {
     return filtered.map((r, i) => ({
       "#": i + 1,
       Timestamp: fmtTs(r.recorded_at),
-      "Plant Type": PLANT_MAP[r.sensor_id] || "Unknown",
+      "Tray Group": PLANT_MAP[r.sensor_id] || "Unknown",
       "Moisture (%)": parseFloat(r.value).toFixed(1),
       Status: getMoistureMeta(r.value).label,
     }));
   }, [filtered]);
 
-  const exportFilename = `moisture-logs-${(plantFilter === "All" ? "all-plants" : plantFilter).toLowerCase()}`;
+  const exportFilename = `moisture-logs-${(trayFilter === "All" ? "all-trays" : trayFilter.replace(/\s+/g, "-")).toLowerCase()}`;
 
   return (
     <div className={isDark ? "dark" : ""}>
@@ -68,7 +73,7 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll,is
             Plant Moisture Monitoring
           </h2>
           <p className={`text-xs mt-0.5 ${isDark ? "text-gray-400" : "text-gray-400"}`}>
-            Soil sensor readings — real-time moisture data per plant
+            Soil sensor readings — real-time moisture data per tray group
           </p>
         </div>
         <ExcelDownloadBtn
@@ -81,9 +86,9 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll,is
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
-          { label: "Bokchoy avg", value: `${avg(bk)}%`, color: "text-[#027e69]" },
-          { label: "Pechay avg",  value: `${avg(pc)}%`, color: "text-[#009983]" },
-          { label: "Mustasa avg", value: `${avg(mt)}%`, color: "text-teal-600"  },
+          { label: "Tray Group 1 avg", value: `${avg(tg1)}%`, color: "text-[#027e69]" },
+          { label: "Tray Group 2 avg", value: `${avg(tg2)}%`, color: "text-[#009983]" },
+          { label: "Tray Group 3 avg", value: `${avg(tg3)}%`, color: "text-teal-600"  },
         ].map(s => (
           <div
             key={s.label}
@@ -104,8 +109,8 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll,is
       {/* Filters + Delete All */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex flex-wrap items-center gap-1.5">
-          {["All", "Bokchoy", "Pechay", "Mustasa"].map(f => (
-            <FilterBtn key={f} label={f} active={plantFilter === f} onClick={() => onFilter(f)} />
+          {["All", "Tray Group 1", "Tray Group 2", "Tray Group 3"].map(f => (
+            <FilterBtn key={f} label={f} active={trayFilter === f} onClick={() => onFilter(f)} />
           ))}
         </div>
 
@@ -131,7 +136,7 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll,is
           <tr>
             <Th isDark={isDark}>#</Th>
             <Th isDark={isDark}>Timestamp</Th>
-            <Th isDark={isDark}>Plant Type</Th>
+            <Th isDark={isDark}>Tray Group</Th>
             <Th isDark={isDark}>Moisture</Th>
             <Th isDark={isDark}>Status</Th>
             {isAdmin && <Th isDark={isDark}>Action</Th>}
@@ -139,9 +144,9 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll,is
         </thead>
         <tbody>
           {!paged.length ? <EmptyRow cols={isAdmin ? 6 : 5} /> : paged.map((r, index) => {
-            const plant = PLANT_MAP[r.sensor_id] || "Unknown";
-            const m     = getMoistureMeta(r.value);
-            const val   = parseFloat(r.value);
+            const tray = PLANT_MAP[r.sensor_id] || "Unknown";
+            const m    = getMoistureMeta(r.value);
+            const val  = parseFloat(r.value);
             return (
               <Tr key={r.reading_id} isDark={isDark}>
                 <Td className={`text-xs tabular-nums ${isDark ? "text-gray-400" : "text-gray-400"}`}>
@@ -156,7 +161,7 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll,is
                       ? "bg-[#0a3d30] text-[#4ecdb4]"
                       : "bg-[#e1f5ee] text-[#085041]"
                   }`}>
-                    {plant}
+                    {tray}
                   </span>
                 </Td>
                 <Td>
