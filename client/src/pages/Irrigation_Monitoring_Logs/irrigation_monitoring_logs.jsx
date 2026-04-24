@@ -212,8 +212,10 @@ export default function Irrigation_Monitoring_Logs() {
           logType={deleteModal.logType}
           onConfirm={handleDeleteConfirm}
           onCancel={closeDeleteModal}
+          isDark={isDark}
         />
       )}
+
 
       {openDeleteNotifModal && (
         <DeleteNotifModal
@@ -222,6 +224,7 @@ export default function Irrigation_Monitoring_Logs() {
           deleteMode={deleteMode}
           onClose={() => setOpenDeleteNotifModal(false)}
           loadNotifs={loadNotifs}
+          isDark={isDark}
         />
       )}
 
@@ -236,5 +239,5 @@ export default function Irrigation_Monitoring_Logs() {
     </section>
   );
 
-  
+
 }

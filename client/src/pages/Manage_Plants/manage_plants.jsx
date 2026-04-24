@@ -456,6 +456,7 @@ export function Manage_Plants() {
               handleUpdateBatch={handleUpdateBatch}
               handleDeleteBatch={handleDeleteBatch}
               trays={trays}
+              trayGroups={trayGroups}
             />
           )}
 

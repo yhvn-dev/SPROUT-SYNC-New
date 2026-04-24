@@ -92,15 +92,35 @@ export function Dashboard() {
     return g ? Number(g.tray_count) : 0;
   };
 
+  const getTrayInfo = (tray_id) => {
+    const tray = trays.find(t => t.tray_id === tray_id);
+    if (!tray) return null;
+    const groupTrays = trays
+      .filter(t => t.tray_group_id === tray.tray_group_id)
+      .sort((a, b) => a.tray_id - b.tray_id);
+    const index = groupTrays.findIndex(t => t.tray_id === tray_id);
+    return `Tray ${index + 1}. ${tray.plant}`;
+  };
 
-  // ─── BUILD BATCH EXCEL DATA (for the Batches panel download button) ────────
+  const getTrayGroupInfo = (tray_id) => {
+    const tray = trays.find(t => t.tray_id === tray_id);
+    if (!tray) return null;
+    const group = trayGroups.find(g => g.tray_group_id === tray.tray_group_id);
+    return group ? group.tray_group_name : null;
+  };
+
+  // ─── BUILD BATCH EXCEL DATA ───────────────────────────────────────────────
   const batchExcelData = useMemo(() => {
     return batches.map((batch) => {
       const tray = trays.find(t => t.tray_id === batch.tray_id);
+      const groupTrays = tray
+        ? trays.filter(t => t.tray_group_id === tray.tray_group_id).sort((a, b) => a.tray_id - b.tray_id)
+        : [];
+      const trayIndex = tray ? groupTrays.findIndex(t => t.tray_id === tray.tray_id) : -1;
       return {
         "Batch Number":          batch.batch_number,
         "Plant Name":            batch.plant_name,
-        "Tray":                  tray ? `${tray.plant} #${tray.tray_number ?? tray.tray_id}` : "—",
+        "Tray":                  tray ? `Tray ${trayIndex + 1} ${tray.plant}` : "—",
         "Date Planted":          new Date(batch.date_planted).toLocaleDateString(),
         "Expected Harvest Days": batch.expected_harvest_days,
         "Growth Stage":          batch.growth_stage,
@@ -114,9 +134,7 @@ export function Dashboard() {
     });
   }, [batches, trays]);
 
-  // ─── BUILD FULL DASHBOARD EXCEL DATA (3 sheets) ───────────────────────────
   const excelSheets = useMemo(() => {
-
     const trayGroupsSheet = sortedTrayGroups.map((group) => ({
       "Group ID":       group.tray_group_id,
       "Group Name":     group.tray_group_name,
@@ -140,8 +158,13 @@ export function Dashboard() {
         else                                         moistureStatus = "Optimal";
       }
 
+      const groupTrays = trays
+        .filter(t => t.tray_group_id === tray.tray_group_id)
+        .sort((a, b) => a.tray_id - b.tray_id);
+      const trayIndex = groupTrays.findIndex(t => t.tray_id === tray.tray_id);
+
       return {
-        "Tray Number":     tray.tray_number,
+        "Tray":            `Tray ${trayIndex + 1}`,
         "Plant":           tray.plant,
         "Status":          tray.status,
         "Tray Group":      group?.tray_group_name ?? "—",
@@ -157,8 +180,6 @@ export function Dashboard() {
       { sheetName: "Batches",     data: batchExcelData   },
     ];
   }, [sortedTrayGroups, trays, trayGroups, sensors, latestReadings, batchExcelData]);
-
-  // ──────────────────────────────────────────────────────────────────────────
 
   if (!user) return <div>Loading...</div>;
 
@@ -208,17 +229,12 @@ export function Dashboard() {
                 </p>
               </div>
 
-              {/* ── DOWNLOAD BUTTON + WIFI STATUS ── */}
               <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap">
-
-                {/* Excel Download — all data, multi-sheet */}
                 <ExcelDownloadBtn
                   sheets={excelSheets}
                   filename={`nursery-dashboard-${new Date().toISOString().slice(0, 10)}`}
                   multi
                 />
-
-                {/* Watering system status */}
                 <div className="conb flex items-center gap-3 sm:gap-4 bg-white p-3 sm:p-4 rounded-2xl shadow-md border border-gray-50 flex-1 sm:flex-none">
                   {ESP32Status ? (
                     <>
@@ -259,7 +275,10 @@ export function Dashboard() {
 
               {sortedTrayGroups.map((group) => {
                 const isExpanded = expandedZones[group.tray_group_id];
-                const groupTrays = trays.filter(t => t.tray_group_id === group.tray_group_id);
+
+                const groupTrays = trays
+                  .filter(t => t.tray_group_id === group.tray_group_id)
+                  .sort((a, b) => a.tray_id - b.tray_id);
 
                 return (
                   <div key={group.tray_group_id} className="main_tray_group_div conb bg-white rounded-3xl shadow-lg overflow-hidden w-full">
@@ -275,7 +294,7 @@ export function Dashboard() {
                           <div>
                             <div className='flex'>
                               <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-                                {group.group_number} {group.tray_group_name} 
+                                {group.group_number} {group.tray_group_name}
                               </h2>
                               <button onClick={(e) => { e.stopPropagation(); handleOpenInfosModalTrayGroups(); }} className='mx-2'>
                                 <CircleQuestionMark className='w-4 h-4 cursor-pointer' />
@@ -316,7 +335,7 @@ export function Dashboard() {
                                 <div className="flex items-start justify-between mb-3">
                                   <div className="flex items-center justify-between w-full">
                                     <h3 className="text-lg font-semibold text-gray-900">
-                                      Tray {index + 1} [{tray.tray_number}] {tray.plant}
+                                      Tray {index + 1}. {tray.plant}
                                     </h3>
                                     <span
                                       className="px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1"
@@ -364,120 +383,125 @@ export function Dashboard() {
               })}
             </div>
 
-              {/* RIGHT — Batches */}
-                <div className="conb bg-[var(--main-whiteb)] rounded-3xl p-4 sm:p-6 shadow-sm w-full">
-                  <div className="flex items-center gap-3 mb-4 sm:mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#92e6a7] to-[#25a244] flex items-center justify-center flex-shrink-0">
-                      <TrendingUp className="w-5 h-5 text-white" />
-                    </div>
-                    {/* title + info btn + download — all in one row */}
-                    <div className="flex items-center justify-between w-full gap-2">
-                      <div className="flex items-center gap-1">
-                        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Plant Batches</h2>
-                        <button onClick={handleOpenInfosModalBatches}>
-                          <CircleQuestionMark className='w-4 h-4 cursor-pointer' />
-                        </button>
-                      </div>
-                      <ExcelDownloadBtn
-                        data={batchExcelData}
-                        filename={`batches-${new Date().toISOString().slice(0, 10)}`}
-                        sheetName="Active Batches"
-                      />
-                    </div>
-                  </div>
 
-                  <div className="batch_scroll_div space-y-3 max-h-[calc(100vh-350px)] overflow-y-auto w-full">
-                    {batches.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                        <Sprout size={48} className="mb-3 opacity-50" />
-                        <p className="text-lg font-medium">No Batches found</p>
-                        <p className="text-sm">Assign a batch to each tray to start tracking plants</p>
-                      </div>
-                    ) : (
-                      batches.map(batch => {
-                        const stageColors   = getStageColor(batch.growth_stage, isDark);
-                        const harvestColors = getHarvestStatusColor(batch.harvest_status, isDark);
-                        const getTrayInfo   = (tray_id) => {
-                          const tray = trays.find(t => t.tray_id === tray_id);
-                          return tray ? `${tray.plant} #${tray.tray_number ?? tray.tray_id} tray` : null;
-                        };
-                        const trayInfo = getTrayInfo(batch.tray_id);
-
-                        return (
-                          <div key={batch.batch_id} className="batch_div bg-gradient-to-br from-[#E8F3ED] to-white rounded-2xl p-4 border border-gray-100 w-full">
-                            <div className="flex items-start justify-between flex-col mb-3">
-                              <h3 className="text-base font-semibold text-gray-900">[{batch.batch_number}] {batch.plant_name}</h3>
-                              {trayInfo && (
-                                <div className="flex items-center gap-1 mt-0.5">
-                                  <LayoutGrid className="w-3 h-3 text-[#25a244]" />
-                                  <span className="text-[11px] text-[#25a244] font-medium">{trayInfo}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="space-y-2">
-                              <div className="flex items-center gap-2 text-xs">
-                                <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                                <span className="text-gray-600">Planted: {new Date(batch.date_planted).toLocaleDateString()}</span>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs">
-                                <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                                <span className="text-gray-600">
-                                  Harvest at: {batch.expected_harvest_days} {batch.expected_harvest_days === 1 ? "day" : "days"}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs">
-                                <Sprout className="w-3.5 h-3.5 text-gray-400" />
-                                <span className="text-gray-500">Growth Stage:</span>
-                                <span
-                                  className="px-2 py-0.5 rounded-2xl font-medium"
-                                  style={{ backgroundColor: stageColors.bg, color: stageColors.text, border: `1px solid ${stageColors.border}` }}
-                                >
-                                  {batch.growth_stage}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs">
-                                <Clock className="w-3.5 h-3.5 text-gray-400" />
-                                <span className="text-gray-500">Harvest Status:</span>
-                                <span className="flex flex-row items-center gap-1 font-medium" style={{ color: harvestColors.text }}>
-                                  <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: harvestColors.dot }} />
-                                  {batch.harvest_status}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs">
-                                <Leaf className="w-3.5 h-3.5 text-gray-400" />
-                                <span className="text-gray-500">Season:</span>
-                                <span className="font-medium text-[#25a244]">{getSeasonLabel(batch.season)}</span>
-                              </div>
-                            </div>
-
-                            <div className="active_plant_batches_nursery_data grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-gray-200">
-                              <div className="text-center">
-                                <p className="text-xs text-gray-500">Seedlings</p>
-                                <p className="total_seedlings_text text-lg font-bold text-[#25a244]">{batch.total_seedlings}</p>
-                              </div>
-                              <div className="text-center">
-                                <p className="text-xs text-gray-500">Grown</p>
-                                <p className="fully_grown_seedlings_text text-lg font-bold text-[#208b3a]">{batch.fully_grown_seedlings}</p>
-                              </div>
-                              <div className="text-center">
-                                <p className="text-xs text-gray-500">Dead</p>
-                                <p className="dead_seedlings_text text-lg font-bold text-[var(--color-danger-b)]">{batch.dead_seedlings}</p>
-                              </div>
-                              <div className="text-center">
-                                <p className="text-xs text-gray-500">Replants</p>
-                                <p className="replanted_seedlings_text text-lg font-bold text-[var(--color-warning)]">{batch.replanted_seedlings}</p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
+            {/* RIGHT — Batches */}
+            <div className="conb bg-[var(--main-whiteb)] rounded-3xl p-4 sm:p-6 shadow-sm w-full">
+              <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#92e6a7] to-[#25a244] flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-5 h-5 text-white" />
                 </div>
+                <div className="flex items-center justify-between w-full gap-2">
+                  <div className="flex items-center gap-1">
+                    <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Plant Batches</h2>
+                    <button onClick={handleOpenInfosModalBatches}>
+                      <CircleQuestionMark className='w-4 h-4 cursor-pointer' />
+                    </button>
+                  </div>
+                  <ExcelDownloadBtn
+                    data={batchExcelData}
+                    filename={`batches-${new Date().toISOString().slice(0, 10)}`}
+                    sheetName="Active Batches"
+                  />
+                </div>
+              </div>
 
+              <div className="batch_scroll_div space-y-3 max-h-[calc(100vh-350px)] overflow-y-auto w-full">
+                {batches.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                    <Sprout size={48} className="mb-3 opacity-50" />
+                    <p className="text-lg font-medium">No Batches found</p>
+                    <p className="text-sm">Assign a batch to each tray to start tracking plants</p>
+                  </div>
+                ) : (
+                  batches.map(batch => {
+                    const stageColors   = getStageColor(batch.growth_stage, isDark);
+                    const harvestColors = getHarvestStatusColor(batch.harvest_status, isDark);
+                  
+                    const trayInfo      = getTrayInfo(batch.tray_id);
+                    const trayGroupInfo = getTrayGroupInfo(batch.tray_id);
 
+                    return (
+                      <div key={batch.batch_id} className="batch_div bg-gradient-to-br from-[#E8F3ED] to-white rounded-2xl p-4 border border-gray-100 w-full">
+                        <div className="flex items-start justify-between flex-col mb-3">
+                          <h3 className="text-base font-semibold text-gray-900">[{batch.batch_number}] {batch.plant_name}</h3>
 
+                          {trayInfo && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <LayoutGrid className="w-3 h-3 text-[#25a244]" />
+                              <span className="text-[11px] text-[#25a244] font-medium">{trayInfo}</span>
+                            </div>
+                          )}
+
+                          {trayGroupInfo && (
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <LayoutGrid className="w-3 h-3 text-[var(--sancga)]" />
+                              <span className="text-[11px] text-[var(--sancga)] font-medium">
+                                {trayGroupInfo}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-xs">
+                            <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-gray-600">Planted: {new Date(batch.date_planted).toLocaleDateString()}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <Calendar className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-gray-600">
+                              Harvest at: {batch.expected_harvest_days} {batch.expected_harvest_days === 1 ? "day" : "days"}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <Sprout className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-gray-500">Growth Stage:</span>
+                            <span
+                              className="px-2 py-0.5 rounded-2xl font-medium"
+                              style={{ backgroundColor: stageColors.bg, color: stageColors.text, border: `1px solid ${stageColors.border}` }}
+                            >
+                              {batch.growth_stage}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <Clock className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-gray-500">Harvest Status:</span>
+                            <span className="flex flex-row items-center gap-1 font-medium" style={{ color: harvestColors.text }}>
+                              <span className="inline-block w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: harvestColors.dot }} />
+                              {batch.harvest_status}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <Leaf className="w-3.5 h-3.5 text-gray-400" />
+                            <span className="text-gray-500">Season:</span>
+                            <span className="font-medium text-[#25a244]">{getSeasonLabel(batch.season)}</span>
+                          </div>
+                        </div>
+
+                        <div className="active_plant_batches_nursery_data grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-gray-200">
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500">Seedlings</p>
+                            <p className="total_seedlings_text text-lg font-bold text-[#25a244]">{batch.total_seedlings}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500">Grown</p>
+                            <p className="fully_grown_seedlings_text text-lg font-bold text-[#208b3a]">{batch.fully_grown_seedlings}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500">Dead</p>
+                            <p className="dead_seedlings_text text-lg font-bold text-[var(--color-danger-b)]">{batch.dead_seedlings}</p>
+                          </div>
+                          <div className="text-center">
+                            <p className="text-xs text-gray-500">Replants</p>
+                            <p className="replanted_seedlings_text text-lg font-bold text-[var(--color-warning)]">{batch.replanted_seedlings}</p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
 
           </div>
         </div>
@@ -509,11 +533,12 @@ export function Dashboard() {
       {logoutOpen && (
         <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
       )}
-
       {messageContext && (
         <FloatSuccessMsg txt={messageContext} clearMsg={clearMsg} />
       )}
     </section>
+
+
   );
 }
 

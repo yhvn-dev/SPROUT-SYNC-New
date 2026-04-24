@@ -37,7 +37,7 @@ function NotifPopup() {
         </p>
       </div>
 
-      <div className="flex items-center justify-end bg-amber-300 w-[20%]">
+      <div className="flex items-center justify-end  w-[20%]">
           <button
           onClick={() => setNewNotifPopup(null)}
           className="cursor-pointer shrink-0 transition hover:opacity-70"

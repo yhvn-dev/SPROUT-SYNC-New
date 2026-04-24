@@ -1,18 +1,29 @@
-import {Sprout, TrendingUp, Pencil, Trash2, Calendar, Clock, LayoutGrid,Leaf} from "lucide-react";
-import { getHarvestStatusColor,getStageColor} from '../../utils/colors'; 
+import {Sprout, TrendingUp, Pencil, Trash2, Calendar, Clock, LayoutGrid, Leaf} from "lucide-react";
+import { getHarvestStatusColor, getStageColor } from '../../utils/colors'; 
 import { useDarkMode } from "../../hooks/useDarkmode";
 import { getSeasonLabel } from "../../utils/seasonUtils"; 
 
-function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, trays}) {
+function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch,  trays = [], trayGroups = []}) {
+
   const isDark = useDarkMode()
 
   const getTrayInfo = (tray_id) => {
     const tray = trays.find(t => t.tray_id === tray_id);
     if (!tray) return null;
-    return `${tray.plant} #${tray.tray_number ?? tray.tray_id} tray`;
+    const groupTrays = trays
+      .filter(t => t.tray_group_id === tray.tray_group_id)
+      .sort((a, b) => a.tray_id - b.tray_id);
+    const index = groupTrays.findIndex(t => t.tray_id === tray_id);
+    return `Tray ${index + 1}. ${tray.plant}`;
+  };
+
+  const getTrayGroupInfo = (tray_id) => {
+    const tray = trays.find(t => t.tray_id === tray_id);
+    if (!tray) return null;
+    const group = trayGroups.find(g => g.tray_group_id === tray.tray_group_id);
+    return group ? group.tray_group_name : null;
   };
     
-
   return (
     <section className="conb bg-white rounded-3xl p-4 sm:p-6 shadow-sm w-full">
       <div className="flex items-center gap-3 mb-5">
@@ -31,7 +42,8 @@ function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, tr
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {batchesDataList.map(batch => {
-            const trayInfo = getTrayInfo(batch.tray_id);
+            const trayInfo      = getTrayInfo(batch.tray_id);
+            const trayGroupInfo = getTrayGroupInfo(batch.tray_id);
 
             const stageColors   = getStageColor(batch.growth_stage, isDark);
             const harvestColors = getHarvestStatusColor(batch.harvest_status, isDark);
@@ -44,10 +56,20 @@ function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, tr
                     <h3 className="text-sm font-semibold text-gray-900">
                       [{batch.batch_number}] {batch.plant_name}
                     </h3>
+
+                    {/* Tray info */}
                     {trayInfo && (
                       <div className="flex items-center gap-1 mt-0.5">
                         <LayoutGrid className="w-3 h-3 text-[#25a244]" />
                         <span className="text-[11px] text-[#25a244] font-medium">{trayInfo}</span>
+                      </div>
+                    )}
+
+                    {/* Tray group info */}
+                    {trayGroupInfo && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <LayoutGrid className="w-3 h-3 text-gray-400" />
+                        <span className="text-[11px] text-gray-400 font-medium">{trayGroupInfo}</span>
                       </div>
                     )}
                   </div>
@@ -66,10 +88,6 @@ function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, tr
                   </div>
                 </div>
 
-
-
-
-
                 <div className="space-y-1.5 mb-3">
                   <div className="flex items-center gap-2 text-xs">
                     <Calendar className="w-3.5 h-3.5 text-gray-400" />
@@ -82,47 +100,40 @@ function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, tr
                     </span>
                   </div>
 
+                  <div className="flex items-center gap-2 text-xs">
+                    <Sprout className="w-3.5 h-3.5 text-gray-400" />
+                    <span
+                      className="px-[2px] rounded-2xl font-medium"
+                      style={{
+                        backgroundColor: stageColors.bg,
+                        color: stageColors.text,
+                        border: `1px solid ${stageColors.border}`,
+                      }}>
+                      {batch.growth_stage}
+                    </span>
+                  </div>
 
-                <div className="flex items-center gap-2 text-xs">
-                  <Sprout className="w-3.5 h-3.5 text-gray-400" />
-                  <span
-                    className="px-[2px]  rounded-2xl font-medium"
-                    style={{
-                      backgroundColor: stageColors.bg,
-                      color: stageColors.text,
-                      border: `1px solid ${stageColors.border}`,
-                    }}>
-                    {batch.growth_stage}
-                  </span>
-                </div>
-
-
-                  {/* harvest stattus */}
+                  {/* Harvest status */}
                   <div className="flex items-center gap-2 text-xs">
                     <Clock className="w-3.5 h-3.5 text-gray-400" />
-            
-                      <span className="text-gray-500">Harvest:</span>
-                      <span className="flex flex-row-reverse items-center gap-1 font-medium" style={{ color: harvestColors.text }}>
-                        <span 
-                          className="w-2 h-2 rounded-full inline-block flex-shrink-0  harvest-status-txt" 
-                          style={{ backgroundColor: harvestColors.text }} 
-                        />
-                        {batch.harvest_status}
-                      </span>
-                
+                    <span className="text-gray-500">Harvest:</span>
+                    <span className="flex flex-row-reverse items-center gap-1 font-medium" style={{ color: harvestColors.text }}>
+                      <span 
+                        className="w-2 h-2 rounded-full inline-block flex-shrink-0 harvest-status-txt" 
+                        style={{ backgroundColor: harvestColors.text }} 
+                      />
+                      {batch.harvest_status}
+                    </span>
                   </div>
+
                   <div className="flex items-center gap-2 text-xs">
                     <Leaf className="w-3.5 h-3.5 text-gray-400" />
                     <span className="text-gray-500">Season:</span>
                     <span className="font-medium text-[#25a244]">
                       {getSeasonLabel(batch.season)}
                     </span>
-
                   </div>
-                  
                 </div>
-
-
 
                 <div className="grid grid-cols-4 gap-1 pt-3 border-t border-gray-200 text-center">
                   <div>
@@ -150,10 +161,5 @@ function Batches_View({batchesDataList, handleUpdateBatch, handleDeleteBatch, tr
     </section>
   );
 }
-
-
-
-
-
 
 export default Batches_View;
