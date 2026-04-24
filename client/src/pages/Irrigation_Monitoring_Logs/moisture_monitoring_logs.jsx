@@ -2,7 +2,6 @@ import { useState, useMemo } from "react";
 import { FilterBtn, TableWrap, Tr, Td, Pager, Th, EmptyRow, SearchInput } from "./components/irrigation_monitoring_components";
 import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx";
 import { useUser } from "../../hooks/userContext.jsx";
-import { useDarkMode } from "../../hooks/useDarkMode.jsx"; 
 
 const PLANT_MAP = { 5: "Tray Group 1", 6: "Tray Group 2", 7: "Tray Group 3" };
 const PAGE_SIZE = 8;
