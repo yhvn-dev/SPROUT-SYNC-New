@@ -44,7 +44,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: process.env.ORIGIN_URL || "http://localhost:3000",
   credentials: true
-}))
+})) 
 
 
 app.use(cookieParser());

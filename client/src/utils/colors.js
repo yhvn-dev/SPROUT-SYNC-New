@@ -144,7 +144,7 @@ export function getSensorStatus(sensor, rawValue, isActive, group, isDark = fals
       text: isDark ? 'hsl(0, 0%, 55%)'     : 'hsl(0, 0%, 55%)',
     },
     dry: {
-      bg:   isDark ? 'var(--color-danger-b)'  : 'hsl(355, 100%, 95%)',  
+      bg:   isDark ? 'var(--color-danger-b)':'hsl(355, 100%, 95%)',  
       text: isDark ? 'hsl(355, 100%, 72%)' : 'hsl(355, 100%, 45%)',
     },
     wet: {
@@ -152,8 +152,8 @@ export function getSensorStatus(sensor, rawValue, isActive, group, isDark = fals
       text: isDark ? 'hsl(35, 90%, 65%)'   : 'hsl(35, 80%, 40%)',
     },
     optimal: {
-      bg:   isDark ? 'hsl(125, 60%, 55%)'  : 'hsl(125, 60%, 94%)', 
-      text: isDark ? 'hsl(125, 60%, 55%)'  : 'hsl(125, 60%, 28%)',
+      bg:   isDark ? 'hsl(259, 44%, 93%)'  : 'hsl(259, 44%, 93%)', 
+      text: isDark ? 'hsl(125, 60%, 55%)'  : 'hsl(259, 44%, 93%)',
     },
     active: {
       bg:   isDark ? 'hsl(220, 35%, 20%)'  : 'hsl(220, 80%, 95%)',    
