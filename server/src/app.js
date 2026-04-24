@@ -148,7 +148,6 @@ wsServer.on("connect", (connection) => {
 });
 
 
-
 // ===== ESP32 STATUS =====
 app.get("/esp32/status", (req, res) => {
   const esp32Connected = clients.some(client => client.connected);
