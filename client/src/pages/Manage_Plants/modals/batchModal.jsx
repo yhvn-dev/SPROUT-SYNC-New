@@ -5,7 +5,7 @@ import { harvestStatusStyles } from '../../../utils/colors';
 import { X, Sprout, Calendar, TrendingUp, Trash2, AlertCircle, Leaf } from 'lucide-react';
 import * as batchModels from "../../../data/batchesData"
 
-export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, selectedBatch, setSuccessMsg, reloadBatches, reloadTrays }) {
+export function BatchModal({ isOpen, onClose, batchModalMode,trayGroups,selectedTray, selectedBatch, setSuccessMsg, reloadBatches, reloadTrays }) {
    
   const [formData, setFormData] = useState({
     tray_id: 0,
@@ -25,8 +25,12 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
   const [harvestLoading, setHarvestLoading] = useState(false);
   const isDark = useDarkMode();
 
-  if (!isOpen) return null;
-  
+
+  useEffect(() =>{
+    console.log("selectedTray:", selectedTray);
+    console.log("trayGroups:", trayGroups)
+  },[])
+
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const d = new Date(dateString);
@@ -178,14 +182,20 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
   }
 
   const isAlreadyHarvested = selectedBatch?.harvest_status === "Harvested";
-  
-  
-  const groupName = selectedTray?.tray_group_name ?? "this group";
-  const plantName = batchModalMode === "insert"
-    ? selectedTray?.plant
-    : selectedBatch?.plant_name;
+      
+      
+    const groupName = trayGroups?.find(g => g.tray_group_id === selectedTray?.tray_group_id)?.tray_group_name ?? "this group";
+    const plantName = batchModalMode === "insert"
+        ? selectedTray?.plant
+        : selectedBatch?.plant_name;
+
 
   const styles = harvestStatusStyles(isDark);
+
+  
+  if (!isOpen) return null;
+
+
 
   return (
     <motion.div
@@ -218,7 +228,9 @@ export function BatchModal({ isOpen, onClose, batchModalMode, selectedTray, sele
                     ? "Add New Batch"
                     : "Update Batch"}
                 </h2>
-                {/* ✅ Now shows: "Manage plant from Zone A" (tray group name, no numbers) */}
+            
+
+
                 <p className="text-xs mt-0.5 text-[#5A8F73]">
                   {batchModalMode === "delete"
                     ? `Are you sure you want to delete this batch? This will move "${selectedBatch?.plant_name}" to Batch History. Only delete if the batch is already harvested or no longer active.`

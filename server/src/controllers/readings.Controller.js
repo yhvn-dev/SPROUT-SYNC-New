@@ -201,6 +201,7 @@ export const handleMoistureNotifications = async (existingSensor, value) => {
 
 
 
+
 export const handleUltrasonicNotifications = async (sensor_id, value) => {
   const waterLevel = Number(value);
   if (isNaN(waterLevel)) return null;
@@ -209,7 +210,7 @@ export const handleUltrasonicNotifications = async (sensor_id, value) => {
     return {
       type: "Alert",
       status: "High",
-      message: `🚨 Water level is CRITICALLY LOW (${waterLevel}%)`
+      message: `Water level is CRITICALLY LOW (${waterLevel}%)`
     };
   }
 
@@ -217,12 +218,17 @@ export const handleUltrasonicNotifications = async (sensor_id, value) => {
     return {
       type: "Warning",
       status: "Medium",
-      message: `⚠️ Water level is LOW (${waterLevel}%)`
+      message: `Water level is LOW (${waterLevel}%)`
     };
   }
 
-  return null;
+  return {
+    type: "Info",
+    status: "Normal",
+    message: `💧 Water level update: ${waterLevel}%`
+  };
 };
+
 
 
 // ===== UPDATE a reading =====

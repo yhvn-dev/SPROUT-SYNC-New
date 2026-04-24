@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useCallback } from "react";
 
 import { usePlantData } from "../../hooks/plantContext.jsx";
 import { useUser } from "../../hooks/userContext.jsx";
@@ -44,6 +44,9 @@ export default function Irrigation_Monitoring_Logs() {
     logType: null,
     log: null,
   });
+
+  // ✅ FIX: useCallback para hindi mag-reset ang timer sa FloatSuccessMsg
+  const clearMessage = useCallback(() => setMessageContext(""), [setMessageContext]);
 
   const openDeleteOne = (logType, log) =>
     setDeleteModal({ open: true, mode: "delete-one", logType, log });
@@ -190,15 +193,13 @@ export default function Irrigation_Monitoring_Logs() {
             </nav>
           </div>
 
-         <div className={`rounded-3xl shadow-sm p-6 transition-colors duration-300
+          <div className={`rounded-3xl shadow-sm p-6 transition-colors duration-300
             ${isDark
               ? "bg-[var(--metal-dark1)] border border-white/10"
               : "bg-white border border-gray-100"
             }`}>
-          {current?.component}
+            {current?.component}
           </div>
-
-
 
         </div>
       </div>
@@ -227,10 +228,13 @@ export default function Irrigation_Monitoring_Logs() {
       {isNotifOpen && <Notif_Modal isOpen={isNotifOpen} onClose={() => setNotifOpen(false)} />}
       {logoutOpen && <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />}
 
+      {/* ✅ FIX: clearMessage via useCallback — hindi na mag-re-reset ang 5s timer */}
       {messageContext && (
-        <FloatSuccessMsg txt={messageContext} clearMsg={() => setMessageContext("")} />
+        <FloatSuccessMsg txt={messageContext} clearMsg={clearMessage} />
       )}
 
     </section>
   );
+
+  
 }

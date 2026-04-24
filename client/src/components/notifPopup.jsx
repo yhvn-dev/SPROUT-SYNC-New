@@ -15,51 +15,41 @@ function NotifPopup() {
 
   return (
     <div
-      className="fixed top-5 left-1/2 -translate-x-1/2 z-50 flex items-start gap-3 px-4 py-3 rounded-xl shadow-lg border max-w-sm w-[360px] animate-slide-in"
+      className="flex items-center fixed top-5 left-1/2 -translate-x-1/2 z-50  gap-3 px-4 py-3 rounded-xl shadow-lg border max-w-sm w-[360px] animate-slide-in"
       style={{
         backgroundColor: colors.bg,
         borderColor: colors.border,
-      }}
-    >
-      {/* Icon */}
+      }}>
+
+
       <div
         className="p-1.5 rounded-lg shrink-0 mt-0.5"
-        style={{ backgroundColor: colors.iconBg }}
-      >
+        style={{ backgroundColor: colors.iconBg }}>
         <Icon size={16} style={{ color: colors.iconColor }} />
       </div>
 
       {/* Content */}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 mb-1">
-          <span
-            className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-            style={{
-              backgroundColor: colors.badge.bg,
-              color: colors.badge.text,
-            }}
-          >
-            {colors.badge.label}
-          </span>
-        </div>
-
+      <div className="flex items-center justify-center min-w-0">
         <p
           className="text-xs leading-snug"
-          style={{ color: colors.text }}
-        >
+          style={{ color: colors.text }}>
           {message}
         </p>
       </div>
 
+      <div className="flex items-center justify-end bg-amber-300 w-[20%]">
+          <button
+          onClick={() => setNewNotifPopup(null)}
+          className="cursor-pointer shrink-0 transition hover:opacity-70"
+          style={{ color: colors.iconColor }}>
+          <X size={14} />
+        </button>     
+      </div>
+   
 
-      <button
-        onClick={() => setNewNotifPopup(null)}
-        className="cursor-pointer shrink-0 transition hover:opacity-70"
-        style={{ color: colors.iconColor }}>
-        <X size={14} />
-      </button>
     </div>
   );
+
 }
 
 export default NotifPopup;

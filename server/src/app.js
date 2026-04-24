@@ -97,7 +97,6 @@ export const io = new SocketIOServer(server, {
     credentials: true}
 });
 
-
 io.on("connection", (socket) => {
   console.log("🟢 User socket connected:", socket.id);
   socket.on("join", (userId) => {

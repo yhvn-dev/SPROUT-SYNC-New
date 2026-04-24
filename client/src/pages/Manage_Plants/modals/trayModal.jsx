@@ -19,6 +19,9 @@ export function TrayModal({
 
   const [formData, setFormData] = useState({ tray_group_id: 0, plant: "", status: "Available" });
   const [formErrors, setFormErrors] = useState({});
+
+
+  
   
   const plantOptions = (plants || []).map((p) => ({
     name: p.name,
@@ -139,11 +142,14 @@ export function TrayModal({
               <h2 className="text-xl font-bold text-[var(--metal-dark5)]">
                 {trayModalMode === "delete" ? "Delete Tray" : trayModalMode === "insert" ? "Add New Tray" : "Update Tray"}
               </h2>
+              
               <p className="text-sm text-[var(--acc-darkc)]">
                 {trayModalMode === "delete"
-                  ? `Are you sure you want to delete ${selectedTray?.plant}?`
-                  : `Tray group: ${resolvedGroupName}`}
+                  ? `Are you sure you want to delete ${selectedTray?.plant} tray?`
+                  : `in ${resolvedGroupName}`}
               </p>
+
+              
             </div>
           </div>
 

@@ -209,6 +209,8 @@ export function Manage_Plants() {
     setBatchModalOpen(true);
   };
   const handleUpdateBatch = (batch) => {
+    const tray = trays.find(t => t.tray_id === batch.tray_id);  
+    setSelectedTray({ ...tray });                                 
     setSelectedBatch({ ...batch });
     setBatchModalMode("update");
     setBatchModalOpen(true);
@@ -509,6 +511,7 @@ export function Manage_Plants() {
           isOpen
           onClose={() => setBatchModalOpen(false)}
           batchModalMode={batchModalMode}
+          trayGroups={trayGroups}
           selectedTray={selectedTray}
           selectedBatch={selectedBatch}
           setSuccessMsg={setSuccessMsg}

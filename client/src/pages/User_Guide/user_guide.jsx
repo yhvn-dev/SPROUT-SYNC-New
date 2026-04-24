@@ -13,8 +13,8 @@ import { DeleteNotifModal } from "../../components/deleteNotifModal.jsx";
 import { FloatSuccessMsg } from "../../components/sucessMsgs.jsx";
 import { MessageContext } from "../../hooks/messageHooks.jsx";
 import { usePlantData } from "../../hooks/plantContext.jsx";
+import { useDarkMode } from "../../hooks/useDarkmode.jsx";
 
-// ─── Section definitions ──────────────────────────────────────────────────────
 const ADMIN_NAV = [
   { id: "dashboard",    label: "Dashboard",              icon: <BarChart2 size={14}/>,     color: "#027e69" },
   { id: "plants",       label: "Plant Management",       icon: <Sprout size={14}/>,        color: "#2d6a4f" },
@@ -32,8 +32,7 @@ const ADMIN_NAV = [
 
 const FARMER_NAV_IDS = ["dashboard", "analytics", "irrigation", "alerts", "hardware", "troubleshoot", "logout"];
 
-// ─── ManualSidebar ────────────────────────────────────────────────────────────
-function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose }) {
+function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose, isDark }) {
   const isAdmin = role === "admin";
   const sections = isAdmin
     ? ADMIN_NAV
@@ -43,21 +42,24 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
   return (
     <>
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black/40 z-40 " onClick={onClose} />
+        <div className="lg:hidden fixed inset-0 bg-black/40 z-40" onClick={onClose} />
       )}
 
       <aside className={`
-        fixed top-0 right-0 h-full w-56 bg-white shadow-xl z-50
+        fixed top-0 right-0 h-full w-56 shadow-xl z-50
         transform transition-transform duration-300 ease-in-out
         flex flex-col
-        lg:static lg:translate-x-0 lg:shadow-none lg:border-l lg:border-[#c4ded0] lg:z-auto
+        lg:static lg:translate-x-0 lg:shadow-none lg:border-l lg:z-auto
         ${isOpen ? "translate-x-0" : "translate-x-full"}
+        ${isDark
+          ? "bg-[var(--metal-dark1)] border-white/10"
+          : "bg-white border-[#c4ded0]"
+        }
       `}>
+
         {/* Header */}
-        <div
-          className="flex items-center justify-between px-4 py-3.5 border-b border-[#c4ded0]"
-          style={{ background: "#027e6910" }}
-        >
+        <div className={`flex items-center justify-between px-4 py-3.5 border-b flex-shrink-0 transition-colors duration-300
+          ${isDark ? "border-white/10 bg-white/5" : "border-[#c4ded0] bg-[#027e6910]"}`}>
           <div className="flex items-center gap-2">
             <BookOpen size={14} className="text-[#027e69]" />
             <span className="text-sm font-bold text-[#027e69] tracking-wide uppercase">
@@ -66,14 +68,15 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
           </div>
           <button
             onClick={onClose}
-            className="lg:hidden p-1 rounded hover:bg-[#c4ded040] transition-colors"
+            className={`lg:hidden p-1 rounded transition-colors
+              ${isDark ? "hover:bg-white/10" : "hover:bg-[#c4ded040]"}`}
           >
-            <X size={15} className="text-gray-500" />
+            <X size={15} className={isDark ? "text-gray-400" : "text-gray-500"} />
           </button>
         </div>
 
         {/* Role badge */}
-        <div className="px-3 pt-3 pb-1">
+        <div className="px-3 pt-3 pb-1 flex-shrink-0">
           <span
             className="flex items-center gap-1.5 text-[10px] font-semibold px-2.5 py-1.5 rounded-full w-fit"
             style={{
@@ -86,8 +89,15 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
           </span>
         </div>
 
-        {/* Nav links */}
-        <nav className="flex-1 overflow-y-auto py-2 px-2">
+        {/* Nav links — scrollable area with dark scrollbar */}
+        <nav
+          className={`flex-1 overflow-y-auto py-2 px-2 transition-colors duration-300
+            ${isDark ? "dark-scroll" : "light-scroll"}`}
+          style={{
+            scrollbarWidth: "thin",
+            scrollbarColor: isDark ? "#3f3f46 transparent" : "#c4ded0 transparent",
+          }}
+        >
           {sections.map((s) => (
             <button
               key={s.id}
@@ -97,7 +107,9 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
                 px-3 py-2 rounded-lg mb-0.5 text-sm transition-all duration-150
                 ${activeSection === s.id
                   ? "text-white font-semibold shadow-sm"
-                  : "text-gray-600 hover:bg-[#f0faf5] hover:text-[#027e69]"
+                  : isDark
+                    ? "text-gray-400 hover:bg-white/10 hover:text-gray-200"
+                    : "text-gray-600 hover:bg-[#f0faf5] hover:text-[#027e69]"
                 }
               `}
               style={activeSection === s.id ? { background: s.color } : {}}
@@ -114,8 +126,9 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-[#c4ded0]">
-          <p className="text-[9px] text-gray-400 leading-relaxed">
+        <div className={`px-4 py-3 border-t flex-shrink-0 transition-colors duration-300
+          ${isDark ? "border-white/10" : "border-[#c4ded0]"}`}>
+          <p className={`text-[9px] leading-relaxed ${isDark ? "text-gray-500" : "text-gray-400"}`}>
             SproutSync Manual · <span className="text-[#027e69]">sproutsync031@gmail.com</span>
           </p>
         </div>
@@ -133,6 +146,8 @@ function User_guide() {
     selectedNotif, deleteMode,
     messageContext, setMessageContext,
   } = useContext(MessageContext);
+
+  const isDark = useDarkMode();
 
   const [sidebarOpen,            setSidebarOpen]          = useState(false);
   const [manualSidebarOpen,      setManualSidebarOpen]    = useState(false);
@@ -152,15 +167,16 @@ function User_guide() {
   const showManual = user?.role === "admin" || user?.role === "farmer";
 
   return (
-      <section className="h-screen w-full overflow-hidden bg-[#eaf4ef] flex gap-4 flex-row">
+    <section className={`h-screen w-full overflow-hidden flex gap-4 flex-row transition-colors duration-300
+      ${isDark ? "bg-[var(--metal-dark1)]" : "bg-[#eaf4ef]"}`}>
 
-      {/* ── LEFT: System sidebar — full height from very top ── */}
       {sidebarOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
       <aside className={`
         ${sidebarOpen ? "fixed inset-y-0 left-0 w-64 z-50" : "hidden"}
         md:static md:flex md:flex-shrink-0 h-full
@@ -173,15 +189,9 @@ function User_guide() {
         />
       </aside>
 
-
-
-      {/* ── RIGHT SIDE: flex col — header row 1, content+manual row 2 ── */}
       <div className="flex flex-col flex-1 min-w-0 overflow-hidden mr-4">
 
-        {/* Row 1: Db_Header spans full width of this column */}
         <div className="flex items-center flex-shrink-0 w-full">
-
-          {/* Mobile: system sidebar toggle */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="md:hidden flex-shrink-0 ml-4 bg-white p-2.5 rounded-lg shadow"
@@ -193,7 +203,6 @@ function User_guide() {
             <Db_Header notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
           </div>
 
-          {/* Mobile: manual sidebar toggle */}
           {showManual && (
             <button
               onClick={() => setManualSidebarOpen(true)}
@@ -205,10 +214,14 @@ function User_guide() {
           )}
         </div>
 
-        {/* Row 2: Guide content + Manual sidebar */}
         <div className="flex flex-1 min-h-0">
-
-          <main className="flex-1 min-w-0 overflow-y-auto">
+          <main
+            className={`flex-1 min-w-0 overflow-y-auto transition-colors duration-300`}
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: isDark ? "#3f3f46 transparent" : "#c4ded0 transparent",
+            }}
+          >
             {renderGuide()}
           </main>
 
@@ -219,12 +232,12 @@ function User_guide() {
               setActiveSection={setActiveSection}
               isOpen={manualSidebarOpen}
               onClose={() => setManualSidebarOpen(false)}
+              isDark={isDark}
             />
           )}
         </div>
       </div>
 
-      {/* ── MODALS ── */}
       {logoutOpen && (
         <LogoutModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} />
       )}
