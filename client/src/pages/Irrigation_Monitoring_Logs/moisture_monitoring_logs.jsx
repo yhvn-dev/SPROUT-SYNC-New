@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { FilterBtn, TableWrap, Tr, Td, Pager, Th, EmptyRow, SearchInput } from "./components/irrigation_monitoring_components";
-import { Trash2 } from "lucide-react";
 import ExcelDownloadBtn from "../../components/excelDownloadBtn.jsx";
 import { useUser } from "../../hooks/userContext.jsx";
 import { useDarkMode } from "../../hooks/useDarkMode.jsx"; 
@@ -14,17 +13,12 @@ function fmtTs(ts) {
     " " + d.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit", hour12: true });
 }
 
-
-
 function getMoistureMeta(v) {
   const n = parseFloat(v);
   if (n >= 60) return { label: "High",   color: "bg-emerald-100 text-emerald-800", dot: "bg-emerald-500" };
   if (n >= 35) return { label: "Medium", color: "bg-amber-100 text-amber-800",     dot: "bg-amber-400"   };
   return             { label: "Low",    color: "bg-red-100 text-red-800",           dot: "bg-red-500"     };
 }
-
-
-
 
 function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll, isDark }) {
   const { user } = useUser();
@@ -69,7 +63,10 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll, i
       {/* Header */}
       <div className="mb-5 flex items-start justify-between">
         <div>
-          <h2 className={`text-xl font-bold ${isDark ? "text-gray-100" : "text-gray-800"}`}>
+          <h2
+            className="text-xl font-bold"
+            style={{ color: isDark ? "hsl(180, 100%, 85%)" : "#1f2937" }}
+          >
             Plant Moisture Monitoring
           </h2>
           <p className={`text-xs mt-0.5 ${isDark ? "text-gray-400" : "text-gray-400"}`}>
@@ -86,52 +83,67 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll, i
       {/* Stat cards */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
-          { label: "Tray Group 1 avg", value: `${avg(tg1)}%`, color: "text-[#027e69]" },
-          { label: "Tray Group 2 avg", value: `${avg(tg2)}%`, color: "text-[#009983]" },
-          { label: "Tray Group 3 avg", value: `${avg(tg3)}%`, color: "text-teal-600"  },
+          { label: "Tray Group 1 avg", value: `${avg(tg1)}%`, lightColor: "text-[#027e69]" },
+          { label: "Tray Group 2 avg", value: `${avg(tg2)}%`, lightColor: "text-[#009983]" },
+          { label: "Tray Group 3 avg", value: `${avg(tg3)}%`, lightColor: "text-teal-600"  },
         ].map(s => (
           <div
             key={s.label}
-            className={`rounded-xl border px-4 py-3 shadow-sm ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-white border-gray-100"
-            }`}
+            className="rounded-xl border px-4 py-3 shadow-sm"
+            style={{
+              backgroundColor: isDark ? "hsl(180, 100%, 10%)" : "#ffffff",
+              borderColor: isDark ? "hsl(180, 60%, 18%)" : "#f3f4f6",
+            }}
           >
             <p className={`text-[11px] uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-400"}`}>
               {s.label}
             </p>
-            <p className={`text-2xl font-bold mt-0.5 ${s.color}`}>{s.value}</p>
+            <p
+              className="text-2xl font-bold mt-0.5"
+              style={{ color: isDark ? "[var(--main-white)]" : undefined }}
+            >
+              {isDark ? s.value : <span className={s.lightColor}>{s.value}</span>}
+            </p>
           </div>
         ))}
       </div>
 
-      {/* Filters + Delete All */}
+      {/* Filters + Search + Delete All */}
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex flex-wrap items-center gap-1.5">
           {["All", "Tray Group 1", "Tray Group 2", "Tray Group 3"].map(f => (
-            <FilterBtn key={f} label={f} active={trayFilter === f} onClick={() => onFilter(f)} />
+            <FilterBtn
+              key={f}
+              label={f}
+              active={trayFilter === f}
+              onClick={() => onFilter(f)}
+              isDark={isDark}
+            />
           ))}
         </div>
 
         <div className="flex items-center gap-2">
-          <SearchInput value={search} onChange={onSearch} placeholder="Search timestamp..." />
+        <SearchInput
+            value={search}
+            onChange={onSearch}
+            placeholder="Search timestamp..."
+            isDark={isDark}
+          />
 
           {isAdmin && (
             <button
               onClick={onDeleteAll}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-              style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
-            >
-              <Trash2 size={13} />
+              style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}>
               Delete All
             </button>
           )}
         </div>
       </div>
 
+    <div className="overflow-y-auto max-h-[200px]">
       {/* Table */}
-      <TableWrap>
+      <TableWrap isDark={isDark}>
         <thead>
           <tr>
             <Th isDark={isDark}>#</Th>
@@ -143,67 +155,80 @@ function MoistureMonitoring({ moistureReadings = [], onDeleteOne, onDeleteAll, i
           </tr>
         </thead>
         <tbody>
-          {!paged.length ? <EmptyRow cols={isAdmin ? 6 : 5} /> : paged.map((r, index) => {
-            const tray = PLANT_MAP[r.sensor_id] || "Unknown";
-            const m    = getMoistureMeta(r.value);
-            const val  = parseFloat(r.value);
-            return (
-              <Tr key={r.reading_id} isDark={isDark}>
-                <Td className={`text-xs tabular-nums ${isDark ? "text-gray-400" : "text-gray-400"}`}>
-                  {(page - 1) * PAGE_SIZE + index + 1}
-                </Td>
-                <Td className={`text-xs tabular-nums ${isDark ? "text-gray-400" : "text-gray-400"}`}>
-                  {fmtTs(r.recorded_at)}
-                </Td>
-                <Td>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                    isDark
-                      ? "bg-[#0a3d30] text-[#4ecdb4]"
-                      : "bg-[#e1f5ee] text-[#085041]"
-                  }`}>
-                    {tray}
-                  </span>
-                </Td>
-                <Td>
-                  <div className="flex items-center gap-2">
-                    <div className={`w-20 h-2 rounded-full overflow-hidden ${isDark ? "bg-gray-700" : "bg-gray-100"}`}>
-                      <div
-                        className={`h-full rounded-full ${val >= 60 ? "bg-emerald-400" : val >= 35 ? "bg-amber-400" : "bg-red-400"}`}
-                        style={{ width: `${Math.min(val, 100)}%` }}
-                      />
-                    </div>
-                    <span className={`text-sm font-bold ${isDark ? "text-gray-200" : "text-gray-700"}`}>
-                      {val.toFixed(1)}%
-                    </span>
-                  </div>
-                </Td>
-                <Td>
-                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${m.color}`}>
-                    <span className={`w-1.5 h-1.5 rounded-full ${m.dot}`} />
-                    {m.label}
-                  </span>
-                </Td>
-                {isAdmin && (
-                  <Td>
-                    <button
-                      onClick={() => onDeleteOne(r)}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-                      style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
-                    >
-                      <Trash2 size={12} />
-                      Delete
-                    </button>
-                  </Td>
-                )}
-              </Tr>
-            );
-          })}
+          {!paged.length
+            ? <EmptyRow cols={isAdmin ? 6 : 5} isDark={isDark} />
+            : paged.map((r, index) => {
+                const tray = PLANT_MAP[r.sensor_id] || "Unknown";
+                const m    = getMoistureMeta(r.value);
+                const val  = parseFloat(r.value);
+                return (
+                  <Tr key={r.reading_id} isDark={isDark}>
+                    <Td isDark={isDark} className={`text-xs tabular-nums ${isDark ? "text-gray-400" : "text-gray-400"}`}>
+                      {(page - 1) * PAGE_SIZE + index + 1}
+                    </Td>
+                    <Td isDark={isDark} className={`text-xs tabular-nums ${isDark ? "text-[var(--main-white)]" : "text-gray-400"}`}>
+                      {fmtTs(r.recorded_at)}
+                    </Td>
+                    <Td isDark={isDark}>
+                      <span
+                        className="px-2.5 py-1 rounded-full text-xs font-semibold"
+                        style={{
+                          backgroundColor: isDark ? "hsl(180, 100%, 10%)" : "#e1f5ee",
+                          color: isDark ? "hsl(180, 100%, 65%)" : "#085041",
+                        }}
+                      >
+                        {tray}
+                      </span>
+                    </Td>
+                    <Td isDark={isDark}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-20 h-2 rounded-full overflow-hidden"
+                          style={{ backgroundColor: isDark ? "hsl(180, 30%, 15%)" : "#f3f4f6" }}
+                        >
+                          <div
+                            className={`h-full rounded-full ${val >= 60 ? "bg-emerald-400" : val >= 35 ? "bg-amber-400" : "bg-red-400"}`}
+                            style={{ width: `${Math.min(val, 100)}%` }}
+                          />
+                        </div>
+                        <span
+                          className="text-sm font-bold"
+                          style={{ color: isDark ? "hsl(180, 100%, 85%)" : "#374151" }}
+                        >
+                          {val.toFixed(1)}%
+                        </span>
+                      </div>
+                    </Td>
+                    <Td isDark={isDark}>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${m.color}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${m.dot}`} />
+                        {m.label}
+                      </span>
+                    </Td>
+                    {isAdmin && (
+                      <Td isDark={isDark}>
+                        <button
+                          onClick={() => onDeleteOne(r)}
+                          className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
+                          style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
+                        >
+                          Delete
+                        </button>
+                      </Td>
+                    )}
+                  </Tr>
+                );
+              })
+          }
         </tbody>
       </TableWrap>
 
-      <Pager page={page} total={filtered.length} onPage={setPage} />
+      </div>
+      <Pager page={page} total={filtered.length} onPage={setPage} isDark={isDark} />
     </div>
+
   );
 }
+
 
 export default MoistureMonitoring;

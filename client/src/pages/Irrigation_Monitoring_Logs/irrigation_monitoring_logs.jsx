@@ -145,7 +145,7 @@ export default function Irrigation_Monitoring_Logs() {
       {/* Mobile menu button */}
       <button
         onClick={() => setSidebarOpen(true)}
-        className={`menu_button md:hidden fixed top-4 left-4 z-40 p-2.5 rounded-lg shadow-lg transition-colors duration-300
+        className={`cursor-pointer menu_button md:hidden fixed top-4 left-4 z-40 p-2.5 rounded-lg shadow-lg transition-colors duration-300
           ${isDark ? "bg-[var(--metal-dark1)] text-white" : "bg-white text-gray-800"}`}>
         <Menu size={22} />
       </button>
@@ -174,7 +174,7 @@ export default function Irrigation_Monitoring_Logs() {
                 <button
                   key={p.id}
                   onClick={() => setActivePage(p.id)}
-                  className={`flex-1 flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
+                  className={`cursor-pointer flex-1 flex items-center justify-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
                     ${activePage === p.id
                       ? "bg-[#027e69] text-white shadow-sm"
                       : isDark
@@ -190,14 +190,15 @@ export default function Irrigation_Monitoring_Logs() {
             </nav>
           </div>
 
-          {/* Content Card */}
-          <div className={`rounded-3xl shadow-sm p-6 overflow-hidden transition-colors duration-300
+         <div className={`rounded-3xl shadow-sm p-6 transition-colors duration-300
             ${isDark
               ? "bg-[var(--metal-dark1)] border border-white/10"
               : "bg-white border border-gray-100"
             }`}>
-            {current?.component}
+          {current?.component}
           </div>
+
+
 
         </div>
       </div>

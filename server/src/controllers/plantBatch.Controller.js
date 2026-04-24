@@ -82,6 +82,7 @@ export const getSeedlingGrowthOverTime = async (req, res) => {
 };
 
 
+
 export const updatePastHarvestStatus = async (forceBatchId = null, forceUpdate = false) => {
   try {
     const allBatches = await plantBatchModels.readPlantBatches();

@@ -4,7 +4,7 @@ import { Sidebar } from "../../components/sidebar";
 import { Db_Header } from "../../components/db_header";
 import { LogoutModal } from "../../components/logoutModal.jsx";
 import RegisterDeviceModal from "../Dashboard/modals/registerDeviceModal.jsx";
-import { Menu, X, BookOpen, ChevronRight, BarChart2, Sprout, Users, Bell, Wrench, AlertTriangle, LogOut, Leaf, Lock, HardDrive, Eye, ShieldCheck, Droplets } from "lucide-react"; // ← add Droplets
+import { Menu, X, BookOpen, ChevronRight, BarChart2, Sprout, Users, Bell, Wrench, AlertTriangle, LogOut, Leaf, Lock, HardDrive, Eye, ShieldCheck, Droplets } from "lucide-react";
 import { useUser } from "../../hooks/userContext";
 import Admin_guide from "./admin_guide.jsx";
 import Farmer_guide from "./farmer_guide.jsx";
@@ -20,7 +20,7 @@ const ADMIN_NAV = [
   { id: "plants",       label: "Plant Management",       icon: <Sprout size={14}/>,        color: "#2d6a4f" },
   { id: "users",        label: "User Management",        icon: <Users size={14}/>,         color: "#027e69" },
   { id: "analytics",    label: "Analytics",              icon: <BarChart2 size={14}/>,     color: "#009983" },
-  { id: "irrigation",   label: "Irrigation Monitoring",  icon: <Droplets size={14}/>,      color: "#0284c7" }, // ← NEW
+  { id: "irrigation",   label: "Irrigation Monitoring",  icon: <Droplets size={14}/>,      color: "#0284c7" },
   { id: "archive",      label: "Batch History",          icon: <HardDrive size={14}/>,     color: "#2d6a4f" },
   { id: "inventory",    label: "Plants Inventory",       icon: <Leaf size={14}/>,          color: "#027e69" },
   { id: "passwords",    label: "Password Resets",        icon: <Lock size={14}/>,          color: "#009983" },
@@ -30,7 +30,7 @@ const ADMIN_NAV = [
   { id: "logout",       label: "Logout",                 icon: <LogOut size={14}/>,        color: "#2d6a4f" },
 ];
 
-const FARMER_NAV_IDS = ["dashboard", "analytics", "irrigation", "alerts", "hardware", "troubleshoot", "logout"]; // ← add "irrigation"
+const FARMER_NAV_IDS = ["dashboard", "analytics", "irrigation", "alerts", "hardware", "troubleshoot", "logout"];
 
 // ─── ManualSidebar ────────────────────────────────────────────────────────────
 function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose }) {
@@ -43,7 +43,7 @@ function ManualSidebar({ role, activeSection, setActiveSection, isOpen, onClose 
   return (
     <>
       {isOpen && (
-        <div className="lg:hidden fixed inset-0 bg-black/40 z-40" onClick={onClose} />
+        <div className="lg:hidden fixed inset-0 bg-black/40 z-40 " onClick={onClose} />
       )}
 
       <aside className={`
@@ -152,19 +152,18 @@ function User_guide() {
   const showManual = user?.role === "admin" || user?.role === "farmer";
 
   return (
-    <section className="flex h-screen gap-4 overflow-hidden bg-[#eaf4ef]">
+      <section className="h-screen w-full overflow-hidden bg-[#eaf4ef] flex gap-4 flex-row">
 
+      {/* ── LEFT: System sidebar — full height from very top ── */}
       {sidebarOpen && (
         <div
           className="md:hidden fixed inset-0 bg-black/50 z-40"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-
-      {/* LEFT: System sidebar */}
       <aside className={`
         ${sidebarOpen ? "fixed inset-y-0 left-0 w-64 z-50" : "hidden"}
-        md:static md:flex md:flex-shrink-0
+        md:static md:flex md:flex-shrink-0 h-full
       `}>
         <Sidebar
           user={user}
@@ -174,14 +173,18 @@ function User_guide() {
         />
       </aside>
 
-      {/* CENTER: Main content */}
-      <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
 
-        {/* Top bar */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+
+      {/* ── RIGHT SIDE: flex col — header row 1, content+manual row 2 ── */}
+      <div className="flex flex-col flex-1 min-w-0 overflow-hidden mr-4">
+
+        {/* Row 1: Db_Header spans full width of this column */}
+        <div className="flex items-center flex-shrink-0 w-full">
+
+          {/* Mobile: system sidebar toggle */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden flex-shrink-0 ml-4 mt-3 bg-white p-2.5 rounded-lg shadow"
+            className="md:hidden flex-shrink-0 ml-4 bg-white p-2.5 rounded-lg shadow"
           >
             <Menu size={20} className="text-[#027e69]" />
           </button>
@@ -190,10 +193,11 @@ function User_guide() {
             <Db_Header notifOpen={notifOpen} setNotifOpen={setNotifOpen} />
           </div>
 
+          {/* Mobile: manual sidebar toggle */}
           {showManual && (
             <button
               onClick={() => setManualSidebarOpen(true)}
-              className="lg:hidden flex-shrink-0 mr-4 mt-3 bg-white p-2.5 rounded-lg shadow"
+              className="lg:hidden flex-shrink-0 mr-4 bg-white p-2.5 rounded-lg shadow"
               aria-label="Open manual navigation"
             >
               <BookOpen size={20} className="text-[#027e69]" />
@@ -201,22 +205,24 @@ function User_guide() {
           )}
         </div>
 
-        {/* Guide content */}
-        <main className="flex-1 overflow-y-auto">
-          {renderGuide()}
-        </main>
-      </div>
+        {/* Row 2: Guide content + Manual sidebar */}
+        <div className="flex flex-1 min-h-0">
 
-      {/* RIGHT: Manual sidebar */}
-      {showManual && (
-        <ManualSidebar
-          role={user?.role}
-          activeSection={activeSection}
-          setActiveSection={setActiveSection}
-          isOpen={manualSidebarOpen}
-          onClose={() => setManualSidebarOpen(false)}
-        />
-      )}
+          <main className="flex-1 min-w-0 overflow-y-auto">
+            {renderGuide()}
+          </main>
+
+          {showManual && (
+            <ManualSidebar
+              role={user?.role}
+              activeSection={activeSection}
+              setActiveSection={setActiveSection}
+              isOpen={manualSidebarOpen}
+              onClose={() => setManualSidebarOpen(false)}
+            />
+          )}
+        </div>
+      </div>
 
       {/* ── MODALS ── */}
       {logoutOpen && (

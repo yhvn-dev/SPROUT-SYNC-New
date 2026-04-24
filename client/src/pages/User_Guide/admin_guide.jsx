@@ -74,12 +74,12 @@ const SECTIONS = [
         visual: "irrigation_water",
         steps: ["Select 'Water Level' tab","Filter by status: Normal, Low, or Critical","Review min/max/average stat cards","Download filtered logs as Excel"],
       },
-      {
-        title: "Watering Logs",
-        body: "Records every irrigation event — when watering started, ended, duration, and which plant was watered. Search by plant name to narrow results. Useful for auditing automatic watering cycles.",
-        visual: "irrigation_logs",
-        steps: ["Select 'Watering Logs' tab","Search by plant name if needed","Review start time, end time, and duration per event","Download logs as Excel"],
-      },
+      // {
+      //   title: "Watering Logs",
+      //   body: "Records every irrigation event — when watering started, ended, duration, and which plant was watered. Search by plant name to narrow results. Useful for auditing automatic watering cycles.",
+      //   visual: "irrigation_logs",
+      //   steps: ["Select 'Watering Logs' tab","Search by plant name if needed","Review start time, end time, and duration per event","Download logs as Excel"],
+      // },
       {
         title: "Deleting Records (Admin Only)",
         body: "Admins can delete individual readings via the Delete button per row, or clear all readings at once using the Delete All button. A confirmation popup will appear before bulk deletion.",
@@ -87,6 +87,7 @@ const SECTIONS = [
       },
     ],
   },
+
   {
     id: "archive",
     icon: <HardDrive size={18}/>,
@@ -97,6 +98,7 @@ const SECTIONS = [
       { title: "Using Batch History", body: 'Open "Batch History" from the sidebar. View all harvested batches with their totals. Delete records that are no longer needed.', steps: ["Sidebar → Batch History","Browse harvested batches","Delete old records as needed"] },
     ],
   },
+
   {
     id: "inventory",
     icon: <Leaf size={18}/>,
@@ -107,6 +109,7 @@ const SECTIONS = [
       { title: "Managing Plant Records", body: 'Click "Add Plants" to create a new plant entry. Edit via the table\'s Edit button; delete with the Delete button + confirm popup.', steps: ["Click 'Add Plants'","Fill plant details → Save","Edit or delete from table"] },
     ],
   },
+
   {
     id: "passwords",
     icon: <Lock size={18}/>,
@@ -117,6 +120,7 @@ const SECTIONS = [
       { title: "Processing Requests", body: "Go to Password Reset Management. Approve → create a new password. Reject → delete the request.", visual: "pwreset", steps: ["Open Password Reset Management","Review pending requests","Approve: set new password","Reject: delete request"] },
     ],
   },
+  
   {
     id: "alerts",
     icon: <Bell size={18}/>,

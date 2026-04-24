@@ -42,6 +42,10 @@ const SortIcon = ({ field, sortConfig }) => {
     : <ArrowDown size={12} className="text-white ml-1 inline" />;
 };
 
+// ===== FORMAT SEASON HELPER =====
+const formatSeason = (season) =>
+  season ? season.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : "";
+
 
 function Batch_History() {
   const { user} = useUser();
@@ -215,7 +219,7 @@ function Batch_History() {
     "Growth Stage":       record.growth_stage,
     "Harvest Status":     record.harvest_status,
     "Harvest Day/s":      record.expected_harvest_days,
-    "Season":             record.season,
+    "Season":             formatSeason(record.season),
   }));
 
   const handleDelete = (historyData) => {
@@ -440,7 +444,7 @@ function Batch_History() {
                         </td>
 
                         <td className="px-4 py-3 text-sm text-center font-medium text-[#027c68]">
-                          {record.season}
+                          {formatSeason(record.season)}
                         </td>
 
                         <td className="px-4 py-3 text-sm text-center">
@@ -505,7 +509,7 @@ function Batch_History() {
                       <span className="text-xs text-gray-600">{record.expected_harvest_days} days to harvest</span>
                     </div>
 
-                    <div className="grid grid-cols-4 gap-2 text-center text-xs">
+                    <div className="grid grid-cols-5 gap-2 text-center text-xs">
                       <div>
                         <p className="text-gray-600">Total</p>
                         <p className="font-bold">{record.total_seedlings}</p>
@@ -521,6 +525,10 @@ function Batch_History() {
                       <div>
                         <p className="text-gray-600">Grown</p>
                         <p className="font-bold text-green-600">{record.fully_grown_seedlings}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-600">Season</p>
+                        <p className="font-bold text-[#027c68]">{formatSeason(record.season)}</p>
                       </div>
                     </div>
                   </div>
@@ -569,5 +577,7 @@ function Batch_History() {
     </section>
   );
 }
+
+
 
 export default Batch_History;

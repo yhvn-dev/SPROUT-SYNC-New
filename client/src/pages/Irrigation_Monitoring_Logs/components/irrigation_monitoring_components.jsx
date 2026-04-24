@@ -32,6 +32,8 @@ export function Pager({ page, total, onPage, isDark }) {
   );
 }
 
+
+
 export function SearchInput({ value, onChange, placeholder, isDark }) {
   return (
     <input
@@ -41,28 +43,36 @@ export function SearchInput({ value, onChange, placeholder, isDark }) {
       placeholder={placeholder}
       className={`px-3 py-1.5 text-xs rounded-lg border focus:outline-none focus:border-[#009983] w-52 transition
         ${isDark
-          ? "bg-gray-800 border-gray-600 text-gray-200 placeholder-gray-500"
+          ? "border-transparent placeholder-gray-500"
           : "bg-white border-gray-200 text-gray-700 placeholder-gray-300"
         }`}
-    />
-  );
-}
+      style={isDark ? { backgroundColor: "var(--main-white)", color: "var(--metal-dark1)" } : {}}
+        />
+    );
+  }
 
+  
 export function TableWrap({ children, isDark }) {
   return (
     <div className={`rounded-xl border overflow-hidden shadow-sm ${isDark ? "border-gray-700" : "border-gray-100"}`}>
       <table className="w-full text-sm">{children}</table>
     </div>
-  );
+  );  
 }
+
+
+
 
 export function Th({ children, isDark }) {
   return (
-    <th className={`px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider border-b
-      ${isDark
-        ? "bg-gray-800 text-gray-400 border-gray-700"
-        : "bg-gray-50 text-gray-400 border-gray-100"
-      }`}>
+    <th
+      className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider border-b"
+      style={{
+        backgroundColor: isDark ? "hsl(180, 100%, 10%)" : "#f9fafb",
+        color: isDark ? "hsl(180, 40%, 60%)" : "#9ca3af",
+        borderColor: isDark ? "hsl(180, 30%, 18%)" : "#f3f4f6",
+      }}
+    >
       {children}
     </th>
   );
@@ -70,7 +80,7 @@ export function Th({ children, isDark }) {
 
 export function Td({ children, className = "", isDark }) {
   return (
-    <td className={`px-4 py-3 ${isDark ? "text-gray-300" : "text-gray-700"} ${className}`}>
+    <td className={`px-4 py-3 ${isDark ? "var(--main-white)" : "text-gray-700"} ${className}`}>
       {children}
     </td>
   );
@@ -98,9 +108,6 @@ export function EmptyRow({ cols, isDark }) {
   );
 }
 
-
-
-
 export function FilterBtn({ label, active, onClick, isDark }) {
   return (
     <button
@@ -109,9 +116,14 @@ export function FilterBtn({ label, active, onClick, isDark }) {
         ${active
           ? "bg-[#027e69] text-white border-[#027e69] shadow-sm"
           : isDark
-            ? "bg-gray-800 text-gray-400 border-gray-600 hover:border-[#009983] hover:text-[#009983]"
+            ? "border-transparent hover:border-[#009983] hover:text-[#009983]"
             : "bg-white text-gray-500 border-gray-200 hover:border-[#009983] hover:text-[#009983]"
         }`}
+      style={
+        !active && isDark
+          ? { backgroundColor: "var(--metal-dark4)", color: "var(--metal-dark1)" }
+          : {}
+      }
     >
       {label}
     </button>

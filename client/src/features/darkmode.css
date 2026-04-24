@@ -170,10 +170,7 @@ body.dark .error_msg{
 }
 
 
-/* SIDEBAR  */
-body.dark svg {
-    @apply stroke-[var(--main-white)];
-}
+
 
 /* Layout containers */
 body.dark .wrapper,

@@ -22,8 +22,8 @@ import { PlantDataProvider } from "./hooks/plantContext.jsx";
 import { ESP32Provider } from "./hooks/esp32Hooks.jsx";
 import { ValveProvider } from "./hooks/valveContext.jsx";
 import { WateringLogProvider } from "./hooks/wateringLogsContext.jsx"
-import { listenForMessages } from "./utils/firebase.js";
 import { markAudioUnlocked } from './utils/notificationSounds'; 
+import NotifPopup from "./components/notifPopup.jsx";
 
 import './styles.css';
 
@@ -71,21 +71,12 @@ function App() {
   }, []);
 
 
-  useEffect(() => {
-    const init = async () => {
-      listenForMessages();
-    };
-    init();
-  }, []);
-
-  
+   
   return (
     <BrowserRouter>
-    <div 
-        id="notification-container"
-        className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] hidden space-y-2 max-w-sm w-80"
-      ></div>
-            
+
+    
+           
       <Suspense fallback={
         <div className="flex justify-center items-center h-screen">
           <Dashboard_Skeleton />
@@ -99,6 +90,7 @@ function App() {
           <Route path='/dashboard' element={
             <MessagesProvider>
               <PlantDataProvider>
+                <NotifPopup />
                 <ValveProvider>
                   <ESP32Provider>
                     <ProtectedRoute allowedRoles={['admin', 'farmer']}>
@@ -113,6 +105,7 @@ function App() {
          <Route path='/manage_plants' element={
             <MessagesProvider>
               <PlantDataProvider>
+                 <NotifPopup />
                 <ValveProvider>
                   <ProtectedRoute allowedRoles={['admin']}>
                     <Manage_Plants/>
@@ -125,6 +118,7 @@ function App() {
           <Route path='/users' element={
             <MessagesProvider>
               <PlantDataProvider>
+                <NotifPopup />
                 <ValveProvider>
                   <ProtectedRoute allowedRoles={['admin']}>
                     <Users />
@@ -137,6 +131,7 @@ function App() {
           <Route path='/reports' element={
             <MessagesProvider>
               <PlantDataProvider>
+                <NotifPopup />
                 <ValveProvider>
                   <ProtectedRoute allowedRoles={['admin', 'farmer']}>
                     <Analytics />
@@ -150,6 +145,7 @@ function App() {
           <Route path='/irrigation_monitoring_logs' element={
             <MessagesProvider> 
               <PlantDataProvider>     
+                <NotifPopup />
                 <WateringLogProvider>
                     <ProtectedRoute allowedRoles={['admin', 'farmer']}>
                         <Irrigation_Monitoring_Logs/>
@@ -162,6 +158,7 @@ function App() {
           <Route path='/batch_history' element={
             <MessagesProvider>
               <PlantDataProvider>
+                <NotifPopup />
                 <ValveProvider>
                   <ProtectedRoute allowedRoles={['admin','superadmin']}>
                     <Batch_History />
@@ -174,6 +171,7 @@ function App() {
           <Route path='/plants' element={
             <MessagesProvider> 
               <PlantDataProvider>
+                <NotifPopup />
                 <ValveProvider>
                   <ESP32Provider>
                     <ProtectedRoute allowedRoles={['admin', 'farmer']}>
@@ -188,6 +186,7 @@ function App() {
           <Route path='/password_request' element={
             <MessagesProvider> 
               <PlantDataProvider>
+                <NotifPopup />
                 <ValveProvider>
                   <ESP32Provider>
                     <ProtectedRoute allowedRoles={['admin', 'farmer']}>
@@ -202,7 +201,8 @@ function App() {
 
           <Route path='/user_guide' element={  
              <MessagesProvider>
-            <PlantDataProvider>    
+              <PlantDataProvider>   
+               <NotifPopup /> 
                 <ProtectedRoute allowedRoles={['admin', 'farmer']}>
                   <UserGuide/>                  
                 </ProtectedRoute>

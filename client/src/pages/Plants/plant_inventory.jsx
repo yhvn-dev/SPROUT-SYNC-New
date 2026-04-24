@@ -162,7 +162,7 @@ export function Plant_Inventory({setPlantModal}) {
                           </div>
                         ) : (
                           <div className="flex items-center justify-center">
-                            <span className="text-xs text-gray-400 italic">Locked</span>
+                          
                           </div>
                         )}
                       </td>

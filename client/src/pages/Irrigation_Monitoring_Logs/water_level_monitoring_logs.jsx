@@ -1,6 +1,5 @@
 import { useState, useMemo } from "react";
 import { FilterBtn, TableWrap, Tr, Td, Th, Pager, EmptyRow } from "./components/irrigation_monitoring_components";
-import { Trash2 } from "lucide-react";
 import ExcelDownloadBtn from "../../components/excelDownloadBtn";
 import { useUser } from "../../hooks/userContext.jsx";
 
@@ -17,6 +16,25 @@ const getWaterMeta = (level) => {
   if (level >= 30) return { label: "Low",      color: "bg-amber-100 text-amber-700",     dot: "bg-amber-500"   };
   return             { label: "Critical", color: "bg-red-100 text-red-700",           dot: "bg-red-500"     };
 };
+
+// ─── Custom FilterBtn with dark mode metal-dark4 unselected style ─────────────
+function WaterFilterBtn({ label, active, onClick, isDark }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors`}
+      style={
+        active
+          ? { backgroundColor: "var(--sancgb)", color: "#ffffff" }
+          : isDark
+            ? { backgroundColor: "var(--metal-dark4)", color: "var(--metal-dark1)" }
+            : { backgroundColor: "#f3f4f6", color: "#6b7280" }
+      }
+    >
+      {label}
+    </button>
+  );
+}
 
 function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAll, isDark }) {
   const { user } = useUser();
@@ -74,15 +92,17 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-5">
         {[
-          { label: "Average Level", value: `${avg}%`, color: "text-[#027e69]"   },
+          { label: "Average Level", value: `${avg}%`, color: "text-[var(--sancgd)]"   },
           { label: "Minimum Level", value: `${min}%`, color: "text-red-500"     },
           { label: "Maximum Level", value: `${max}%`, color: "text-emerald-600" },
         ].map((s) => (
           <div
             key={s.label}
-            className={`rounded-xl border px-4 py-3 shadow-sm ${
-              isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"
-            }`}
+            className="rounded-xl border px-4 py-3 shadow-sm"
+            style={{
+              backgroundColor: isDark ? "hsl(180, 100%, 10%)" : "#ffffff",
+              borderColor: isDark ? "hsl(180, 60%, 18%)" : "#f3f4f6",
+            }}
           >
             <p className={`text-[11px] uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-400"}`}>
               {s.label}
@@ -96,7 +116,13 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
         <div className="flex gap-1.5">
           {["All", "Normal", "Low", "Critical"].map((f) => (
-            <FilterBtn key={f} label={f} active={statusFilter === f} onClick={() => onFilter(f)} isDark={isDark} />
+            <WaterFilterBtn
+              key={f}
+              label={f}
+              active={statusFilter === f}
+              onClick={() => onFilter(f)}
+              isDark={isDark}
+            />
           ))}
         </div>
 
@@ -106,7 +132,6 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
             style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
           >
-            <Trash2 size={13} />
             Delete All
           </button>
         )}
@@ -165,9 +190,7 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
                         <button
                           onClick={() => onDeleteOne(r)}
                           className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors hover:opacity-80"
-                          style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}
-                        >
-                          <Trash2 size={12} />
+                          style={{ backgroundColor: "var(--color-danger-b)", color: "hsl(355, 100%, 30%)" }}>
                           Delete
                         </button>
                       </Td>
@@ -182,7 +205,10 @@ function WaterLevelMonitoring({ waterLevelReadings = [], onDeleteOne, onDeleteAl
 
       <Pager page={page} total={filtered.length} onPage={setPage} isDark={isDark} />
     </div>
+    
   );
 }
+
+
 
 export default WaterLevelMonitoring;

@@ -183,7 +183,7 @@ export const handleMoistureNotifications = async (existingSensor, value) => {
     return {
       type: "Alert",
       status: "High",
-      message: `💧 [${group_number}] ${tray_group_name} soil is TOO DRY! Needs watering (${moisture.toFixed(1)}%)`
+      message: `${tray_group_name} soil is TOO DRY! Needs watering (${moisture.toFixed(1)}%)`
     };
   }
 
@@ -191,12 +191,14 @@ export const handleMoistureNotifications = async (existingSensor, value) => {
     return {
       type: "Alert",
       status: "High",
-      message: `💧 [${group_number}] ${tray_group_name} soil is TOO WET! Do not water (${moisture.toFixed(1)}%)`
+      message: `${tray_group_name} soil is TOO WET! Do not water (${moisture.toFixed(1)}%)`
     };
   }
 
   return null;
 };
+
+
 
 
 export const handleUltrasonicNotifications = async (sensor_id, value) => {

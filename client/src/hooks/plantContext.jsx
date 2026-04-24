@@ -31,6 +31,8 @@ export const PlantDataProvider = ({ children }) => {
   const [notifs, setNotifs] = useState([]);
   const [notifsCount, setNotifCount] = useState(0);
   const [readNotifs, setReadNotifs] = useState([]);
+  const [newNotifPopup, setNewNotifPopup] = useState(null); 
+  
 
   // NEW: Plant groups and plants
   const [plants, setPlants] = useState([]);
@@ -154,19 +156,24 @@ export const PlantDataProvider = ({ children }) => {
 
   const prevNotifsRef = useRef([]);
   const isFirstLoad = useRef(true); 
+
+
   const loadNotifs = useCallback(async () => {
     try {
       const data = await notifService.fetchAllNotifs();
 
       const prevIds = new Set(prevNotifsRef.current.map((n) => n.notification_id));
       const newNotifs = data.filter((d) => !prevIds.has(d.notification_id));
-
+    
+  
       if (newNotifs.length > 0 && !isFirstLoad.current) {
-        console.log("🔔 New notifs detected:", newNotifs.length);
         playNotifSound();
+        setNewNotifPopup(newNotifs[0]); 
+        setTimeout(() => setNewNotifPopup(null), 10000);
       }
+      
 
-      isFirstLoad.current = false; 
+      isFirstLoad.current = false;
       prevNotifsRef.current = data;
       setNotifs(data);
     } catch (error) {
@@ -197,11 +204,7 @@ export const PlantDataProvider = ({ children }) => {
     }
   }, []);
 
-
-
-
   
-  // NEW: Load plants
   const loadPlants = useCallback(async () => {
     try {
       const data = await plantService.fetchAllPlants();
@@ -212,7 +215,6 @@ export const PlantDataProvider = ({ children }) => {
   }, []);
 
 
-  
   // ------------------- INITIAL LOAD -------------------
   useEffect(() => {
     loadTrayGroups();
@@ -230,7 +232,6 @@ export const PlantDataProvider = ({ children }) => {
     loadAverageReadingsBySensor("ultra_sonic");
     loadNotifs();
     loadNotifsCount();
-    markNotifsAsRead();
     loadPlants();
   }, [
     
@@ -248,12 +249,9 @@ export const PlantDataProvider = ({ children }) => {
     loadAverageReadingsBySensor,
     loadNotifs,
     loadNotifsCount,
-    markNotifsAsRead,
     loadPlants
   ]);
-
-  
-
+ 
   // ------------------- INTERVAL UPDATES -------------------
   useEffect(() => {
     const interval = setInterval(() => {
@@ -266,7 +264,6 @@ export const PlantDataProvider = ({ children }) => {
   }, [loadReadings, loadLatestReadings, loadAverageReadingsBySensor]);
 
 
-
   
   // ------------------- NOTIFICATIONS WHEN READINGS CHANGE -------------------
   useEffect(() => {
@@ -276,9 +273,6 @@ export const PlantDataProvider = ({ children }) => {
     }, 5000); 
     return () => clearInterval(notifInterval);
   }, [loadNotifs, loadNotifsCount]);
-
-
-
 
 
 
@@ -301,6 +295,8 @@ export const PlantDataProvider = ({ children }) => {
         notifsCount,
         readNotifs,
         plants,   
+        newNotifPopup,   
+        setNewNotifPopup,  
 
 
         // LOAD FUNCTIONS
