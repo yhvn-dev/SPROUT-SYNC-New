@@ -68,7 +68,7 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
       } else if (isDelete) {
         await passwordResetService.deletePasswordResetRequest(request.request_id);
       }
-      await onRefresh?.();
+      if (onRefresh) await onRefresh();
       handleClose();
     } catch (err) {
       console.error("Error processing request:", err);
@@ -93,7 +93,7 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
     try {
       setLoading(true);
       await passwordResetService.approvePasswordReset(request.request_id, newPassword);
-      await onRefresh?.();
+      if (onRefresh) await onRefresh();
       handleClose();
     } catch (err) {
       console.error("Error approving request:", err);
@@ -103,21 +103,18 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
     }
   };
 
-  // ── icon background
   const iconBg = isApprove
     ? isDark ? "bg-[var(--sage-lighter)]/20" : "bg-[var(--sage-lighter)]"
     : isDelete
     ? "bg-[var(--color-danger-b-light)]"
     : "bg-[var(--color-danger-a-light)]";
 
-  // ── icon element
   const icon = isApprove
     ? <ShieldCheck size={24} color="var(--sancgb)" />
     : isDelete
     ? <Trash2 size={24} color="var(--color-danger-b)" />
     : <ShieldX size={24} color="var(--color-danger-a)" />;
 
-  // ── confirm button
   const confirmBtnClass = isApprove
     ? "bg-[var(--sancgb)] hover:bg-[var(--sancgd)]"
     : isDelete
@@ -141,7 +138,6 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
     ? "This will permanently delete this request record. This action cannot be undone."
     : "This will reject the user's password reset request. They will need to submit a new one.";
 
-  // ── dark mode styles
   const modalBg       = isDark ? "bg-gray-900"   : "bg-white";
   const titleColor    = isDark ? "text-white"     : "text-gray-900";
   const descColor     = isDark ? "text-gray-400"  : "text-gray-500";
@@ -186,7 +182,6 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
           </button>
 
           <div className="p-8">
-            {/* ── STEP 1: CONFIRM */}
             {step === "confirm" && (
               <>
                 <div className="flex items-center gap-4 mb-5">
@@ -221,7 +216,6 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
               </>
             )}
 
-            {/* ── STEP 2: SET PASSWORD (approve only) */}
             {step === "password" && (
               <>
                 <div className="flex items-center gap-4 mb-5">
@@ -287,9 +281,6 @@ function Action_Confirmation_Modal({ isOpen, onClose, actionMode, request, onRef
       </motion.div>
     </AnimatePresence>
   );
-
 }
-
-
 
 export default Action_Confirmation_Modal;
