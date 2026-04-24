@@ -138,7 +138,6 @@ export const createReadings = async (req, res) => {
       notifPayload = await handleUltrasonicNotifications(sensor_id, numericValue);
     }
 
-    // If a notification is triggered, save to DB and send push
     if (notifPayload) {
       await notificationModels.createNotif({
         related_sensor: sensor_id,
@@ -146,12 +145,8 @@ export const createReadings = async (req, res) => {
         status: notifPayload.status,
         message: notifPayload.message
       });
-
-      await notifyAllUsers(notifPayload);
     }
-
     res.status(201).json(reading);
-
   } catch (error) {
     console.error("❌ Sensor reading error:", error);
     res.status(500).json({ message: "Error creating reading" });
@@ -225,7 +220,7 @@ export const handleUltrasonicNotifications = async (sensor_id, value) => {
   return {
     type: "Info",
     status: "Normal",
-    message: `💧 Water level update: ${waterLevel}%`
+    message: `Water level update: ${waterLevel}%`
   };
 };
 

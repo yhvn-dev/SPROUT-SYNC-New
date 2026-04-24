@@ -25,9 +25,10 @@ import path from "path";
 import { fileURLToPath } from "url";
 import http from "http";
 
+
 // ===== SOCKETS =====
-import { server as WebSocketServer } from "websocket"; // ESP32
-import { Server as SocketIOServer } from "socket.io"; // USERS
+import { server as WebSocketServer } from "websocket"; 
+import { Server as SocketIOServer } from "socket.io"; 
 
 dotenv.config();
 
@@ -57,7 +58,6 @@ app.use("/streams", express.static(path.resolve(__dirname, "../streams"), {
   }
 }));
 
-// REDEPLOY APRIL 19
 
 // ===== ROUTES =====
 app.use('', userRoutes);
@@ -88,9 +88,7 @@ app.get("/api/hello", (req, res) => {
 const port = process.env.PORT || 5000;
 const server = http.createServer(app);
 
-// =====================================================
-// 🔥 SOCKET.IO — USER PUSH NOTIFICATIONS
-// =====================================================
+
 export const io = new SocketIOServer(server, {
   cors: {
     origin: process.env.ORIGIN_URL  || "http://localhost:3000",
@@ -108,10 +106,6 @@ io.on("connection", (socket) => {
   });
 });
 
-
-// 🔌 RAW WEBSOCKET — ESP32 (UNCHANGED)
-// =====================================================
-// =====================================================
 const wsServer = new WebSocketServer({
   httpServer: server,
   autoAcceptConnections: true  

@@ -106,15 +106,6 @@ export const notifyReplantDate = async (req, res) => {
         (harvestDate.getTime() - today.getTime()) / msPerDay
       );
 
-      console.log({
-        batch_id: batch.batch_id,
-        plant: batch.plant_name,
-        planted: planted.toISOString().slice(0, 10),
-        harvest: harvestDate.toISOString().slice(0, 10),
-        today: today.toISOString().slice(0, 10),
-        daysRemaining
-      });
-
       if (daysRemaining === 1) {
 
         const tray = await trayModel.readTrayById(batch.tray_id);
@@ -126,11 +117,11 @@ export const notifyReplantDate = async (req, res) => {
           batch_id: batch.batch_id,
           type: "Warning",
           status: "Medium",
-          message: `🌱 Harvest Reminder\n1 Day Remaining before harvest \n\nPlant: ${batch.plant_name}\nLocation: ${location}\nPlanted: ${planted.toISOString().slice(0, 10)}\nExpected Harvest: ${harvestDate.toISOString().slice(0, 10)}`
+          message: `Harvest Reminder\n1 Day Remaining before harvest \n\nPlant: ${batch.plant_name}\nLocation: ${location}\nPlanted: ${planted.toISOString().slice(0, 10)}\nExpected Harvest: ${harvestDate.toISOString().slice(0, 10)}`
         });
 
         const devices = await deviceTokenModel.getAllDeviceTokens();
-        console.log("📱 Device tokens count:", devices.length);
+    
 
         if (devices.length > 0) {
           const notifMessage = `${batch.plant_name}[${batch.batch_number}] harvest is tomorrow!`;
