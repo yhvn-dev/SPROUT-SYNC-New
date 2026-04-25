@@ -153,7 +153,7 @@ export function getSensorStatus(sensor, rawValue, isActive, group, isDark = fals
     },
     optimal: {
       bg:   isDark ? 'hsl(259, 44%, 93%)'  : 'hsl(259, 44%, 93%)', 
-      text: isDark ? 'hsl(125, 60%, 55%)'  : 'hsl(259, 44%, 93%)',
+      text: isDark ? 'hsl(125, 60%, 55%)'  : 'hsl(170, 97%, 25%)',
     },
     active: {
       bg:   isDark ? 'hsl(220, 35%, 20%)'  : 'hsl(220, 80%, 95%)',    
